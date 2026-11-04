@@ -55,8 +55,8 @@ class Programs::FutureFacultyController < ApplicationController
     @activity.title = 'FFP Overview'
     @activity.lead_consultant = Current.user
     @activity.completed_on = Time.zone.today
+    @participant.first_consultation_on ||= Time.zone.today
     @participant.save
-    @participant.first_consultation_on = Time.zone.today
 
     respond_to do |format|
       format.turbo_stream { render 'replace_participant_sidebar' }

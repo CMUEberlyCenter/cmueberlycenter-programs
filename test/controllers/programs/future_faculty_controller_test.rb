@@ -4,6 +4,20 @@ require 'minitest/mock'
 class Programs::FutureFacultyControllerTest < ActionController::TestCase
   self.fixture_table_names = []
 
+  test 'enrollment persists the first consultation date with its overview activity' do
+    load Rails.root.join('db/seeds.rb')
+    admin = Participant.create!(andrewid: 'ffpadmin', is_admin: true, ldap_entry: Object.new)
+    participant = Participant.create!(andrewid: 'ffpnew', ldap_entry: Object.new)
+
+    Current.stub(:user, admin) do
+      patch :enroll, params: { participant_id: participant.andrewid }
+    end
+
+    assert_response :redirect
+    assert_equal Time.zone.today, participant.reload.first_consultation_on
+    assert_equal 1, participant.activities.where(title: 'FFP Overview').count
+  end
+
   test 're-enrollment has its own PATCH route' do
     assert_routing(
       { path: '/future-faculty/existing/reenroll', method: :patch },

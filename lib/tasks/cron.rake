@@ -25,13 +25,10 @@ namespace :cron do
   end
 
   task recalculate_ffp_progress: :environment do
-    # TODO: Add "active" boolean to RV and select all active RVs
-    v = Programs::FutureFaculty::RequirementsVersion.find_by(key: '2015')
-    s = ProgressStatusType.find('incomplete')
-    v.participants.where(future_faculty_progress_status: s).each do |p|
-      p.future_faculty_progress_status = v.calculate_participant_status(p)
-      p.save
-    end
+    Participant.where(future_faculty_progress_status: ProgressStatusType.find('incomplete'))
+               .where.not(future_faculty_enrollment_id: nil)
+               .includes(:future_faculty_enrollment)
+               .find_each(&:save!)
   end
 
   task cleanup_participants: :environment do
