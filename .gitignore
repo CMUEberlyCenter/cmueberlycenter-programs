@@ -10,3 +10,16 @@
 
 # Ignore sass cache
 /.sass-cache/
+/config/master.key
+
+# Local environment and editor backups
+.env
+.env.*
+*~
+*.swp
+*.swo
+
+# Generated assets and packaged dependencies
+/public/assets/
+/public/dev-assets/
+/vendor/cache/
