@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class FutureFaculty::RequirementCategoryTest < ActiveSupport::TestCase
+class Programs::FutureFaculty::RequirementCategoryTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
   # end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_06_11_200747) do
+ActiveRecord::Schema[7.0].define(version: 2026_11_04_150000) do
   create_table "future_faculty_requirement_categories", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "key"
     t.string "label"
@@ -178,7 +178,6 @@ ActiveRecord::Schema[7.0].define(version: 2025_06_11_200747) do
   add_foreign_key "future_faculty_requirements", "future_faculty_requirements_versions"
   add_foreign_key "participant_activities", "future_faculty_requirements"
   add_foreign_key "participant_activities", "participant_activity_status_types", column: "status_id"
-  add_foreign_key "participant_activities", "participants"
   add_foreign_key "participant_activities", "participants"
   add_foreign_key "participant_activities", "participants", column: "lead_consultant_id"
   add_foreign_key "participant_activity_status_types", "future_faculty_requirements"

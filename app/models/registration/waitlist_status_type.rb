@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Registration::WaitlistStatusType < ApplicationRecord
+  KEYS = %w[pending confirmed canceled].freeze
+
   # See key as waitlist_status_id in paths
   def to_param = key
 

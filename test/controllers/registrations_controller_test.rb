@@ -4,6 +4,26 @@ require 'minitest/mock'
 class RegistrationsControllerTest < ActionController::TestCase
   self.fixture_table_names = []
 
+  test 'the registration list renders with pagination' do
+    admin = Struct.new(:admin?, :name).new(true, 'Test Admin')
+    Current.stub(:user, admin) { get :index }
+
+    assert_response :success
+    assert_includes response.body, 'Participant Registrations'
+    assert_includes response.body, 'Download Registrations (.xlsx)'
+  end
+
+  test 'the registration list exports a valid workbook' do
+    admin = Struct.new(:admin?, :name).new(true, 'Test Admin')
+    Current.stub(:user, admin) { get :index, format: :xlsx }
+
+    assert_response :success
+    assert_equal 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response.media_type
+    Zip::File.open_buffer(response.body) do |archive|
+      assert archive.find_entry('xl/workbook.xml')
+    end
+  end
+
   test 'manual attendance creates and syncs a new participant' do
     participant = Minitest::Mock.new
     participant.expect(:new_record?, true)

@@ -11,6 +11,9 @@
 # Ignore sass cache
 /.sass-cache/
 /config/master.key
+/config/credentials/*.key
+/config/secrets.yml
+/config/initializers/secret_token.rb
 
 # Local environment and editor backups
 .env
@@ -18,6 +21,8 @@
 *~
 *.swp
 *.swo
+\#*#
+.#*
 
 # Generated assets and packaged dependencies
 /public/assets/

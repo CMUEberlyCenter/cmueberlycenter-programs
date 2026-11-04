@@ -4,6 +4,8 @@ require 'active_support/concern'
 module Seminar::Common
   extend ActiveSupport::Concern
 
+  STATUS_KEYS = %w[open closed].freeze
+
   included do
     scope :present, -> { where('end_at >= ? or end_at is null', Time.zone.now) }
     scope :past, -> { where('end_at < ?', Time.zone.now) }
@@ -12,15 +14,15 @@ module Seminar::Common
             Time.zone.now.beginning_of_day + n.days,
             Time.zone.now.end_of_day + n.days)
     }
-    Seminar::StatusType.find_each do |s|
+    STATUS_KEYS.each do |key|
       # Scopes Seminar.open, Seminar.closed, etc.
-      scope s.key, -> { where(seminars: { seminar_status: s }) }
+      scope key, -> { where(seminars: { seminar_status_id: Seminar::StatusType.where(key: key).select(:id) }) }
 
       # Methods s.open?, s.closed?, etc.
-      define_method("#{s.key}?") { seminar_status.key == s.key.to_s }
+      define_method("#{key}?") { seminar_status&.key == key }
     end
     scope :registerable, -> { present.merge(open) }
-    scope :async, -> { present.merge(where(is_async: true)) }
+    scope :asynchronous, -> { present.merge(where(is_async: true)) }
     scope :in_person, -> { present.merge(where(is_async: false)) }
     scope :upcoming, -> { present.merge(closed) }
 

@@ -5,7 +5,7 @@
     <%= "This seminar is asynchronous." if seminar.async? %>
     <%= seminar.location %>
   </h3>
-  <p><%= seminar.description.html_safe %></p>
+  <p><%= seminar.description&.html_safe %></p>
   <h4 class="alignright">Tags: <%= seminar.tags.join(', ') %></h4>
 
   <% if Current.user&.admin? %>

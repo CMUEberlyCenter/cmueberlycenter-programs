@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Registration::AttendanceStatusType < ApplicationRecord
+  KEYS = %w[attended absent].freeze
+
   # See key as registration_status_id in paths
   def to_param = key
 

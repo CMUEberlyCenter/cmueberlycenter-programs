@@ -26,7 +26,7 @@ class Participant < ApplicationRecord
     return if x.blank?
     #   x.map{|p| {id: p.uid.downcase, label: p.name + " (" + p.uid.downcase + ")"} }
        x.map{|p| {id: p.uid.downcase, label: "#{p.name} <span class=\"uid\">(#{p.uid.downcase})</span>" } }
-  end    
+  end
 
   # Participant filters (e.g.: Participant.admins)
   scope :admins, -> { where(is_admin: true) }
@@ -41,7 +41,7 @@ class Participant < ApplicationRecord
       self['name']
     end
   end
-  
+
   def sortable_name(fallback: true)
     if fallback
       self['sortable_name'] || sortable_name_archive || andrewid
@@ -82,7 +82,7 @@ class Participant < ApplicationRecord
       future_faculty_progress_status.key unless future_faculty_progress_status.blank?
     end
 
-    
+
   def program_enrollment?
     Programs::FutureFaculty::Enrollment.find(self).present?
   end
@@ -101,7 +101,7 @@ class Participant < ApplicationRecord
              -> { readonly },
              class_name: 'ProgressStatusType',
              optional: true)
-             
+
 
   has_many(:registrations, dependent: :destroy)
 
@@ -179,7 +179,7 @@ class Participant < ApplicationRecord
 #  end
 
 
-  scope :ffp_participants, -> (status) { where(:future_faculty_progress_status => Program::ProgressStatusType.find(status)) }
+  scope :ffp_participants, -> (status) { where(future_faculty_progress_status: ProgressStatusType.find(status)) }
 
   scope :completed_future_faculty_requirements, -> {
     joins(:future_faculty_progress_status)
@@ -189,7 +189,7 @@ class Participant < ApplicationRecord
 
 
   default_scope { order(created_at: :desc) }
-  
+
   #filterrific(
   #  default_filter_params: { sorted_by: 'created_at_desc' },
   #  available_filters: [
@@ -288,9 +288,9 @@ class Participant < ApplicationRecord
                 'ffp_dei_size' => dei.fetch(p.id, 0))
     end
   end
-  
 
-  
+
+
   #scope :created_before, ->(time) { where("created_at < ?", time)
 
 #          <th>Last Change</th>

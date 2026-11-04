@@ -91,7 +91,7 @@ class Programs::FutureFacultyController < ApplicationController
 
   def ungraduate
     @participant = Participant.find(params[:participant_id])
-    
+
     unless Programs::FutureFaculty::Enrollment.find(@participant).nil?
       @participant.future_faculty_progress_status_id = 2
       @participant.save
@@ -104,7 +104,7 @@ class Programs::FutureFacultyController < ApplicationController
   end
 
   def drop
-    
+
     @participant = Participant.find(params[:participant_id])
     unless Programs::FutureFaculty::Enrollment.find(@participant).nil?
       @participant.future_faculty_progress_status_id = 4

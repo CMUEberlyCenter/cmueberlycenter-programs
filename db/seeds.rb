@@ -1,210 +1,94 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
-#
-# Examples:
-#
-#   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
-#   Mayor.create(name: 'Emanuel', city: cities.first)
+# frozen_string_literal: true
 
+# Reference data only. Existing records, IDs and program assignments are preserved.
+ActiveRecord::Base.transaction do
+  %w[open closed].each do |key|
+    Seminar::StatusType.find_or_create_by!(key: key)
+  end
 
-# Populate each seminar status if it doesn't already exist
-['open','closed'].each { |status| SeminarStatus.find_or_create_by( :key => status) }
+  { 'pending' => 'Move to Waitlist', 'confirmed' => 'Confirm Registration',
+    'canceled' => 'Cancel Registration' }.each do |key, label|
+    Registration::WaitlistStatusType.find_or_create_by!(key: key) do |status|
+      status.action_label = label
+    end
+  end
 
-# Populate each registration status if it doesn't already exist
-#
-# TODO: Yeah... I spelled canceled wrong.
-['pending','confirmed','canceled']
-  each { |status| RegistrationStatus.find_or_create_by( :key => status ) }
+  { 'attended' => 'Attended', 'absent' => 'Absent' }.each do |key, label|
+    Registration::AttendanceStatusType.find_or_create_by!(key: key) do |status|
+      status.label = label
+    end
+  end
 
-# Populate each attendance status if it doesn't already exist
-#
-# TODO: Ruby 1.9.1 really doesn't like '-' in symbol names. Deal with renaming these
-# before they get used in a scope or something similar.
-['attended','absent'].
-  each { |status| AttendanceStatus.find_or_create_by( :key => status ) }
+  {
+    'incomplete' => 'Program requirements are not met',
+    'complete' => 'Program requirements have been met',
+    'graduated' => 'Officially completed program',
+    'dropout' => 'Program requirements are not met and no longer at CMU'
+  }.each do |key, label|
+    ProgressStatusType.find_or_create_by!(key: key) { |status| status.label = label }
+  end
 
-# Create certain admins by default if they don't already exist
-['meribyte','jmbrooks','rpoprosk','hershock','hdwyer'].each do |andrewid|
-  Participant.find_or_create_by( { :andrewid => andrewid } ) do |u|
-    u.is_admin = true
+  tag = ENV.fetch('DEFAULT_SEMINAR_TAG', 'S13')
+  { 'default-tag' => 'Default tag for new seminars',
+    'admin-list-tag' => 'List seminars in admin view with tag' }.each do |key, label|
+    Setting.find_or_create_by!(key: key) do |setting|
+      setting.label = label
+      setting.value = tag
+    end
+  end
+
+  versions = {
+    '2012' => 'Requirements in place on app launch (2012)',
+    '2015' => 'Requirements in effect 1/1/2015.',
+    '2023' => 'Requirements in effect for the 2023 program'
+  }.to_h do |key, label|
+    version = Programs::FutureFaculty::RequirementsVersion.find_or_create_by!(key: key) do |version|
+      version.label = label
+    end
+    [key, version]
+  end
+
+  categories = {
+    'projects' => 'Projects',
+    'observations' => 'Observations',
+    'teaching_consultations' => 'Teaching Feedback Consultations'
+  }.to_h do |key, label|
+    category = Programs::FutureFaculty::RequirementCategory.find_or_create_by!(key: key) do |category|
+      category.label = label
+    end
+    [key, category]
+  end
+
+  # These activity types match the requirements evaluated by RequirementsVersion.
+  requirements = [
+    [%w[2012 2015 2023], 'projects', 'course_project',
+     'Course & Syllabus Design Project', 'CourseAndSyllabusDesignProject'],
+    [%w[2012], 'projects', 'individual_project', 'Individual Project', 'IndividualProject'],
+    [%w[2015 2023], 'projects', 'statement_project', 'Teaching Statement Project', 'TeachingStatementProject'],
+    [%w[2012], 'observations', 'microteaching_observation', 'Microteaching Observation', 'MicroteachingObservation'],
+    [%w[2012], 'observations', 'classroom_observation', 'Classroom Observation', 'ClassroomObservation'],
+    [%w[2015 2023], 'teaching_consultations', 'microteaching_workshop',
+     'Microteaching Workshop and Follow-Up Conversation', 'MicroteachingWorkshop'],
+    [%w[2015 2023], 'teaching_consultations', 'teaching_observation', 'Teaching Observation', 'TeachingObservation'],
+    [%w[2015 2023], 'teaching_consultations', 'ecf_fg_observation',
+     'Early Course Feedback/Focus Group', 'EarlyCourseFeedback'],
+    [%w[2023], 'teaching_consultations', 'lesson_plan_review', 'Lesson Plan Review', 'LessonPlanReview']
+  ]
+  requirements.each do |version_keys, category_key, key, label, activity_class|
+    version_keys.each do |version_key|
+      Programs::FutureFaculty::Requirement.find_or_create_by!(
+        key: key, requirements_version: versions.fetch(version_key)
+      ) do |requirement|
+        requirement.requirement_category = categories.fetch(category_key)
+        requirement.label = label
+        requirement.activity_class = "Participant::Activities::#{activity_class}"
+      end
+    end
   end
 end
 
-# Create default application-wide settings if they don't already exist
-#
-# TODO: Ruby 1.9.1 really doesn't like '-' in symbol names. Deal with renaming these
-# before they get used in a scope or something similar.
-Setting.find_or_create_by( :key => "default-tag" ) do |s|
-  s.label = "Default tag for new seminars"
-  s.value = "S13"
-end
-
-Setting.find_or_create_by( :key => "admin-list-tag" ) do |s|
-  s.label = "List seminars in admin view with tag"
-  s.value = "S13"
-end
-
-
-##
-# Future Faculty Program additions
-
-# TODO: Make this less clunky after phasing out protected_attr gem.
-
-# Requirements Versions
-v1 = Programs::FutureFaculty::RequirementsVersion.find_or_create_by(
-  key: '2012') do |v|
-  v.key = '2012'
-  v.label = 'Requirements in place on app launch (2012)'
-end
-
-v2 = Programs::FutureFaculty::RequirementsVersion.find_or_create_by(
-  key: '2015') do |v|
-  v.key = '2015'
-  v.label = 'Requirements in effect 1/1/2015.'
-end
-
-# Requirement Categories and Requirements
-c = Programs::FutureFaculty::RequirementCategory.find_or_create_by(
-  key: 'projects') do |p|
-  p.key = 'projects'
-  p.label = 'Projects'
-end
-
-Programs::FutureFaculty::Requirement.find_or_create_by(
-  key: 'course_project',
-  requirements_version: v1,
-  requirement_category: c ) do |p|
-  p.key = 'course_project'
-  p.label = 'Course & Syllabus Design Project'
-  p.requirements_version = v1
-  p.requirement_category = c
-  p.activity_class = 'Participant::Activities::CourseAndSyllabusDesignProject'
-end
-
-Programs::FutureFaculty::Requirement.find_or_create_by(
-  key: 'individual_project',
-  requirements_version: v1,
-  requirement_category: c ) do |p|
-  p.label = 'Individual Project'
-  p.key = 'individual_project'
-  p.requirements_version = v1
-  p.requirement_category = c
-  p.activity_class = 'Participant::Activities::IndividualProject'
-end
-
-Programs::FutureFaculty::Requirement.find_or_create_by(
-  key: 'course_project',
-  requirements_version: v2,
-  requirement_category: c ) do |p|
-  p.label = 'Course & Syllabus Design Project'
-  p.key = 'course_project'
-  p.requirements_version = v2
-  p.requirement_category = c
-  p.activity_class = 'Participant::Activities::CourseAndSyllabusDesignProject'
-end
-
-Programs::FutureFaculty::Requirement.find_or_create_by(
-  key: 'statement_project',
-  requirements_version: v2,
-  requirement_category: c ) do |p|
-  p.label = 'Teaching Statement Project'
-  p.key = 'statement_project'
-  p.requirements_version = v2
-  p.requirement_category = c
-  p.activity_class = 'Participant::Activities::TeachingStatementProject'
-end
-
-c = Programs::FutureFaculty::RequirementCategory.find_or_create_by(
-  key: 'observations') do |p|
-  p.label = 'Observations'
-  p.key = 'observations'
-end
-
-
-Programs::FutureFaculty::Requirement.find_or_create_by(
-  key: 'microteaching_observation',
-  requirements_version: v1,
-  requirement_category: c ) do |p|
-  p.label = 'Microteaching Observation'
-  p.key = 'microteaching_observation'
-  p.requirements_version = v1
-  p.requirement_category = c
-  p.activity_class = 'Participant::Activities::MicroteachingObservation'
-end
-
-Programs::FutureFaculty::Requirement.find_or_create_by(
-  key: 'classroom_observation',
-  requirements_version: v1,
-  requirement_category: c ) do |p|
-  p.label = 'Classroom Observation'
-  p.key = 'classroom_observation'
-  p.requirements_version = v1
-  p.requirement_category = c
-  p.activity_class = 'Participant::Activities::ClassroomObservation'
-end
-
-
-c = Programs::FutureFaculty::RequirementCategory.find_or_create_by(
-  key: 'teaching_consultations') do |p|
-  p.label = 'Teaching Feedback Consultations'
-  p.key = 'teaching_consultations'
-end
-
-Programs::FutureFaculty::Requirement.find_or_create_by(
-  key: 'microteaching_workshop',
-  requirements_version: v2,
-  requirement_category: c ) do |p|
-  p.label = 'Microteaching Workshop and Follow-Up Conversation'
-  p.key = 'microteaching_workshop'
-  p.requirements_version = v2
-  p.requirement_category = c
-  p.activity_class = 'Participant::Activities::MicroteachingWorkshop'
-end
-
-Programs::FutureFaculty::Requirement.find_or_create_by(
-  key: 'teaching_observation',
-  requirements_version: v2,
-  requirement_category: c ) do |p|
-  p.label = 'Teaching Observation'
-  p.key = 'teaching_observation'
-  p.requirements_version = v2
-  p.requirement_category = c
-  p.activity_class = 'Participant::Activities::TeachingObservation'
-end
-
-Programs::FutureFaculty::Requirement.find_or_create_by(
-  key: 'ecf_fg_observation',
-  requirements_version: v2,
-  requirement_category: c ) do |p|
-  p.label = 'Early Course Feedback/Focus Group'
-  p.key = 'ecf_fg_observation'
-  p.requirements_version = v2
-  p.requirement_category = c
-  p.activity_class = 'Participant::Activities::EarlyCourseFeedback'
-end
-
-
-# Program Progress Status Types
-Program::ProgressStatusType.find_or_create_by(
-  key: 'incomplete') do |v|
-  v.key = 'incomplete'
-  v.label = 'Program requirements are not met'
-end
-
-Program::ProgressStatusType.find_or_create_by(
-  key: 'complete') do |v|
-  v.key = 'complete'
-  v.label = 'Program requirements have been met'
-end
-
-Program::ProgressStatusType.find_or_create_by(
-  key: 'graduated') do |v|
-  v.key = 'graduated'
-  v.label = 'Officially completed program'
-end
-
-Program::ProgressStatusType.find_or_create_by(
-  key: 'dropout') do |v|
-  v.key = 'dropout'
-  v.label = 'Program requirements are not met and no longer at CMU'
+# Grant access explicitly; fresh setup does not provision named real-world admins.
+if (andrewid = ENV['BOOTSTRAP_ADMIN_ANDREWID']).present?
+  participant = Participant.find_or_create_by!(andrewid: andrewid.strip.downcase)
+  participant.update!(is_admin: true)
 end

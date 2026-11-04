@@ -5,7 +5,7 @@
 <div class="content">
   <div>
     <%= greeting %>
-    <%= @homepage_note.html_safe %>
+    <%= @homepage_note&.html_safe %>
   </div><div class="sidebar">
     <% if Current.user&.admin? %>
     <div class="list left-rule">

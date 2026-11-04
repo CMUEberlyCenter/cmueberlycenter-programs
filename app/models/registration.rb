@@ -7,25 +7,25 @@ class Registration < ApplicationRecord
   }
   scope :present_seminars, -> { joins(:seminar).present }
   scope :past_seminars, -> { joins(:seminar).past }
-  Seminar::StatusType.find_each do |s|
+  Seminar::Common::STATUS_KEYS.each do |key|
     # Scopes Registration.open_seminars, etc.
-    scope "#{s.key}_seminars", -> { joins(seminar: s.key.to_sym) }
+    scope "#{key}_seminars", -> { joins(:seminar).merge(Seminar.public_send(key)) }
   end
   
-  Registration::WaitlistStatusType.find_each do |s|
+  Registration::WaitlistStatusType::KEYS.each do |key|
     # Scopes Registration.pending, Registration.confirmed, etc.
-    scope s.key, -> { where(waitlist_status: s) }
+    scope key, -> { where(waitlist_status_id: Registration::WaitlistStatusType.where(key: key).select(:id)) }
 
     # Methods r.pending?, r.confirmed?, etc.
-    define_method("#{s.key}?") { waitlist_status.key == s.key.to_s }
+    define_method("#{key}?") { waitlist_status&.key == key }
   end
 
-  Registration::AttendanceStatusType.find_each do |s|
+  Registration::AttendanceStatusType::KEYS.each do |key|
     # Scopes Attendance.pending, Registration.confirmed, etc.
-    scope s.key, -> { where(attendance_status: s) }
+    scope key, -> { where(attendance_status_id: Registration::AttendanceStatusType.where(key: key).select(:id)) }
 
     # Methods r.attended?, r.absent?, etc.
-    define_method("#{s.key}?") { attendance_status && attendance_status.key == s.key }
+    define_method("#{key}?") { attendance_status&.key == key }
   end
 
   belongs_to :participant, default: -> { Current.user }

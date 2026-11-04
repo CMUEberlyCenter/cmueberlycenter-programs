@@ -11,7 +11,7 @@ class WelcomeController < ApplicationController
       SeminarGroup.new(title: 'Programs Open for Registration: Synchronous',
                        seminars: Seminar.registerable.in_person),
       SeminarGroup.new(title: 'Programs Open for Registration: Asynchronous',
-                       seminars: Seminar.registerable.async)
+                       seminars: Seminar.registerable.asynchronous)
     ]
 
     if Current.user&.admin?

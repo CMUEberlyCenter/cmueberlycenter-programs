@@ -28,6 +28,6 @@ class Programs::FutureFacultyControllerTest < ActionController::TestCase
       end
     end
 
-    participant.verify
+    assert participant.verify
   end
 end

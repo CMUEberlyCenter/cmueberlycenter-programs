@@ -1,0 +1,19 @@
+default: &default
+  adapter: mysql2
+  encoding: utf8mb4
+  pool: <%= ENV.fetch('RAILS_MAX_THREADS', 5) %>
+  host: <%= ENV.fetch('DATABASE_HOST', 'localhost').to_json %>
+  username: <%= ENV.fetch('DATABASE_USERNAME', 'root').to_json %>
+  password: <%= ENV.fetch('DATABASE_PASSWORD', '').to_json %>
+
+development:
+  <<: *default
+  database: seminars_development
+
+test:
+  <<: *default
+  database: seminars_test
+
+production:
+  <<: *default
+  url: <%= ENV.fetch('DATABASE_URL', '').to_json %>
