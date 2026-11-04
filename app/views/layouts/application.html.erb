@@ -1,66 +1,71 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title><%= document_title %></title>
+<html lang="en">
+  <head>
+    <title><%= document_title %></title>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
 
-  <%= stylesheet_link_tag 'application', :media => "all" %>
-  
-  <% if content_for :stylesheets %>
-    <%= yield :stylesheets %>
-  <% end %>
+    <%# linked individually: propshaft 0.6 names application.css from its own source, so @imports went stale %>
+    <%= stylesheet_link_tag "cmu", "eberly", "tabulator_cmu", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    <%= javascript_include_tag "application", :"data-turbo-track" => "reload" %>
 
-  <%= javascript_include_tag 'application' %>
-  <%= render partial: 'layouts/analytics' %>
+    <link href="//www.cmu.edu/favicon.ico" rel="icon">
+    <link href="//www.cmu.edu/favicon-152.png" rel="apple-touch-icon-precomposed">
+    <meta content="#9f0000" name="msapplication-TileColor">
+    <meta content="//www.cmu.edu/favicon-144.png" name="msapplication-TileImage">
+  </head>
 
-  <%= csrf_meta_tags %>
-</head>
-<body>
-  <script type="text/javascript">
-  var default_filter="<%= @display_tag %>";
-  </script>
+  <body class="no-js">
+    <%= turbo_frame_tag "modal" %>
 
-  <%#= render :partial => "layouts/impersonate_user" %>
+    <%= render 'layouts/impersonate_message' %>
+    <div id="container">
+      <%= image_tag('cmu-wordmark.png', id: 'wordmarkPrint') %>
+      <header>
+        <div class="roof">
+          <div>
+            <%= link_to("Carnegie Mellon University",
+                "http://www.cmu.edu/",
+                { class: "wordmark" }) %>
+            <a aria-label="Jump to navigation" class="menu-btn" href="#nav"><b>&#8212;</b><b>&#8212;</b><b>&#8212;</b></a>
 
-  <div id="cmu-bar-container" class="container-fluid">
-    <div id="cmu-bar">
-      <%= link_to( image_tag( 'carnegie-mellon-wordmark.gif', 
-                   :alt => 'Carnegie Mellon Wordmark'),
-                   'http://www.cmu.edu' )
-      %>
-    </div>
-  </div>
+	    <%  if Current.user && Current.user.admin? %>
+	      <%= form_tag(search_participants_path, id: 'site-search', method: 'get', class: 'search', data: {controller: 'search'} ) do %>
+	      <label><span>Search</span>
+		<%= text_field_tag(:q, '', { autocomplete: 'off', placeholder: 'Search', data: { action: 'keyup->search#lookupParticipants', behavior: "autocomplete", 'search-target': 'q' }} ) %>
+	      </label>
+	      <%= button_tag("Search") %>
+	      <ul id="site-search-results">
+	      </ul>
+	      <% end %>
 
-  <%= render partial: 'layouts/page_header' %>
-
-  <div class="container-fluid">
-      <div class="row">
-          <div class="col-md-3 sidebar">
-              <%= render "layouts/utility_nav" %>
-              
-              <%= sidebar_note %>
+	      
+	    <% end %>
+	    
           </div>
+        </div>
 
-          <div class="col-md-9">
-              <div class="row">
-                  <div class="col-md-12">
-                      <%# TODO: raw is cludgy and requires no direct user input to go in the flash.
-                      Let's whitelist some reasonable tags instead %>
-                      <% if flash[:error] %><div class="flash error"><p><%= raw flash[:error] %></p></div><% end %>
-                      <% if flash[:notice] %><div class="flash notice"><p><%= raw flash[:notice] %></p></div><% end %>
-                      <% if flash[:success] %><div class="flash success"><p><%= raw flash[:success] %></p></div><% end %>
-                  </div>
-              </div>
+        <div id="sitename">
+	  <h1><%= link_to('Seminars & Workshops', root_url) %></h1>
+	  <h2><%= link_to('Eberly Center', eberly_url) %></h2>
+        </div>
+      </header>
 
-              <div class="row">
-                  <section id="content" role="main" class="col-md-12">
-                      <%= yield %>
-                  </section>
-              </div>
-          </div><!-- /.col-md-9 -->
-      </div><!-- /.row -->
-  </div>
+      <div id="content">
+        <div class="breadcrumbs">
+	  <%= breadcrumbs %>
+        </div>
 
-  <%= render partial: 'layouts/page_footer' %>
-
-</body>
+	<% flash.each do |name, message| -%>
+	<div class="content wide flash none <%= flash_css_class(name) %>" role="alert">
+          <%= message.html_safe %>
+        </div>
+	<% end %>
+	  
+	<%= yield %>	
+      </div>
+      <%= render partial: "layouts/footer" %>
+    </div>
+  </body>
 </html>

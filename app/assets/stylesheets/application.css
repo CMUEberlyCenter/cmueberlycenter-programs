@@ -1,0 +1,2 @@
+/* Stylesheets are linked individually in app/views/layouts/application.html.erb
+ * (cmu.css, eberly.css, tabulator_cmu.css) so each gets a fresh digest when it changes. */

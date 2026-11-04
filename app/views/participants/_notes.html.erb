@@ -1,0 +1,20 @@
+<h2>Notes &mdash; Internal Use Only</h2>
+
+<%#= form_with(model: participant, id: "new-article", local: false) do |f| %>
+<%# seed = "Nachos" %>
+<%#= f.text_area(:note, id: "note", value: seed) %>
+<%#= f.submit "Update", id: "note-submit2" %>
+<%# end %>
+
+<div id="note-response"><p></p></div>
+
+    <%# TODO: Bootstrap %>
+    <%#= simple_form_for participant, remote: true do |f| %>
+    <%= form_for participant, remote: true do |f| %>
+    <% default_text = "Add a note..." %>
+    <% seed = (participant.note.nil? || participant.note.empty?) ? default_text : participant.note %>
+    <%= hidden_field_tag(:note_seed_text, seed) %> <%# TODO: update field w/ new seed on update %>
+    <%= hidden_field_tag(:note_default_text, default_text) %>
+    <%= f.text_area(:note, id: "note", value: seed) %>
+    <%= f.submit "Update", id: "note-submit3" %>
+    <% end %>

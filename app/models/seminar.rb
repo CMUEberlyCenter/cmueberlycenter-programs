@@ -1,33 +1,52 @@
-class Seminar < ActiveRecord::Base
-  belongs_to :seminar_status
-  has_many :registrations, :dependent => :delete_all
-  has_many :seminar_tags, dependent: :destroy
-  delegate :status, :to => :seminar_status, :prefix => false
-  accepts_nested_attributes_for :registrations, :allow_destroy => true
-  accepts_nested_attributes_for :seminar_tags
-  attr_accessor :start_time, :start_date, :end_time, :end_date
+class Seminar < ApplicationRecord
+  include Seminar::Common
 
-  # Seminar.published, Seminar.development, etc.
-  SeminarStatus.all.each do |s|
-    #scope s.status, :conditions => { :seminar_status_id => s }
-    scope s.status, -> { where( seminar_status: s) }
+  default_scope { order(start_at: :asc) }
+
+  def self.core_indicia = '*'
+
+  belongs_to(:seminar_status,
+             -> { readonly },
+             class_name: 'Seminar::StatusType',
+             inverse_of: :seminars)
+
+  has_many(:registrations,
+           -> { includes :participant },
+           inverse_of: :seminar,
+           dependent: :restrict_with_error)
+
+  has_many :seminar_tags, class_name: 'Seminar::Tag', dependent: :destroy
+
+  def tags = seminar_tags.map(&:value).map(&:downcase)
+
+  def tags=(new_tags)
+    return unless new_tags.is_a? String
+
+    new_tags = new_tags.split(',').map(&:strip).map(&:downcase)
+
+    # Destroy existing tags not in new tags
+    (tags - new_tags).each { |t| seminar_tags.destroy_by(value: t) }
+
+    # Add tags in new_tags not in existing tags
+    (new_tags - tags).each { |t| seminar_tags.build(value: t) }
   end
-  scope :active, -> { where("end_at >= ?", Time.now).order('start_at asc') }
-  scope :expired, -> { where("end_at <= ?", Time.now).order('start_at asc') }
-  scope :completed, -> { where("end_at <= ?", Time.now).merge( self.published ).order( start_at: :asc ) }
-  scope :upcoming, -> { where("end_at >= ?", Time.now).order('start_at asc') }
 
-  scope :with_tag, -> (tag) { joins(:seminar_tags).where("seminar_tags.value = :tag", tag: tag) }
-  scope :without_tag, -> (tag) { where.not( id: self.with_tag(tag).pluck(:id)) }
+  def title_with_indicia = "#{title}#{Seminar.core_indicia if core?}"
+  def core? = tags.include? 'core'
 
 
-   
-  def self.days_away( num_days )
-    where( "start_at >= ? and start_at < ?", 
-           Date.today + num_days.days, 
-           Date.today + 1.days + num_days.days
-    )
+
+  def confirmed_registrations_size
+    return 0 unless self.registrations && self.registrations.confirmed
+    return self.registrations.confirmed.size
   end
+
+  def attended_registrations_size
+    return 0 unless self.registrations && self.registrations.attended
+    return self.registrations.attended.size
+  end
+
+
 
   def self.confirmed_for( participant )
     self.status_for( "confirmed", participant )
@@ -39,87 +58,55 @@ class Seminar < ActiveRecord::Base
 
   def self.status_for( status, participant )
     joins(:registrations).where(
-      "registrations.participant_id = ? and " + 
-      "registrations.registration_status_id = ?", 
-      participant.id, 
-      RegistrationStatus.find_by_key( status ).id
+      "registrations.participant_id = ? and " +
+      "registrations.waitlist_status_id = ?",
+      participant.id,
+      Registration::WaitlistStatusType.find_by_key( status ).id
     )
   end
 
-  def core?
-    self.tags.include? "core"
-  end
 
-  def tags
-    self.seminar_tags.map( &:value )
-  end
-  
-  def tags=(tags)
-    SeminarTag.where('seminar_id is NULL').each do |x|
-      x.destroy
-    end
-    self.seminar_tags.delete_all
-    tags.split(',').each do |tag|
-      SeminarTag.create( :seminar_id => self.id, :value => tag )
-    end
-                               
-  end
+
+
 
   def self.unrequested_by( participant )
-    select{ |s| s.registrations.find_by_participant_id( participant) == nil }
+    if participant.blank?
+      all
+    else
+      select{ |s| s.registrations.find_by_participant_id( participant) == nil }
+    end
   end
 
-  def expired?
-    self.end_at < Time.now
-  end
 
-
-  # TODO: filter for current semester regardless of publish status
-  scope :current_semester, -> { where() }
 
   validates :title, :presence => true
 
   #named_scope :confirmed, lambda {|participant| {:conditions => {:author_id => author.id}}}
 
 
-  def status=(status)
-    self.seminar_status=(status)
+  def async?
+    self.is_async
   end
 
-
-  def registration_for( participant )
-    self.registrations.where( :participant_id => participant ).first
+  def registration_for(p)
+    self.registrations.where(participant: p).first
   end
 
-
-  
-  def confirmed_count
-    self.registrations.confirmed.size
-  end
-
-  def capacity_percentage
-    (self.confirmed_count.to_f/self.maximum_capacity*100).to_i
-  end
 
   def formatted_timespan
-    start_format = "%A, %B %e, %l:%M"
-    start_format = "%A, %B %e, Noon" if self.start_at.hour == 12 and self.start_at.min == 0
-    end_format = ""
-    if self.start_at.to_date == self.end_at.to_date
-      end_format = "%-l:%M%P"
-      end_format = "Noon" if self.end_at.hour == 12 and self.end_at.min == 0
-      unless (self.start_at.hour < 12 and self.end_at.hour < 12) or
-          (self.start_at.hour >= 12 and self.end_at.hour >= 12)
-        start_format = start_format + "%P"
-      end
+    if self.start_at && self.end_at
+      start_format = "%A, %B %e, %Y %l:%M%P "
+      end_format = if self.start_at.to_date == self.end_at.to_date
+                     "%-l:%M%P"
+                   else
+                     " " + start_format
+                   end
+      "#{self.start_at.strftime(start_format)}&ndash;\
+        #{self.end_at.strftime(end_format)}".html_safe
     else
-      start_format = start_format + "%P "
-      end_format = " " + start_format
-      # TODO: multi-day support for noons
-      end_format = "Noon" if self.end_at.hour == 12 and self.end_at.min == 0
+      end_format = "Available until %A, %B %e, %Y %l:%M"
+      self.end_at.strftime(end_format)
     end
-
-    self.start_at.strftime(start_format) + "&ndash;" + self.end_at.strftime(end_format)
   end
 
   def formatted_timespan_short
@@ -127,21 +114,7 @@ class Seminar < ActiveRecord::Base
     self.start_at.strftime(start_format)
   end
 
-  def formatted_timespan_safe
-    HTMLEntities.new.decode self.formatted_timespan
-  end
-
-  #validate :expiration_date_cannot_be_in_the_past,
-  #  :discount_cannot_be_greater_than_total_value
- 
-  #def expiration_date_cannot_be_in_the_past
-  #  if !expiration_date.blank? and expiration_date < Date.today
-  #    errors.add(:expiration_date, "can't be in the past")
-  #  end
-
-
   def seminar_params
     params.require(:seminar).permit!
   end
 end
-

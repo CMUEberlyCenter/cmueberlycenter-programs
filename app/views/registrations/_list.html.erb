@@ -1,0 +1,58 @@
+<div id="filterrific_results">
+  <%== pagy_info(@pagy) %>
+  <table class="alternate">
+    <thead class="invert">
+      <tr>
+        <th>Last Change</th>
+        <th>Name</th>
+        <th>Andrew ID</th>
+        <th>Department</th>
+        <th>School</th>
+        <th>Student Class</th>
+        <th>FFP Graduation Date</th>
+        <th>Registration Status</th>
+        <th>Attendance Status</th>
+        <th>FFP Status</th>
+        <th>Category</th>
+        <th>Type</th>
+        <th>Title</th>
+        <th>Core?</th>
+        <th>Event Start Date</th>
+        <th>Event End Date</th>
+        <th>Tags</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% registrations.each do |r| %>
+      <% p = r.participant %>
+      <% s = r.seminar %>
+      <% next if p.nil? || s.nil?%>
+      <% start_at = s.start_at %>
+      <% start_at = "Async" unless start_at.is_a? (DateTime) %>
+      <tr>
+        <th><%= r.updated_at.to_formatted_s(:short) %>
+          <td><%= link_to p.name ? p.name : p.andrewid, participant_url(p.andrewid) %></td>
+          <td><%= p.andrewid %></td>
+	  <td><%= p.pretty_depts %></td>
+          <td><%= p.pretty_colleges %></td>
+          <td><%= p.student_class %></td>
+          <td><%= p.future_faculty_program_graduated_on%></td>
+          <td><%= r.waitlist_status.key %></td>
+          <td><%= r.attendance_status.key unless r.attendance_status.blank? %></td>
+          <td><%= p.future_faculty_progress_status ? p.future_faculty_progress_status.label : ''%></td>
+          <td>Event</td>
+          <% type = "Workshop" if s.tags.include?("workshop") %>
+          <% type ||= "GUSIO" if s.tags.include?("gusio") %>
+          <% type ||= "Seminar" %>
+          <td><%= type %></td>
+          <td><%= s.title %></td>
+          <td><%= s.core? %></td>
+          <td><%= start_at %></td>
+          <td><%= s.end_at.to_formatted_s%></td>
+          <td><%= s.tags.join(",") %></td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <%== pagy_nav(@pagy) %>
+</div>

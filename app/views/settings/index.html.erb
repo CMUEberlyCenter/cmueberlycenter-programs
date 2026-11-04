@@ -1,0 +1,112 @@
+<% update_document_title(add: "Application Settings") %>
+<% update_breadcrumbs(add: "Application Settings") %>
+<% content_for :nav do %>
+<li class="parent">
+  <%= link_to('Seminars', seminars_path) %>
+  <ul>
+    <li>
+      <%= link_to('Create New Seminar', new_seminar_path) %>
+    </li>
+  </ul>
+</li><li>
+  <%= link_to('Participants', participants_path) %>
+</li><li>
+  <%= link_to('Registrations', registrations_path) %>
+</li><li>
+  <%= link_to('Future Faculty Program', future_faculty_path) %>
+</li><li class="active">
+  <%= link_to('Application Settings', settings_path) %>
+</li>
+<% end %>
+
+<div class="content">
+  <div>
+    <h1>Application Settings</h1>
+
+    <h2>Display Settings</h2>
+    <% @settings.each do |setting| %>
+    <%= form_for setting do |f| %>
+    <p>
+      <%= f.label :value, "#{setting.label}:" %>
+      <%= f.text_field :value, class: 'inline' %>
+      <%= f.submit "Update", class: 'small' %>
+    </p>
+    <% end %>
+    <% end %>
+
+  </div><div class="sidebar">
+    <h1>Sidebar Note Previews</h1>
+    <% @settings.sidebar_settings.each do |s| %>
+    <h2><%= s.label %></h2>
+    <div class="left-rule">
+      <%= s.value.to_s.html_safe %>
+    </div>
+    <% end %>
+  </div>
+</div>
+<div class="grid column2">
+  <div>
+    <h2>Consultants</h2>
+    <%= form_with model: Participant.new do |f| %>
+    <p>
+      <%= f.label :andrewid, 'Add Consultant:' %>
+      <%= f.text_field :andrewid, class: 'inline' %>
+      <%= f.hidden_field :is_consultant, value: true %>
+      <%= f.submit 'Add Consultant', class: "btn small" %>
+    </p>
+    <% end %>
+    
+    <table class="alternate">
+      <thead>
+      <tr class="invert">
+	<th>Name</th>
+	<th>Andrew ID</th>
+	<th>Actions</th>
+      </tr>
+      </thead>
+	<tbody>
+      <% @consultants.each do |c| %>
+      <tr>
+        <td><%= c.name %></td>
+        <td><%= c.andrewid %></td>
+        <td>
+          <%= button_to "Remove", participant_path(c,:participant => { :is_consultant => false}), :method => :put, class: 'small' %>
+        </td>
+      </tr>
+      <% end %>
+      </tbody>
+    </table>
+      </div>
+      <div>
+    <h2>Admins</h2>
+    <%= form_with model: Participant.new do |g| %>
+    <p>
+      <%= g.label :andrewid, 'Add Admin:' %>
+      <%= g.text_field :andrewid, class: 'inline' %>
+      <%= g.hidden_field :is_admin, value: true %>
+      <%= g.submit 'Add Admin', class: "btn small" %>
+    </p>
+    <% end %>
+    
+    <table class="alternate">
+      <thead>
+	<tr class="invert">
+	  <th>Name</th>
+	  <th>Andrew ID</th>
+	  <th>Actions</th>
+	</tr>
+      </thead>
+      <tbody>
+      <% @admins.each do |c| %>
+      <tr>
+        <td><%= c.name %></td>
+        <td><%= c.andrewid %></td>
+        <td>
+          <%= button_to "Remove", participant_path(c,:participant => { :is_admin => false}), :method => :put, class: 'small' %>
+        </td>
+      </tr>
+      <% end %>
+      </tbody>
+    </table>
+      </div>
+</div>

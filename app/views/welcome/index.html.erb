@@ -1,38 +1,30 @@
-
-<section class="dialog" id="registrations" style="width: 700px;">
-
-<h1 style="width: 687px;">S13 Teaching Seminars</h1>
-
-
-
-<ul style="margin-left: 20px;">
-<% @seminars.each do |seminar| %>
-
-<li class="seminar">
-
-  <h1><%#= link_to seminar.title, seminar_path(  seminar ) %><%= link_to seminar.title, '#' %></h1>
-  <p><strong><%= seminar.start_at.strftime("%a %B %e, %Y at %l:%M %P") %> - <%=seminar.end_at.strftime("%l:%M %P") %></strong><br/>
-    <%= seminar.description %>
-  </p>
-</li>
-
+<% content_for :nav do %>
+  <%= render "nav" %>
 <% end %>
-</ul>
 
-<ul style="clear: left; margin-left: 20px; margin-top: 30px;">
-<li><strong>Expired Seminars</strong></li>
-<% Seminar.expired.each do |seminar| %>
+<div class="content">
+  <div>
+    <%= greeting %>
+    <%= @homepage_note.html_safe %>
+  </div><div class="sidebar">
+    <% if Current.user&.admin? %>
+    <div class="list left-rule">
+      <h1>Admin Resources</h1>
+      <ul>
+        <li><%= link_to("Create New Seminar",
+                new_admin_seminar_path) %></li>
+      </ul>
+    </div>
+    <% elsif Current.user %>
+      <% if @sidebar_note.present? %>
+        <div class="left-rule">
+          <%= @sidebar_note.html_safe %>
+        </div>
+      <% end %>
+    <% else %>
+    <%= render 'sessions/sidebar_login' %>
+    <% end %>
+  </div>
+</div>
 
-<li class="seminar">
-
-<h1><%#= link_to seminar.title, seminar_path(  seminar ) %><%= link_to seminar.title, '#', :style => "color: #bbbbbb;" %></h1>
-<p><strong><%= seminar.start_at.strftime("%a %B %e, %Y at %l:%M %P") %> - <%=seminar.end_at.strftime("%l:%M %P") %></strong><br/>
- <%= seminar.description %>
-</p>
-</li>
-<% end %>
-</ul>
-
-
-
-</section>
+<%= filterable_list(@seminar_groups) %>

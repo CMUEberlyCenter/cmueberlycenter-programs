@@ -1,22 +1,10 @@
-  <div style="margin-left: 10px;border-bottom: 1px solid #aaa; border-top:1px solid #aaa;">
-      Registrations:
-      <strong><%= @seminar.registrations.size %></strong> | 
-      Pending:
-          <strong><%= @seminar.registrations.pending.size %></strong> |
-          Confirmed:
-          <strong><%= @seminar.registrations.confirmed.size %></strong> |
-          
-          Capacity:
-
-          <div style="width: 120px; float: right; margin-top: 0px; margin-right: 230px;">
-        <div class="capacity">
-          <%=
-             content_tag( :div,
-             content_tag( :span, '', :style => "width: " + @seminar.capacity_percentage.to_s + "%" ), :class => "capacity-meter" )
-
-          %>
-        </div>
-      </div>
-
-      <strong><%= @seminar.capacity_percentage.to_s %>%</strong>
-  </div>
+<div style="margin-left: 10px;border-bottom: 1px solid #aaa; border-top:1px solid #aaa;">
+  Registrations:
+  <strong><%= @seminar.registrations.size %></strong> (
+  Pending:
+  <strong><%= @seminar.registrations.pending.size %></strong> +
+  Confirmed:
+  <strong><%= @seminar.registrations.confirmed.size %></strong> ) ||
+  Attended:
+  <strong><%= @seminar.registrations.attended.size %></strong>
+</div>

@@ -1,3 +1,8 @@
+<% if @registration_type == "bulk" %>
+$("#bulk-register").html("<%= escape_javascript( render(:partial => "bulk")).html_safe %>");
+<% else %>
+
 $("#add-participant").html("<%= escape_javascript( render(:partial => "form")).html_safe %>");
 
 $("#add-participant2").html("<%= escape_javascript( render(:partial => "form")).html_safe %>");
+<% end %>

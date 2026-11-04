@@ -1,0 +1,7 @@
+<h2><%= title %></h2>
+<p>
+  <strong>Attended:</strong> <%= seminars.size %>
+</p>
+<div>
+  <%= render( partial: "seminar", collection: seminars ) %>
+</div>

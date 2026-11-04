@@ -1,0 +1,38 @@
+<footer class="grid column3 invert">
+  <div>
+    <p>
+      Eberly Center<br />
+      Carnegie Mellon University<br />
+      4765 Forbes Avenue<br />
+      Tepper Quad, Suite 1310<br />
+      Pittsburgh, PA 15213<br />
+      412-268-2896<br />
+      <br />
+      <%= link_to 'Contact Us', contact_email_url %>
+    </p>
+    <ul>
+      <li><%= link_to 'Legal Info', '//www.cmu.edu/legal/', target: :blank %>
+      </li>
+      <li><%= link_to 'www.cmu.edu', '//www.cmu.edu', target: :blank %> </li>
+    </ul>
+    <ul
+      ><li
+        >&#169; <span id="js-current-year">2023</span> Carnegie Mellon
+        University</li
+      ></ul
+    >
+  </div>
+  <nav id="nav">
+    <ul>
+      <li class="secondary right">
+        <% if Current.user.present? %>
+          <%= link_to(Current.user.name, profile_path) %>
+          <%= link_to 'Sign out', logout_path %>
+        <% else %>
+          <%= button_to 'Sign in', login_path, form_class: 'signIn' %>
+        <% end %>
+      </li>
+      <%= yield :nav %>
+    </ul>
+  </nav>
+</footer>

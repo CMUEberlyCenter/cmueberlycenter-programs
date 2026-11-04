@@ -1,55 +1,45 @@
-class Registration < ActiveRecord::Base
+class Registration < ApplicationRecord
+  include Seminar::Common
 
-  # Participant
-  belongs_to :participant
+  scope :with_seminar_tag, -> (tag) { joins(:seminar).with_tag(tag) }
+  scope :seminar_in_days, lambda { |n = 2|
+    joins(:seminar).in_days(n)
+  }
+  scope :present_seminars, -> { joins(:seminar).present }
+  scope :past_seminars, -> { joins(:seminar).past }
+  Seminar::StatusType.find_each do |s|
+    # Scopes Registration.open_seminars, etc.
+    scope "#{s.key}_seminars", -> { joins(seminar: s.key.to_sym) }
+  end
+  
+  Registration::WaitlistStatusType.find_each do |s|
+    # Scopes Registration.pending, Registration.confirmed, etc.
+    scope s.key, -> { where(waitlist_status: s) }
 
+    # Methods r.pending?, r.confirmed?, etc.
+    define_method("#{s.key}?") { waitlist_status.key == s.key.to_s }
+  end
 
-  # Event Information
+  Registration::AttendanceStatusType.find_each do |s|
+    # Scopes Attendance.pending, Registration.confirmed, etc.
+    scope s.key, -> { where(attendance_status: s) }
+
+    # Methods r.attended?, r.absent?, etc.
+    define_method("#{s.key}?") { attendance_status && attendance_status.key == s.key }
+  end
+
+  belongs_to :participant, default: -> { Current.user }
   belongs_to :seminar
-  [:description, :title, :start_at, :end_at, :location].each do |m|
-    delegate m, to: :seminar, prefix: :event
-  end
+  belongs_to :waitlist_status, class_name: 'Registration::WaitlistStatusType'
+  belongs_to :attendance_status, class_name: 'Registration::AttendanceStatusType', optional: true
 
-  
-  # Registration Status
-  delegate :status, :to => :registration_status
-  belongs_to :registration_status
-  
-  RegistrationStatus.find_each do |s| 
-    scope s.status, -> { where( registration_status: s ) }
-  end
-
-  
-  # Attendance Status
-  belongs_to :attendance_status, optional: true
-  
-  AttendanceStatus.find_each do |s| 
-    scope s.status, -> { where( attendance_status: s ).
-                         joins( :seminar ).
-                         merge( Seminar.completed ) }
-  end
+  has_many :seminar_tags, through: :seminar
 
 
 
-#  scope :has_tag, -> (tag) { joins(:seminar_tags).where("seminar_tags.value = ?", tag) }
-  scope :credited, -> { merge(:confirmed).merge(:attended).where( 'end_at < ?', Time.now ) }
-  #
-  
-#  scope :credited, -> { self.confirmed.attended.joins(:seminar).where( 'end_at < ?', Time.now ) }
 
-#  scope :credited, -> { joins(:seminar) & (:registration_).where( 'end_at < ?', Time.now )
-  scope :upcoming, -> { joins(:seminar).where('end_at >= ?', Time.now) }
 
-  validates :participant, :presence => true
-  validates_uniqueness_of :participant_id, :scope => [:seminar_id]
 
-  def confirmed?
-    self.status == RegistrationStatus.find_by_key('confirmed').key
-  end
-
-  def pending?
-    self.status == RegistrationStatus.find_by_key('pending').key
-  end
 
   def search_string
   end
@@ -62,7 +52,53 @@ class Registration < ActiveRecord::Base
     participant.save!
     self.participant_id = Participant.find_by_andrewid(search).id
     #self.participant_id=64
-    
+
   end
 
+
+
+  #filterrific(
+  #  default_filter_params: { sorted_by: 'created_at_desc' },
+  #  available_filters: [
+  #    :sorted_by,
+  #    :search_query,
+  #    :with_seminar,
+  #    :with_created_at_gte,
+  #    :with_waitlist_status
+  #  ]
+  #)
+
+  scope :sorted_by, ->(sort_option) {
+    direction = /desc$/.match?(sort_option) ? "desc" : "asc"
+    case sort_option.to_s
+    when /^created_at/
+      order("LOWER(created_at) #{direction}")
+    else
+      raise(ArgumentError, "Invalid sort option: #{sort_option.inspect}")
+    end
+  }
+
+  def self.options_for_select
+    order("LOWER(name)").map { |e| [e.observer.name, e.observer_id] }
+  end
+  scope :search_query, ->(query) {
+
+  }
+  scope :with_created_at_gte, ->(ref_date) {
+
+  }
+  scope :with_waitlist_status, -> (s) { where(waitlist_status: s) }
+
+  validates :participant, :presence => true
+  validates :participant_id, uniqueness: { scope: :seminar_id,
+                                        message: "You have already registered for this seminar." }
+
+  # Delegate any unknown method to the registration's seminar
+  def method_missing(method, *args)
+    return seminar.send(method,*args) if seminar.respond_to?(method)
+    super
+  end
+
+
+  #validates_uniqueness_of :participant_id, :scope => [:seminar_id]
 end

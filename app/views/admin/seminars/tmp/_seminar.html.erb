@@ -1,0 +1,28 @@
+<div>
+  <%#= turbo_frame_tag seminar do %>
+
+  <h2><%= seminar.title %><% if seminar.tags.include? "core" %>*<% end %></h2>
+
+  <p>
+    <%= raw seminar.formatted_timespan %><br/>
+    <%= seminar.location %><br/>
+    <% if seminar.seminar_status == 'open' %>
+    Registrations:
+    <strong><%= seminar.registrations.size %></strong> (
+    Pending:
+    <strong><%= seminar.registrations.pending.size %></strong> +
+    Confirmed:
+    <strong><%= seminar.registrations.confirmed.size %></strong> ),
+    Attended:
+    <strong><%= seminar.registrations.attended.size %></strong>
+    <% end %>
+  </p>
+  
+  <p>
+    <%= link_to "Edit", edit_admin_seminar_url(seminar), :class => 'cta' %><br/>
+    <%= link_to "Manage Registrations", admin_seminar_url(seminar), :class => 'cta' %><br/>
+    <%= link_to "Manage Attendance", seminar_attendance_url(seminar), :class => 'cta' %><br/>
+  </p>
+  <%# end %>
+</div>
+

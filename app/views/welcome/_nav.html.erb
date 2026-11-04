@@ -1,0 +1,33 @@
+<% if Current.user&.admin? %>
+  <li class="parent">
+    <%= link_to('Seminars', seminars_path) %>
+    <ul>
+      <li>
+        <%= link_to('Create New Seminar', new_seminar_path) %>
+      </li>
+    </ul>
+  </li><li>
+    <%= link_to('Participants', participants_path) %>
+  </li><li>
+    <%= link_to('Registrations', registrations_path) %>
+  </li><li>
+    <%= link_to('Future Faculty Program', future_faculty_path) %>
+  </li><li>
+    <%= link_to('Application Settings', settings_path) %>
+  </li>
+
+<% else %>
+  <li>
+    <%= link_to('My Eberly Activities', profile_path, format: :pdf) %>
+  </li><li>
+    <%= link_to('Graduate Student Support',
+        eberly_graduate_students_url,
+        class: 'external',
+        target: :blank) %>
+  </li><li>
+    <%= link_to('Learn About Our Future Faculty Program',
+        eberly_future_faculty_program_url,
+        class: 'external',
+        target: :blank) %>
+  </li>
+<% end %>

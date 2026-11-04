@@ -1,0 +1,49 @@
+    <div class="list grey">
+      <h1>Registrations</h1>
+      <p><strong><%= @seminar.registrations.size %></strong> Total</p>
+      <p><strong><%= @seminar.registrations.pending.size %></strong> Pending</p>
+      <p><strong><%= @seminar.registrations.confirmed.size %></strong> Confirmed</p>
+      <p>
+	<%= link_to "Manage Registrations", admin_seminar_path(@seminar), class: 'cta' %>
+      </p>
+
+      <h1>Attended</h1>
+      <p><strong><%= @seminar.registrations.attended.size %></strong> Total</p>
+
+  <p>
+    <%= link_to "Manage Attendance", seminar_attendance_path(@seminar), class: 'cta' %>
+  </p>
+
+</div>
+
+    <div class="simple">
+      <p><%= link_to("Edit Seminar",
+             edit_admin_seminar_url(@seminar), class: "btn wide") %></p>
+      <p><%= link_to("Download Sign-In Sheet (.pdf)",
+             admin_seminar_url(@seminar, :format => 'pdf', :profile => 'sign-in'), class: "btn ghost wide") %></p>
+      <script>
+	function copyToClipboard(text) {
+  navigator.clipboard.writeText(text)
+    .then(() => {
+      console.log('Text copied to clipboard');
+    })
+    .catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+}
+      </script>
+      
+
+      <p><% emails = @seminar.registrations.confirmed.reject {|r| r.participant.nil? }.map {|r| r.participant.email}.compact.join(",") %>
+        <%= mail_to "seminars@eberly.cmu.edu","Email Participants",
+            :bcc => emails, class: "btn ghost wide" %></p>
+      <p><%= link_to 'Copy Participant Emails', '#',
+             :onclick => "copyToClipboard(\"#{emails}\")",
+	     class: "btn ghost wide" %></p>
+
+      <p>
+	<%= turbo_frame_tag @seminar do %>
+	<%= link_to "Manual Attendance CSV", new_seminar_registration_path(@seminar), class: 'btn ghost wide' %>
+	<% end %>
+      </p>
+    </div>

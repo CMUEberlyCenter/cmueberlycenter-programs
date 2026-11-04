@@ -1,6 +1,6 @@
 require 'prawn_rails'
 
-# Callback function used by transcript pdf generation to
+# Callback function used by record pdf generation to
 # draw background and labels for content sections.
 class TextblockCallback
   def initialize(options)

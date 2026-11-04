@@ -1,0 +1,20 @@
+wb = xlsx_package.workbook
+wb.add_worksheet(name: "Participants") do |sheet|
+  sheet.add_row [ "Last Change","Name","Andrew ID","Department","School","Student Class","First Consultation On","FFP Graduation Date","FFP Status" ]
+  @participants.each do |p|
+    future_faculty_progress = p.future_faculty_progress_status.label if p.future_faculty_progress_status.present?
+    sheet.add_row [   p.updated_at, 
+                      p.name,
+                      p.andrewid,
+                      p.pretty_depts,
+                      p.pretty_colleges,
+                      p.student_class,
+     	              p.first_consultation_on,
+                      p.future_faculty_program_graduated_on,
+  		      future_faculty_progress
+      ]
+  end # participants
+  #.to_formatted_s(:short),
+end # sheet
+
+

@@ -1,0 +1,52 @@
+<div class="list red invert" id="future-faculty-participant-sidebar">
+  <h1>Future Faculty Program</h1>
+
+  <p>
+  <% unless Programs::FutureFaculty::Enrollment.find( @participant ).nil? %>  
+  <strong>Status:</strong> <%= @participant.future_faculty_progress_status.label %>
+  <% if @participant.future_faculty_progress_status_id == 3 %>
+  <br/>
+  Completion Date: <%= @participant.future_faculty_program_graduated_on || 'N/A' %>
+  &nbsp;&nbsp;<%= link_to 'Edit', '', class: 'cta' %>
+  <% end %>
+  <% else %>
+
+  Status: Not enrolled<br/>
+
+  <%= button_to( "Enroll in Future Faculty",
+      enroll_future_faculty_path( @participant ),
+      class: ['btn', 'wide'],
+      method: :patch ) %>
+  <% end %>
+  </p>
+
+  <ul>
+<% if not Programs::FutureFaculty::Enrollment.find( @participant ).nil? %>
+    <% if @participant.future_faculty_progress_status_id == 2 %>
+      <%= button_to( "Graduate from Future Faculty",
+          graduate_future_faculty_path( @participant ),
+          data: { confirm: "Are you sure?" },
+	  class: ['btn', 'wide'],
+          method: :patch ) %>
+    <% elsif @participant.future_faculty_progress_status_id == 1 %>
+      <%= button_to( "Drop from Future Faculty",
+          drop_future_faculty_path( @participant ),
+          data: { confirm: "Are you sure?" },
+          class: ['btn', 'ghost', 'wide'],
+          method: :patch ) %>
+      <%= button_to( "Force-Graduate from Future Faculty",
+          graduate_future_faculty_path( @participant ),
+          data: { confirm: "Are you sure?" },
+          class: ['btn', 'ghost', 'wide'],
+          method: :patch ) %>
+    <% elsif @participant.future_faculty_progress_status_id == 4 %>
+       <%= button_to( "Re-Enroll into Future Faculty",
+           reenroll_future_faculty_path( @participant ),
+           data: { confirm: "Are you sure?" },
+           class: ['btn', 'wide'],
+           method: :patch ) %>
+    <% end %>
+<% end %>
+    
+  </ul>
+</div>

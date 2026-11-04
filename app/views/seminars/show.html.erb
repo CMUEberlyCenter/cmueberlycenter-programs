@@ -1,0 +1,14 @@
+<%= turbo_frame_tag @seminar do %>
+<h3>Problem registering:</h3>
+<ul>
+  <% if @bad_uids.blank? %><li>None.</li><% end %>
+  <%= @bad_uids.html_safe %>
+</ul>
+
+<h3>Done registering:</h3>
+<ul>
+  <% if @uids.blank? %><li>None.</li><% end %>
+  <%= @uids.html_safe %>
+</ul>
+<%= link_to "Bulk Register", new_seminar_registration_path(@seminar), :class => 'btn ghost wide', :remote => true %>
+<% end %>

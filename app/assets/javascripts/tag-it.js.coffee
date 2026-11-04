@@ -1,2 +1,0 @@
-$ ->
-  $("#seminar-tags").tagit()

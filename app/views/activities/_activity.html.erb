@@ -1,0 +1,57 @@
+<div class="list-group-item activity" data-activity="<%= activity.id %>">
+  <% if activity.type == "Participant::Activities::Additional" %>
+  <h3><%= activity.title %></h3>
+  Lead Consultant: <%= activity.lead_consultant ? activity.lead_consultant.name : "Unassigned" %><br/>
+  <%= activity.description %><br/>
+  Completed: <%= activity.completed_on %><br/>
+  <% else %>
+  
+  <h3><%= Programs::FutureFaculty::Requirement.find_by_activity_class(activity.type).label %></h3>
+  Internal Notes: <%= activity.internal_notes %><br/>
+  
+  <% if activity.type=="Participant::Activities::CourseAndSyllabusDesignProject"||
+        activity.type=="Participant::Activities::IndividualProject" ||
+        activity.type=="Participant::Activities::LessonPlanReview" ||
+        activity.type=="Participant::Activities::TeachingStatementProject"
+     %>
+            
+  Lead Consultant: <%= activity.lead_consultant ? activity.lead_consultant.name : "Unassigned" %><br/>
+  First Consultation On: <%= activity.first_consultation_on %><br/>
+  <% end %>
+
+  <% if activity.type=="Participant::Activities::CourseAndSyllabusDesignProject"||
+        activity.type=="Participant::Activities::IndividualProject" ||
+        activity.type=="Participant::Activities::TeachingStatementProject"
+     %>
+  Completed: <%= activity.completed_on %><br/>
+
+  <% else %>
+  Date of Service: <%= activity.completed_on %><br/>
+  <% end %>
+  
+
+  <% if activity.type == "Participant::Activities::MicroteachingWorkshop" ||
+     activity.type == "Participant::Activities::MicroteachingObservation" ||
+     activity.type == "Participant::Activities::EarlyCourseFeedback" ||
+     activity.type == "Participant::Activities::ClassroomObservation" ||
+     activity.type=="Participant::Activities::LessonPlanReview" ||
+     activity.type == "Participant::Activities::TeachingObservation"
+     %>
+  Memo Completed On: <%= activity.memo_completed_on %><br/>
+  Consultant: <%= activity.observer ? activity.observer.name : "Unassigned" %><br/>
+  <% end %>
+
+  <% if activity.type == "Participant::Activities::EarlyCourseFeedback" ||
+     activity.type == "Participant::Activities::TeachingObservation" ||
+     activity.type == "Participant::Activities::ClassroomObservation" ||
+     activity.type=="Participant::Activities::LessonPlanReview" ||
+     activity.type == "Participant::Activities::CourseAndSyllabusDesignProject" %>
+  
+  Course: <%= activity.course %><br/>
+  <% end %>
+  <% end %>
+  <p>
+  <%= link_to( "delete", activity_path(activity), data: { turbo_method: :delete, turbo_confirm: "Really delete this activity?" }, class: 'cta') %>
+  <%= link_to( "edit", edit_activity_path(activity), data: { "turbo-frame": "modal", activity: activity.id }, class: 'cta' ) %>
+  </p>
+</div>

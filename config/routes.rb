@@ -1,137 +1,99 @@
 Rails.application.routes.draw do
-  # The priority is based upon order of creation: first created -> highest priority.
-  # See how all your routes lay out with "rake routes".
+  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
-  root :to => 'seminars#index'
+  # Defines the root path route ("/")
+  root 'welcome#index'
 
-  # The priority is based upon order of creation:
-  # first created -> highest priority.
+  # External navigation items
+  direct :eberly do
+    '//www.cmu.edu/teaching'
+  end
+  direct :eberly_future_faculty_program do
+    '//www.cmu.edu/teaching/graduatestudentsupport/futurefacultyprogram.html'
+  end
+  direct :eberly_graduate_students do
+    '//www.cmu.edu/teaching/services/graduate-students/index.html'
+  end
+  direct :contact_email do |options|
+    params = options.map { |k,v| "#{k}=#{v}" }.join('&')
+    params.prepend('?') unless params.blank?
+    "mailto:seminars@eberly.cmu.edu#{params}"
+  end
 
-  # ==|== participant exports and filters ====================================
-  get 'participants/future-faculty-program', to: 'participants/programs/future_faculty#index',
-      format: 'xlsx', as: 'future_faculty_program_participants'
+  # Shibboleth logout path (with optional return url)
+  direct :sso_logout, return_url: nil do |options|
+    if Rails.env.staging? || Rails.env.production?
+      "/Shibboleth.sso/Logout?return=#{options[:return_url]}"
+    else
+      options[:return_url] || root_url
+    end
+  end
 
+  # Session management
+  scope module: :sessions do
+    get 'login'
+    get 'logout'
+    post 'impersonate/:participant_id', as: :impersonate, action: :impersonate
+    get 'unimpersonate'
+  end
 
-  # ==|== participants and associated resources ==============================
-  resources :participants, except: :new, controller: "participants/base" do
-    resource 'future-faculty-program',
-             as: :future_faculty_program,
-             controller: "participants/programs/future_faculty",
-             only: [:enroll, :unenroll,
-                    :graduate, :ungraduate,
-                    :drop, :undrop, :reenroll] do
+  # Application settings
+  resources :settings, only: [:index, :update]
+
+  # Future faculty program management
+  scope module: :programs do
+    resource :future_faculty, path: 'future-faculty', only: [] do
       member do
-        patch 'enroll'
-        patch 'unenroll'
-        patch 'graduate'
-        patch 'ungraduate'
-        patch 'drop'
-        patch 'undrop'
-        patch 'reenroll'
+        get :index
+        scope ':participant_id' do
+          patch :enroll
+          patch :unenroll
+          patch :graduate
+          patch :ungraduate
+          patch :drop
+          patch :undrop
+          patch :reenroll
+        end
       end
     end
-    
-    resource 'transcript', only: :show, controller: "participants/transcripts", format: 'pdf'
-
-    # Get the participant_activity path name without requiring an explicit
-    # (and implicitly defined) participant_id for update and destroy
-    scope shallow_prefix: "participant" do
-      resources 'activities',
-                only: [:edit, :create, :update, :destroy],
-                controller: "participants/activities",
-                shallow: true
-     end
   end
-  
 
-  # ==|== shortcuts to one's own resources ===================================
-  # One's own transcript (participant_id will be nil)
-  get 'transcript', to: 'participants/transcripts#show', format: 'pdf'
+  # Participants resource route
+  resources :participants, except: :new do
+    get 'search', on: :collection
+    resources :activities, shallow: true
+  end
 
+  # Direct link to a participant's own resource
+  get 'profile', to: 'participants#show', as: :profile
+
+
+
+
+  resources :seminars do
+    resources :registrations, shallow: true
+  end
+  get 'registrations', to: 'registrations#index', :as => 'registrations'  
 
 
   patch 'admin/seminars/update_seminar' => 'admin/seminars#update_seminar', :as => 'update_whole_seminar'
+  get 'admin/seminars/:id/attendance' => 'admin/seminars#show_attendance', :as => 'seminar_attendance'
 
-  resources :seminars do
-    resources :registrations, only: [:create, :destroy]
-  end
-  get 'registrations', to: 'registrations#index', :as => 'registrations'
-  patch 'admin/seminars/mark_all_attended' => 'admin/seminars#mark_all_attended', :as => 'mark_all_attended_seminar'
-  patch 'admin/seminars/mark_all_cleared' => 'admin/seminars#mark_all_cleared', :as => 'mark_all_cleared_seminar'
-  
-  patch 'admin/seminars/mark_attended' => 'admin/seminars#mark_attended', :as => 'mark_attended_seminar'
-  
+  patch 'admin/seminars/change_status' => 'admin/seminars#change_status', :as => 'change_registration_status'
+  patch 'admin/seminars/change_status_multiple' => 'admin/seminars#change_status_multiple', :as => 'change_registration_status_multiple'
 
-  resources :sessions, only: [:create, :destroy]
-  get 'login',  to: 'sessions#create'
-  get 'logout', to: 'sessions#destroy', via: [:get, :delete]
+  patch 'admin/seminars/change_attendance_status' => 'admin/seminars#change_attendance_status', :as => 'change_attendance_status'
+  patch 'admin/seminars/change_attendance_status_multiple' => 'admin/seminars#change_attendance_status_multiple', :as => 'change_attendance_status_multiple'
 
 
-  resource :search, only: :show
 
-  get 'admin' => 'admin/seminars#index', :as => 'root_admin_url'
   namespace :admin do
+    root '/seminars#index'
     # Directs /admin/seminars/* to Admin::SeminarController
     # (app/controllers/admin/seminars_controller.rb)
     resources :seminars do
       resources :registrations
     end
 
-    resources :spreadsheets, only: [:show]
-    resources :settings, only: [:index, :update]
   end
-  
-
-
-  # You can have the root of your site routed with "root"
-  # root 'welcome#index'
-
-  # Example of regular route:
-  #   get 'products/:id' => 'catalog#view'
-
-  # Example of named route that can be invoked with purchase_url(id: product.id)
-  #   get 'products/:id/purchase' => 'catalog#purchase', as: :purchase
-
-  # Example resource route (maps HTTP verbs to controller actions automatically):
-  #   resources :products
-
-  # Example resource route with options:
-  #   resources :products do
-  #     member do
-  #       get 'short'
-  #       post 'toggle'
-  #     end
-  #
-  #     collection do
-  #       get 'sold'
-  #     end
-  #   end
-
-  # Example resource route with sub-resources:
-  #   resources :products do
-  #     resources :comments, :sales
-  #     resource :seller
-  #   end
-
-  # Example resource route with more complex sub-resources:
-  #   resources :products do
-  #     resources :comments
-  #     resources :sales do
-  #       get 'recent', on: :collection
-  #     end
-  #   end
-
-  # Example resource route with concerns:
-  #   concern :toggleable do
-  #     post 'toggle'
-  #   end
-  #   resources :posts, concerns: :toggleable
-  #   resources :photos, concerns: :toggleable
-
-  # Example resource route within a namespace:
-  #   namespace :admin do
-  #     # Directs /admin/products/* to Admin::ProductsController
-  #     # (app/controllers/admin/products_controller.rb)
-  #     resources :products
-  #   end
 end

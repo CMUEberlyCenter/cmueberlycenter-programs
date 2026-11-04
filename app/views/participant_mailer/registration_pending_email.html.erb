@@ -17,7 +17,7 @@
 
     <% if @registration.seminar.pending_email_insert %>
     <p>
-      <%= @registration.seminar.pending_email_insert %>
+      <%= raw @registration.seminar.pending_email_insert %>
     </p>
     <% end %>
 

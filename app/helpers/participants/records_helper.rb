@@ -1,0 +1,2 @@
+module Participants::RecordsHelper
+end

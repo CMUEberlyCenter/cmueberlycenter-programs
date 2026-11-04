@@ -1,10 +1,18 @@
-<li>
-  <h1 class="title"><%= seminar.title %><% if seminar.tags.include? "core" %>*<% end %></h1>
-  <p class="date"><%= raw seminar.formatted_timespan %></p>
-  <p class="location"><%= seminar.location %></p>
-  <p class="description"><%= seminar.description %></p>
+<div class="item <%= seminar.tags.join(' ') %>">
+  <h2><%= seminar.title %></h2>
+  <h3><%= seminar.formatted_timespan %></h3>
+  <h3>
+    <%= "This seminar is asynchronous." if seminar.async? %>
+    <%= seminar.location %>
+  </h3>
+  <p><%= seminar.description.html_safe %></p>
+  <h4 class="alignright">Tags: <%= seminar.tags.join(', ') %></h4>
 
-  <div class="registration-options">
-    <%= seminar_registration_options seminar %>
-  </div>
-</li>
+  <% if Current.user&.admin? %>
+    <%= admin_options(seminar) %>
+  <% elsif Current.user %>
+    <%= registration_options(seminar) %>
+  <% else %>
+    <%= guest_options(seminar) %>
+  <% end %>
+</div>

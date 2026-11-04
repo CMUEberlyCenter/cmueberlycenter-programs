@@ -8,19 +8,19 @@
 
 
 # Populate each seminar status if it doesn't already exist
-['development','locked','published'].each { |status| SeminarStatus.find_or_create_by( :key => status) }
+['open','closed'].each { |status| SeminarStatus.find_or_create_by( :key => status) }
 
 # Populate each registration status if it doesn't already exist
 #
 # TODO: Yeah... I spelled canceled wrong.
-['pending','confirmed','cancelled','cancelled_late'].
+['pending','confirmed','canceled']
   each { |status| RegistrationStatus.find_or_create_by( :key => status ) }
 
 # Populate each attendance status if it doesn't already exist
 #
 # TODO: Ruby 1.9.1 really doesn't like '-' in symbol names. Deal with renaming these
 # before they get used in a scope or something similar.
-['attended','attended-incomplete','absent-unexcused','absent-excused'].
+['attended','absent'].
   each { |status| AttendanceStatus.find_or_create_by( :key => status ) }
 
 # Create certain admins by default if they don't already exist

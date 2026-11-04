@@ -1,0 +1,31 @@
+<% update_document_title(add: "Registrations") %>
+<% update_breadcrumbs(add: "Registrations") %>
+<% content_for :nav do %>
+<li class="parent">
+  <%= link_to('Seminars', seminars_path) %>
+  <ul>
+    <li>
+      <%= link_to('Create New Seminar', new_seminar_path) %>
+    </li>
+  </ul>
+</li><li>
+  <%= link_to('Participants', participants_path) %>
+</li><li class="active">
+  <%= link_to('Registrations', registrations_path) %>
+</li><li>
+  <%= link_to('Future Faculty Program', future_faculty_path) %>
+</li><li>
+  <%= link_to('Application Settings', settings_path) %>
+</li>
+<% end %>
+
+<div class="content">
+  <h1>Participant Registrations</h1>
+
+  <%= link_to "Download Registrations (.xlsx)",
+              registrations_path(format: :xlsx),
+              class: 'btn' %>
+
+  <%= render partial: 'list',
+             locals: { registrations: @registrations } %>
+</div>

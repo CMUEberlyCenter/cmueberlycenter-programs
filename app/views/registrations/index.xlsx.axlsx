@@ -1,0 +1,34 @@
+wb = xlsx_package.workbook
+wb.add_worksheet(name: "Event Registrations") do |sheet|
+  sheet.add_row [ "Last Change","Name","Andrew ID","Department","Former Department","School","Former School","Student Class","Former Student Class","FFP Graduation Date","Registration Status","Attendance Status","FFP Status","Category","Type","Title","Core?","Event Start Date","Event End Date","Tags" ]
+  @registrations.each do |r|
+      s = r.seminar
+      p = r.participant
+      start_at = s.start_at
+      start_at = "Async" unless start_at.is_a? (DateTime)
+      sheet.add_row [ r.updated_at.to_formatted_s(:short_date),
+                      p.name,
+                      p.andrewid,
+                      #p.dept[:pretty_depts],
+		      p.pretty_depts,
+                      p.pretty_depts_archive,
+                      #p.college[:pretty_colleges],
+		      p.pretty_colleges,
+		      p.pretty_colleges_archive,
+                      p.student_class,
+		      p.student_class_archive,
+               	      p.future_faculty_program_graduated_on,
+		      r.waitlist_status ? r.waitlist_status.key : "",
+		      r.attendance_status ? r.attendance_status.key : "",
+                      p.future_faculty_progress_status ? p.future_faculty_progress_status.label : '',
+                      "Event",
+                      s.tags.include?("workshop") ? "Workshop" : "Seminar",
+                      s.title,
+                      s.tags.include?("core") ? "core" : "",
+		      start_at,
+                      s.end_at.to_formatted_s,
+		      s.tags.join(",")
+      ]
+                                                                                                                                     
+  end # participants
+end # sheet

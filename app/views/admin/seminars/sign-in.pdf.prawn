@@ -14,9 +14,10 @@ prawn_document(
 ) do |pdf|
   default_text_color ="010101"
   cmu_red = "990000"
-  title_font_size = 24
-  body_font_size = 12
-  name_font_size = 14
+  title_font_size = 20
+  body_font_size = 9
+  dept_font_size = 8
+  name_font_size = 12
   footer_large_font_size = 12
   footer_font_size = 9
 
@@ -27,7 +28,7 @@ prawn_document(
   pdf.font "OpenSans"
 
   # Header
-  pdf.repeat :all do
+  #pdf.repeat :all do
     pdf.image "app/assets/images/eberly-wordmark.png", :at => [pdf.bounds.left, pdf.bounds.top+15], :height => 40
     pdf.move_down 45
 
@@ -36,12 +37,34 @@ prawn_document(
     pdf.move_down 2
 
     pdf.fill_color default_text_color
-    pdf.text  'Attendance Sheet | <b>' + @seminar.formatted_timespan_safe + '</b>', :inline_format => true, :size => name_font_size
+    pdf.text  'Attendance Sheet | <b>' + @seminar.formatted_timespan + '</b>', :inline_format => true, :size => name_font_size
 
-  end
+  #end
 
+  pdf.fill_color = '000000'
+  pdf.stroke_color = 'cccccc'
+
+  pdf.default_leading 10
+  pdf.move_down 20
+
+  #pdf.bounding_box [0, pdf.bounds.top-120], :width => 200, :height => 550 do
+    participants = @seminar.registrations.confirmed.all.collect {|r| r.participant }
+    participants.sort_by(&:sortable_name).each do |p|
+      pdf.default_leading 5
+      pdf.text p.name + " (" + p.andrewid + ")", :size => body_font_size
+      pdf.default_leading 10
+      pdf.text p.pretty_depts, :size => dept_font_size
+      pdf.stroke do
+        pdf.horizontal_line 0, 450, :at => pdf.cursor+5
+	pdf.vertical_line pdf.cursor+48, pdf.cursor+15, :at => 200
+      end
+
+    end
+  #end
+
+  pdf.default_leading 0
   # Footer
-  pdf.repeat :all do
+  #pdf.repeat :all do
     footer_y = 36
     footer_text_width = 136
     pdf.image "app/assets/images/carnegie-mellon-wordmark-inverse.png", :at => [0,footer_y], :height => 20
@@ -59,27 +82,8 @@ prawn_document(
         pdf.text "412-268-2896", :character_spacing => 0.5
       end
     end
-  end
+  #end
 
 
-  pdf.fill_color = '000000'
-  pdf.stroke_color = 'cccccc'
-
-  pdf.default_leading 20
-
-  pdf.bounding_box [0, pdf.bounds.top-120], :width => 200, :height => 550 do
-    participants = @seminar.registrations.confirmed.all.collect {|r| r.participant }
-    participants.sort_by(&:surname).each do |p|
-
-      pdf.text p.name + " (" + p.andrewid + ")"
-      pdf.stroke do
-        pdf.horizontal_line 0, 450, :at => pdf.cursor+15
-	pdf.vertical_line pdf.cursor+48, pdf.cursor+15, :at => 200
-      end
-
-    end
-  end
-
-  pdf.default_leading 0
 
 end

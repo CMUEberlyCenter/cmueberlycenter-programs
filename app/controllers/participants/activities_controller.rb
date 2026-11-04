@@ -1,6 +1,6 @@
 class Participants::ActivitiesController < ApplicationController
-  #respond_to :html, :json
-
+  before_action :require_administrator
+  
   def edit
     @activity = Participant::Activity.find( params[:id] )
     @activity.becomes( @activity.type.constantize )
@@ -37,7 +37,7 @@ class Participants::ActivitiesController < ApplicationController
   def update
 #    @participant = Participant.find params[:id]
     @a = Participant::Activity.find( params[:id] )
-    @a.update_attributes!( activity_params )
+    @a.update!( activity_params )
     #@a.assign_attributes(params[:participant_activities_additional], :without_protection => true)
     @a.participant.save!
     #respond_with @a
@@ -48,7 +48,7 @@ class Participants::ActivitiesController < ApplicationController
 
   private
   def activity_params
-    if current_user.is_admin?
+    if Current.user.admin?
       params.require(:participant_activity).permit(:type, :description, :title, :completed_on, :internal_notes, :course, :first_consultation_on, :memo_completed_on, :lead_consultant_id, :observer_id, :observer, :future_faculty_requirement_id)
     else
       params.require(:participant_activity).permit(nil)

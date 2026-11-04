@@ -1,10 +1,10 @@
 class SeminarGroup
-  attr_accessor :title, :css_class, :seminars
+  attr_accessor :title, :seminars
 
   def to_partial_path() "seminars/seminar_group" end
 
   def initialize(attributes = {})
-    @title, @css_class, @seminars = 
-      *attributes.values_at(:title, :css_class, :seminars)
+    @title, @seminars =
+      *attributes.values_at(:title, :seminars)
   end
 end

@@ -9,8 +9,29 @@ class Programs::FutureFaculty::RequirementsVersion < ActiveRecord::Base
   has_many :pending_graduates, -> { ffp_participants('complete') },
            class_name: 'Participant', foreign_key: :future_faculty_enrollment_id
 
+  def calculate_participant_closeness(participant)
+    unless participant.future_faculty_enrollment
+      participant.future_faculty_progress_status = nil
+      return
+    end
 
-  def calculate_participant_status( participant )
+    if participant.future_faculty_progress_status == ProgressStatusType.find('dropout') ||
+       participant.future_faculty_progress_status == ProgressStatusType.find('graduated')
+      return
+    end
+
+    if ( participant.attended_seminars.size >= 6 ) &&
+       ( participant.attended_seminars.with_tag("dei").size >= 1 ) &&
+       ( participant.activities.size > 2)
+      return true
+    elsif participant.activities.size > 4
+      return true
+    else
+      return false
+    end
+  end
+  
+  def calculate_participant_status(participant)
 
     # Participant must be enrolled in an ffp version to have a status
     unless participant.future_faculty_enrollment
@@ -19,28 +40,45 @@ class Programs::FutureFaculty::RequirementsVersion < ActiveRecord::Base
     end
 
     # Do not recalculate terminal states
-    if participant.future_faculty_progress_status == Program::ProgressStatusType.find('dropout') ||
-       participant.future_faculty_progress_status == Program::ProgressStatusType.find('graduated')
+    if participant.future_faculty_progress_status == ProgressStatusType.find('dropout') ||
+       participant.future_faculty_progress_status == ProgressStatusType.find('graduated')
       return
     end
 
     # Calculate various requirements of the programs
     participant.future_faculty_progress_status =
       case participant.future_faculty_enrollment.key
-      when "2015"
+      when "2023"
         if ( participant.attended_seminars.size >= 8 ) &&
-           ( participant.attended_seminars.with_tag("core").size >= 4 ) &&
-           ( ( participant.activities.where('completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 2 ) ||
-             ( participant.activities.where('completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 1 &&
-               participant.activities.where('completed_on is not null and type="Participant::Activities::EarlyCourseFeedback"').size >= 1 ) ||
-             ( participant.activities.where('completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 1 &&
-               participant.activities.where('completed_on is not null and type="Participant::Activities::MicroteachingWorkshop"').size >= 1 )
+           ( participant.attended_seminars.with_tag("dei").size >= 2 ) &&
+           ( ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 2 ) ||
+             ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 1 &&
+               participant.activities.where('memo_completed_on is not null and type="Participant::Activities::EarlyCourseFeedback"').size >= 1 ) ||
+             ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 1 &&
+               participant.activities.where('memo_completed_on is not null and type="Participant::Activities::MicroteachingWorkshop"').size >= 1 ) ||
+             ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 1 &&
+               participant.activities.where('memo_completed_on is not null and type="Participant::Activities::LessonPlanReview"').size >= 1 )
            ) &&
            ( participant.activities.where('completed_on is not null and type="Participant::Activities::CourseAndSyllabusDesignProject"').size >= 1 ) &&
            ( participant.activities.where('completed_on is not null and type="Participant::Activities::TeachingStatementProject"').size >= 1 )
-          Program::ProgressStatusType.find('complete')
+          ProgressStatusType.find('complete')
         else
-          Program::ProgressStatusType.find('incomplete')
+          ProgressStatusType.find('incomplete')
+        end # 2023
+      when "2015"
+        if ( participant.attended_seminars.size >= 8 ) &&
+           ( participant.attended_seminars.with_tag("core").size >= 4 ) &&
+           ( ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 2 ) ||
+             ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 1 &&
+               participant.activities.where('memo_completed_on is not null and type="Participant::Activities::EarlyCourseFeedback"').size >= 1 ) ||
+             ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 1 &&
+               participant.activities.where('memo_completed_on is not null and type="Participant::Activities::MicroteachingWorkshop"').size >= 1 )
+           ) &&
+           ( participant.activities.where('completed_on is not null and type="Participant::Activities::CourseAndSyllabusDesignProject"').size >= 1 ) &&
+           ( participant.activities.where('completed_on is not null and type="Participant::Activities::TeachingStatementProject"').size >= 1 )
+          ProgressStatusType.find('complete')
+        else
+          ProgressStatusType.find('incomplete')
         end # 2015
       when "2012"
         if ( participant.attended_seminars.size >= 8 ) &&
@@ -51,9 +89,9 @@ class Programs::FutureFaculty::RequirementsVersion < ActiveRecord::Base
            ) &&
            ( participant.activities.where('completed_on is not null and type="Participant::Activities::CourseAndSyllabusDesignProject"').size >= 1 ) &&
            ( participant.activities.where('completed_on is not null and type="Participant::Activities::IndividualProject"').size >= 1 )
-          Program::ProgressStatusType.find('complete')
+          ProgressStatusType.find('complete')
         else
-          Program::ProgressStatusType.find('incomplete')
+          ProgressStatusType.find('incomplete')
         end # 2012
       else
         nil

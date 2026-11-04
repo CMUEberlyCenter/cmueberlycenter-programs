@@ -1,0 +1,40 @@
+<% update_document_title(add: "Future Faculty Program") %>
+<% update_breadcrumbs(add: "Future Faculty Program") %>
+<% content_for :nav do %>
+<li class="parent">
+  <%= link_to('Seminars', seminars_path) %>
+  <ul>
+    <li>
+      <%= link_to('Create New Seminar', new_seminar_path) %>
+    </li>
+  </ul>
+</li>
+<li>
+  <%= link_to('Participants', participants_path) %>
+</li><li>
+  <%= link_to('Registrations', registrations_path) %>
+</li>
+<li class="active">
+  <%= link_to('Future Faculty Program', future_faculty_path) %>
+</li>
+<li>
+  <%= link_to('Application Settings', settings_path) %>
+</li>
+<% end %>
+
+<div class="content">
+  <div style="min-width: 0">
+    <h1>Future Faculty Participant Activities</h1>
+    <%= content_tag :div, id: 'example-table', style: 'width: 100%', data: { controller: 'table', config: future_faculty_table_config } do %>
+      Loading...
+    <% end %>
+  </div><div class="sidebar">
+    <div class="list red invert">
+      <h2>Review FFP Participants</h2>
+      <ul>
+        <li><%= link_to "With Completed Requirements (#{@completed_requirements_count})", participants_path(ffp_status: 'complete') %></li>
+        <li><%= link_to "Near Completion ()" %></li>
+      </ul>
+    </div>
+  </div>
+</div>
