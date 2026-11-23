@@ -6,7 +6,7 @@ class WelcomeController < ApplicationController
     @sidebar_note = Setting.find_by(key: 'sidebar-participant')&.value
 
     @seminar_groups = [
-      SeminarGroup.new(title: 'Upcoming Programs',
+      SeminarGroup.new(title: 'Scheduled Programs',
                        seminars: Seminar.registerable.in_person, color: 'teal'),
       SeminarGroup.new(title: 'Self-Paced Programs',
                        seminars: Seminar.registerable.asynchronous, color: 'blue')
