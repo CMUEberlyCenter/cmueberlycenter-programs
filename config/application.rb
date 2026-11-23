@@ -8,6 +8,8 @@ Bundler.require(*Rails.groups)
 
 module Seminars
   class Application < Rails::Application
+    # Not Found and other errors render in the app's layout (ErrorsController)
+    config.exceptions_app = routes
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
 
