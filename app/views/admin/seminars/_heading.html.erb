@@ -5,3 +5,7 @@
   <span class="cmu-pill <%= seminar.open? ? 'cmu-pill--green' : 'cmu-pill--amber' %>"><%= seminar.open? ? "Open for Registration" : "Not Open for Registration" %></span>
   <%= tag_pills(seminar.tags) %>
 </p>
+<p class="cmu-cta-row">
+  <% if Current.user.admin? %><%= link_to "Edit Seminar", edit_admin_seminar_path(seminar), class: "btn" %><% end %>
+  <%= link_to "Print the Sign-In Sheet", sign_in_sheet_admin_seminar_path(seminar), class: "cta" %>
+</p>

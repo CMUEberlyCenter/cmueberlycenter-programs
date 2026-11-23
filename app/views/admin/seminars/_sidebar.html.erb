@@ -9,20 +9,16 @@
     <strong><%= registrations.attended.size %></strong> attended
     <% if seminar.maximum_capacity.present? %><br>Capacity: <%= seminar.maximum_capacity %><% end %>
   </p>
+  <% emails = registrations.confirmed.filter_map { |r| r.participant&.email }.join(", ") %>
+  <% if emails.present? %>
+    <p>
+      <%= mail_to "seminars@eberly.cmu.edu", "Email Confirmed Participants", bcc: emails %><br>
+      <button type="button" class="btn small ghost" data-cmu-copy="#prg-emails">Copy Their Email Addresses</button>
+    </p>
+    <p class="sr-only" id="prg-emails"><%= emails %></p>
+  <% end %>
   <p>
     <%= link_to "Manage Registrations", admin_seminar_path(seminar), class: "cta" unless current_page?(admin_seminar_path(seminar)) %>
     <%= link_to "Take Attendance", attendance_admin_seminar_path(seminar), class: "cta" unless current_page?(attendance_admin_seminar_path(seminar)) %>
   </p>
-</div>
-<% emails = registrations.confirmed.filter_map { |r| r.participant&.email }.join(", ") %>
-<div class="simple">
-  <% if Current.user.admin? %>
-    <p><%= link_to "Edit Seminar", edit_admin_seminar_path(seminar), class: "btn wide" %></p>
-  <% end %>
-  <p><%= link_to "Print the Sign-In Sheet", sign_in_sheet_admin_seminar_path(seminar), class: "btn ghost wide" %></p>
-  <% if emails.present? %>
-    <p><%= mail_to "seminars@eberly.cmu.edu", "Email Confirmed Participants", bcc: emails, class: "btn ghost wide" %></p>
-    <p><button type="button" class="btn ghost wide" data-cmu-copy="#prg-emails">Copy Their Email Addresses</button></p>
-    <p class="sr-only" id="prg-emails"><%= emails %></p>
-  <% end %>
 </div>
