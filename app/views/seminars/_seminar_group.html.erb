@@ -7,7 +7,7 @@
   </div>
 <% end %>
 <% if seminar_group.seminars.any? %>
-  <div class="grid column3 <%= seminar_group.color %> boxes prg-seminars">
+  <div class="grid column2 <%= seminar_group.color %> boxes prg-seminars">
     <%= render partial: "seminars/seminar", collection: seminar_group.seminars %>
   </div>
 <% end %>
