@@ -10,9 +10,9 @@
       <dd><%= value.presence || "Not yet" %></dd>
     <% end %>
   </dl>
-  <p class="prg-actions">
+  <div class="prg-actions">
     <%= link_to "Edit", edit_activity_path(activity), class: "btn small ghost", data: { turbo_frame: "modal" } %>
     <%= button_to "Delete", activity_path(activity), method: :delete, class: "btn small ghost",
                   data: { turbo_confirm: "Delete #{activity_name(activity)}?" } %>
-  </p>
+  </div>
 </div>

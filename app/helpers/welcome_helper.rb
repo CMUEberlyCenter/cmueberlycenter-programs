@@ -5,7 +5,7 @@ module WelcomeHelper
     if Current.user
       tag.h1("Welcome, #{Current.user.name}")
     else
-      tag.h1('Seminars and Workshops for Graduate Students')
+      tag.h1('Find a Program')
     end
   end
 end

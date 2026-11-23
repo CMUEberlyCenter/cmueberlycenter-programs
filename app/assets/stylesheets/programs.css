@@ -80,6 +80,8 @@
 
 @media print {
   .cmu-site-bar,
+  #skipnav,
+  #sitename,
   header .roof,
   #nav,
   footer,
@@ -103,4 +105,20 @@
   .prg-sign-in-sheet thead {
     display: table-header-group;
   }
+}
+
+/* A button_to form on its own line, spaced like a paragraph */
+.prg-button {
+  margin: 0 0 1rem;
+}
+
+/* A table too wide for the page scrolls sideways in its own box */
+.prg-scroll {
+  overflow-x: auto;
+}
+
+/* The sidebar's button_to buttons fill the box, as its links do */
+.sidebar .prg-button form,
+.sidebar .prg-button .btn.wide {
+  width: 100%;
 }

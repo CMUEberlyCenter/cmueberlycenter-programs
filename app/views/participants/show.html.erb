@@ -45,7 +45,7 @@
     <div class="simple">
       <p><%= link_to "View Participation Record", record_participant_path(@participant), class: "btn wide" %></p>
       <% unless @participant == Current.user || Current.imposter %>
-        <p><%= button_to "Act as #{@participant.name}", act_as_path(@participant), class: "btn ghost wide", form: { data: { turbo: false } } %></p>
+        <div class="prg-button"><%= button_to "Act as #{@participant.name}", act_as_path(@participant), class: "btn ghost wide", form: { data: { turbo: false } } %></div>
       <% end %>
     </div>
     <%= render "programs/future_faculty/participant_sidebar", participant: @participant %>

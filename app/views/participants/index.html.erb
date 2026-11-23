@@ -29,7 +29,8 @@
       <label for="prg-participant-search" class="sr-only">Find a Participant</label>
       <input type="text" id="prg-participant-search" placeholder="Find a participant&hellip;" data-cmu-filter="prg-participants">
     </div>
-    <table class="alternate cmu-full cmu-sticky prg-wide-table" id="prg-participants" data-cmu-table data-cmu-noun="participant">
+    <div class="prg-scroll">
+    <table class="alternate cmu-full prg-wide-table" id="prg-participants" data-cmu-table data-cmu-noun="participant">
       <thead>
         <tr>
           <th scope="col" data-sort-key="name"><button type="button" class="cmu-sort">Name<span class="cmu-sort-arrow"></span></button></th>
@@ -63,6 +64,7 @@
         <% end %>
       </tbody>
     </table>
+    </div>
     <p class="cmu-results-count" data-cmu-count="prg-participants" aria-live="polite">Showing all <%= pluralize(@rows.size, "participant") %></p>
   </div>
 </div>

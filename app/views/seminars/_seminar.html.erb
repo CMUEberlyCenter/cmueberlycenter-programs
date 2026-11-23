@@ -1,4 +1,4 @@
-<div class="grey">
+<div>
   <h3><%= seminar.title %></h3>
   <p class="date"><strong><%= seminar_when(seminar) %></strong><% if seminar.location.present? %><br><%= seminar.location %><% end %></p>
   <%= sanitize seminar.description %>
@@ -8,6 +8,6 @@
   <% elsif Current.user %>
     <%= render "seminars/registration_options", seminar: %>
   <% elsif seminar.open? %>
-    <p><%= button_to "Sign In to Register", login_path(return_to: root_path), class: "btn small ghost", form: { data: { turbo: false } } %></p>
+    <div class="prg-button"><%= button_to "Sign In to Register", login_path(return_to: root_path), class: "btn small ghost", form: { data: { turbo: false } } %></div>
   <% end %>
 </div>

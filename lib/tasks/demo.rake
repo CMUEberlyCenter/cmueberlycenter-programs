@@ -143,7 +143,7 @@ class DemoData
 
         past = seminar.end_at < Time.zone.now
         Registration.find_or_create_by!(seminar:, participant:) do |r|
-          r.waitlist_status = seminar.enable_waitlist? && i.odd? ? @pending : @confirmed
+          r.waitlist_status = seminar.enable_waitlist? && (i / 2).odd? ? @pending : @confirmed
           r.attendance_status = ((i + n) % 7).zero? ? @absent : @attended if past
         end
       end
