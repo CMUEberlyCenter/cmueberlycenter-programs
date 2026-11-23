@@ -91,9 +91,7 @@ Rails.application.routes.draw do
     root '/seminars#index'
     # Directs /admin/seminars/* to Admin::SeminarController
     # (app/controllers/admin/seminars_controller.rb)
-    resources :seminars do
-      resources :registrations
-    end
+    resources :seminars
 
   end
 end

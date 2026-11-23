@@ -1,7 +1,0 @@
-<%= form_for(@registration, :url => admin_seminar_registrations_path, :html => {:class => 'add-participant-form', :style => 'position:absolute', :id => 'registrant'} ) do |g| -%>
-<h2 style="float:none">Bulk Registrations</h2>
-<p>Comma-separated ANDREW IDs</p>
-<%= text_area_tag :eppns, '', style: "width: 100%;line-height:16px" %>
-<%= g.hidden_field :registration_status_id %>
-<%= g.submit "Create Registrations" %>
-<% end -%>
