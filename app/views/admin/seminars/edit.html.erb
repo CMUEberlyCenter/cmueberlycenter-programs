@@ -5,14 +5,12 @@
   <div>
     <h1>Edit <%= @seminar.title %></h1>
     <%= render "form", seminar: @seminar %>
-  </div><div class="sidebar">
-    <div class="simple">
-      <% if @seminar.registrations.any? %>
-        <p class="cmu-hint">To delete this seminar, remove its registrations first.</p>
-      <% else %>
-        <%= button_to "Delete Seminar", seminar_path(@seminar), method: :delete, class: "btn ghost wide",
-                      data: { turbo_confirm: "Delete #{@seminar.title}?" } %>
-      <% end %>
-    </div>
+    <h2 class="rule-top">Delete This Seminar</h2>
+    <% if @seminar.registrations.any? %>
+      <p>To delete this seminar, remove its registrations first.</p>
+    <% else %>
+      <%= button_to "Delete Seminar", seminar_path(@seminar), method: :delete, class: "btn ghost",
+                    data: { turbo_confirm: "Delete #{@seminar.title}?" } %>
+    <% end %>
   </div>
 </div>

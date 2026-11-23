@@ -250,11 +250,11 @@ class DemoData
       Setting.find_by!(key:).update!(value:)
     end
     {
-      'homepage-participant' => ['Home page note',
+      'homepage-participant' => ['Home Page Note',
                                  '<p class="cmu-lead">Seminars and workshops on teaching from the Eberly Center, ' \
                                  'wherever you are in your teaching. Register for one below; the Future ' \
                                  'Faculty Program counts the ones you attend.</p>'],
-      'sidebar-participant' => ['Sidebar note for signed-in participants',
+      'sidebar-participant' => ['Sidebar Note for Signed-In Participants',
                                 '<p>Questions? Email seminars@eberly.cmu.edu.</p>']
     }.each do |key, (label, value)|
       Setting.find_or_create_by!(key:) { |s| s.assign_attributes(label:, value:) }

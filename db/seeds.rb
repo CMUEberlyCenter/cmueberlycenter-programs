@@ -29,8 +29,8 @@ ActiveRecord::Base.transaction do
   end
 
   tag = ENV.fetch('DEFAULT_SEMINAR_TAG', 'S13')
-  { 'default-tag' => 'Default tag for new seminars',
-    'admin-list-tag' => 'List seminars in admin view with tag' }.each do |key, label|
+  { 'default-tag' => 'Default Tag for New Seminars',
+    'admin-list-tag' => 'Show Past Programs Tagged' }.each do |key, label|
     Setting.find_or_create_by!(key: key) do |setting|
       setting.label = label
       setting.value = tag
