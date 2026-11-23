@@ -7,11 +7,7 @@
       <p class="cmu-lead">Seminars and workshops on teaching from the Eberly Center, wherever you are in your teaching. Register for one below; the Future Faculty Program counts the ones you&nbsp;attend.</p>
     <% end %>
   </div><div class="sidebar">
-    <% if Current.user&.admin? %>
-      <div class="simple">
-        <%= link_to "Create Seminar", new_admin_seminar_path, class: "btn wide" %>
-      </div>
-    <% elsif Current.user %>
+    <% if Current.user %>
       <% if @sidebar_note.present? %>
         <div class="left-rule"><%= sanitize @sidebar_note %></div>
       <% end %>

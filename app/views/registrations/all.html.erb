@@ -12,8 +12,8 @@
         <button class="btn" type="submit">Search</button>
       </div>
     <% end %>
-    <p class="cmu-results-count"><%= cmu_results_count(@pagy, "registration", "registrations") %></p>
-    <table class="alternate cmu-full" id="prg-registrations" data-cmu-table data-cmu-table-server>
+    <div class="prg-scroll">
+    <table class="alternate cmu-full prg-wide-table" id="prg-registrations" data-cmu-table data-cmu-table-server>
       <thead>
         <tr>
           <th scope="col" class="cmu-fit">Last Change</th>
@@ -46,6 +46,8 @@
         <% end %>
       </tbody>
     </table>
+    </div>
+    <p class="cmu-results-count"><%= cmu_results_count(@pagy, "registration", "registrations") %></p>
     <%= cmu_pager(@pagy) %>
   </div>
 </div>

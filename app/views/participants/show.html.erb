@@ -5,6 +5,12 @@
 <div class="content">
   <div>
     <h1><%= @participant.name %></h1>
+    <div class="cmu-cta-row">
+      <% if Current.user.admin? && !(@participant == Current.user || Current.imposter) %>
+        <%= button_to "Act as #{@participant.name}", act_as_path(@participant), class: "btn ghost", form: { data: { turbo: false } } %>
+      <% end %>
+      <%= link_to "View Participation Record", record_participant_path(@participant), class: "cta" %>
+    </div>
     <dl class="prg-facts">
       <dt>Andrew ID</dt><dd><%= @participant.andrewid %></dd>
       <dt>Email</dt><dd><%= @participant.email.present? ? mail_to(@participant.email) : "None" %></dd>
@@ -42,12 +48,6 @@
       <p><%= f.submit "Save Notes", class: "btn" %></p>
     <% end %>
   </div><div class="sidebar">
-    <div class="simple">
-      <p><%= link_to "View Participation Record", record_participant_path(@participant), class: "btn wide" %></p>
-      <% unless @participant == Current.user || Current.imposter %>
-        <div class="prg-button"><%= button_to "Act as #{@participant.name}", act_as_path(@participant), class: "btn ghost wide", form: { data: { turbo: false } } %></div>
-      <% end %>
-    </div>
     <%= render "programs/future_faculty/participant_sidebar", participant: @participant %>
   </div>
 </div>
