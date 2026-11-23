@@ -51,16 +51,16 @@ class Programs::FutureFaculty::RequirementsVersion < ActiveRecord::Base
       when "2023"
         if ( participant.attended_seminars.size >= 8 ) &&
            ( participant.attended_seminars.with_tag("dei").size >= 2 ) &&
-           ( ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 2 ) ||
-             ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 1 &&
-               participant.activities.where('memo_completed_on is not null and type="Participant::Activities::EarlyCourseFeedback"').size >= 1 ) ||
-             ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 1 &&
-               participant.activities.where('memo_completed_on is not null and type="Participant::Activities::MicroteachingWorkshop"').size >= 1 ) ||
-             ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 1 &&
-               participant.activities.where('memo_completed_on is not null and type="Participant::Activities::LessonPlanReview"').size >= 1 )
+           ( ( participant.activities.where(type: 'Participant::Activities::TeachingObservation').where.not(memo_completed_on: nil).size >= 2 ) ||
+             ( participant.activities.where(type: 'Participant::Activities::TeachingObservation').where.not(memo_completed_on: nil).size >= 1 &&
+               participant.activities.where(type: 'Participant::Activities::EarlyCourseFeedback').where.not(memo_completed_on: nil).size >= 1 ) ||
+             ( participant.activities.where(type: 'Participant::Activities::TeachingObservation').where.not(memo_completed_on: nil).size >= 1 &&
+               participant.activities.where(type: 'Participant::Activities::MicroteachingWorkshop').where.not(memo_completed_on: nil).size >= 1 ) ||
+             ( participant.activities.where(type: 'Participant::Activities::TeachingObservation').where.not(memo_completed_on: nil).size >= 1 &&
+               participant.activities.where(type: 'Participant::Activities::LessonPlanReview').where.not(memo_completed_on: nil).size >= 1 )
            ) &&
-           ( participant.activities.where('completed_on is not null and type="Participant::Activities::CourseAndSyllabusDesignProject"').size >= 1 ) &&
-           ( participant.activities.where('completed_on is not null and type="Participant::Activities::TeachingStatementProject"').size >= 1 )
+           ( participant.activities.where(type: 'Participant::Activities::CourseAndSyllabusDesignProject').where.not(completed_on: nil).size >= 1 ) &&
+           ( participant.activities.where(type: 'Participant::Activities::TeachingStatementProject').where.not(completed_on: nil).size >= 1 )
           ProgressStatusType.find('complete')
         else
           ProgressStatusType.find('incomplete')
@@ -68,14 +68,14 @@ class Programs::FutureFaculty::RequirementsVersion < ActiveRecord::Base
       when "2015"
         if ( participant.attended_seminars.size >= 8 ) &&
            ( participant.attended_seminars.with_tag("core").size >= 4 ) &&
-           ( ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 2 ) ||
-             ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 1 &&
-               participant.activities.where('memo_completed_on is not null and type="Participant::Activities::EarlyCourseFeedback"').size >= 1 ) ||
-             ( participant.activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size >= 1 &&
-               participant.activities.where('memo_completed_on is not null and type="Participant::Activities::MicroteachingWorkshop"').size >= 1 )
+           ( ( participant.activities.where(type: 'Participant::Activities::TeachingObservation').where.not(memo_completed_on: nil).size >= 2 ) ||
+             ( participant.activities.where(type: 'Participant::Activities::TeachingObservation').where.not(memo_completed_on: nil).size >= 1 &&
+               participant.activities.where(type: 'Participant::Activities::EarlyCourseFeedback').where.not(memo_completed_on: nil).size >= 1 ) ||
+             ( participant.activities.where(type: 'Participant::Activities::TeachingObservation').where.not(memo_completed_on: nil).size >= 1 &&
+               participant.activities.where(type: 'Participant::Activities::MicroteachingWorkshop').where.not(memo_completed_on: nil).size >= 1 )
            ) &&
-           ( participant.activities.where('completed_on is not null and type="Participant::Activities::CourseAndSyllabusDesignProject"').size >= 1 ) &&
-           ( participant.activities.where('completed_on is not null and type="Participant::Activities::TeachingStatementProject"').size >= 1 )
+           ( participant.activities.where(type: 'Participant::Activities::CourseAndSyllabusDesignProject').where.not(completed_on: nil).size >= 1 ) &&
+           ( participant.activities.where(type: 'Participant::Activities::TeachingStatementProject').where.not(completed_on: nil).size >= 1 )
           ProgressStatusType.find('complete')
         else
           ProgressStatusType.find('incomplete')
@@ -83,12 +83,12 @@ class Programs::FutureFaculty::RequirementsVersion < ActiveRecord::Base
       when "2012"
         if ( participant.attended_seminars.size >= 8 ) &&
            ( participant.attended_seminars.with_tag("core").size >= 4 ) &&
-           ( ( participant.activities.where('completed_on is not null and type="Participant::Activities::ClassroomObservation"').size >= 2 ) ||
-             ( participant.activities.where('completed_on is not null and type="Participant::Activities::ClassroomObservation"').size >= 1 &&
-               participant.activities.where('completed_on is not null and type="Participant::Activities::MicroteachingObservation"').size >= 1 )
+           ( ( participant.activities.where(type: 'Participant::Activities::ClassroomObservation').where.not(completed_on: nil).size >= 2 ) ||
+             ( participant.activities.where(type: 'Participant::Activities::ClassroomObservation').where.not(completed_on: nil).size >= 1 &&
+               participant.activities.where(type: 'Participant::Activities::MicroteachingObservation').where.not(completed_on: nil).size >= 1 )
            ) &&
-           ( participant.activities.where('completed_on is not null and type="Participant::Activities::CourseAndSyllabusDesignProject"').size >= 1 ) &&
-           ( participant.activities.where('completed_on is not null and type="Participant::Activities::IndividualProject"').size >= 1 )
+           ( participant.activities.where(type: 'Participant::Activities::CourseAndSyllabusDesignProject').where.not(completed_on: nil).size >= 1 ) &&
+           ( participant.activities.where(type: 'Participant::Activities::IndividualProject').where.not(completed_on: nil).size >= 1 )
           ProgressStatusType.find('complete')
         else
           ProgressStatusType.find('incomplete')

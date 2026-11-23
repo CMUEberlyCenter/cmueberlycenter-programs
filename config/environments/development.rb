@@ -1,70 +1,50 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
-  # TODO: Remove
-  config.hosts << "seminars.eberly.cmu.edu"
-  # Settings specified here will take precedence over those in config/application.rb.
+  # The address the app answers to behind a proxy, such as the fleet's
+  # nginx (APP_HOST=programs.eberly.cmu.edu), besides localhost. /up answers
+  # any host, for health checks inside the container.
+  config.hosts << ENV["APP_HOST"] if ENV["APP_HOST"].present?
+  config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 
-  # In the development environment your application's code is reloaded any time
-  # it changes. This slows down response time but is perfect for development
-  # since you don't have to restart the web server when you make code changes.
-  config.cache_classes = false
-
-  # Do not eager load code on boot.
+  config.enable_reloading = true
   config.eager_load = false
-
-  # Show full error reports.
   config.consider_all_requests_local = true
-
-  # Enable server timing
   config.server_timing = true
 
-  # Enable/disable caching. By default caching is disabled.
-  # Run rails dev:cache to toggle caching.
   if Rails.root.join("tmp/caching-dev.txt").exist?
     config.action_controller.perform_caching = true
     config.action_controller.enable_fragment_cache_logging = true
-
     config.cache_store = :memory_store
-    config.public_file_server.headers = {
-      "Cache-Control" => "public, max-age=#{2.days.to_i}"
-    }
+    config.public_file_server.headers = { "Cache-Control" => "public, max-age=#{2.days.to_i}" }
   else
     config.action_controller.perform_caching = false
-
     config.cache_store = :null_store
   end
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
-  # Don't care if the mailer can't send.
+  # Mail stays in the app: each message is logged and kept in
+  # ActionMailer::Base.deliveries, never sent
+  config.action_mailer.delivery_method = :test
+  config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = false
-
   config.action_mailer.perform_caching = false
+  config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "localhost"), port: ENV["APP_HOST"] ? nil : 3000 }
 
-  # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
-
-  # Raise an error on page load if there are pending migrations.
   config.active_record.migration_error = :page_load
-
-  # Highlight code that triggered database queries in logs.
   config.active_record.verbose_query_logs = true
 
-  # Suppress logger output for asset requests.
   config.assets.quiet = true
-
-  # Raises error for missing translations.
-  # config.i18n.raise_on_missing_translations = true
-
-  # Annotate rendered view with file names.
-  # config.action_view.annotate_rendered_view_with_filenames = true
-
-  # Uncomment if you wish to allow Action Cable access from any origin.
-  # config.action_cable.disable_request_forgery_protection = true
-
-  # TODO: Remove
-  # Prevent compiled assets from winning
   config.assets.prefix = "/dev-assets"
+
+  # A secret that outlasts the container, when one is given; otherwise
+  # Rails keeps its own in tmp/local_secret.txt
+  config.secret_key_base = ENV["SECRET_KEY_BASE"] if ENV["SECRET_KEY_BASE"].present?
+
+  # Logs to standard output in a container (RAILS_LOG_TO_STDOUT)
+  if ENV["RAILS_LOG_TO_STDOUT"].present?
+    config.logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new($stdout))
+  end
 end

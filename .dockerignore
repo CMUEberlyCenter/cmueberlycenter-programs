@@ -4,7 +4,6 @@
 .env.*
 **/.env
 **/.env.*
-config/database.yml
 config/master.key
 config/credentials/*.key
 config/secrets.yml

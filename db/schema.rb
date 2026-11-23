@@ -10,15 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_11_04_150000) do
-  create_table "future_faculty_requirement_categories", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+ActiveRecord::Schema[8.1].define(version: 2026_11_04_150000) do
+  create_table "future_faculty_requirement_categories", force: :cascade do |t|
     t.string "key"
     t.string "label"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
   end
 
-  create_table "future_faculty_requirements", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "future_faculty_requirements", force: :cascade do |t|
     t.string "key"
     t.string "label"
     t.integer "future_faculty_requirements_version_id"
@@ -30,14 +30,14 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_04_150000) do
     t.index ["future_faculty_requirements_version_id"], name: "index_ff_requirements_on_ff_requirements_version_id"
   end
 
-  create_table "future_faculty_requirements_versions", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "future_faculty_requirements_versions", force: :cascade do |t|
     t.string "key"
     t.string "label"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
   end
 
-  create_table "participant_activities", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "participant_activities", force: :cascade do |t|
     t.integer "participant_id"
     t.string "type"
     t.integer "future_faculty_requirement_id"
@@ -61,7 +61,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_04_150000) do
     t.index ["status_id"], name: "index_participant_activities_on_status_id"
   end
 
-  create_table "participant_activity_status_types", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "participant_activity_status_types", force: :cascade do |t|
     t.integer "future_faculty_requirement_id"
     t.string "key"
     t.string "label"
@@ -70,7 +70,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_04_150000) do
     t.index ["future_faculty_requirement_id"], name: "fk_rails_136cc54ad1"
   end
 
-  create_table "participants", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "participants", force: :cascade do |t|
     t.string "andrewid"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
@@ -100,28 +100,28 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_04_150000) do
     t.index ["future_faculty_progress_status_id"], name: "index_participants_on_future_faculty_progress_status_id"
   end
 
-  create_table "progress_status_types", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "progress_status_types", force: :cascade do |t|
     t.string "key"
     t.string "label"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
   end
 
-  create_table "registration_attendance_status_types", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "registration_attendance_status_types", force: :cascade do |t|
     t.string "key"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
     t.string "label"
   end
 
-  create_table "registration_waitlist_status_types", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "registration_waitlist_status_types", force: :cascade do |t|
     t.string "key"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
     t.string "action_label"
   end
 
-  create_table "registrations", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "registrations", force: :cascade do |t|
     t.integer "participant_id"
     t.integer "seminar_id"
     t.integer "waitlist_status_id"
@@ -134,13 +134,13 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_04_150000) do
     t.index ["waitlist_status_id"], name: "index_registrations_on_waitlist_status_id"
   end
 
-  create_table "seminar_status_types", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "seminar_status_types", force: :cascade do |t|
     t.string "key"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
   end
 
-  create_table "seminar_tags", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "seminar_tags", force: :cascade do |t|
     t.integer "seminar_id"
     t.string "value"
     t.datetime "created_at", precision: nil, null: false
@@ -148,7 +148,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_04_150000) do
     t.index ["seminar_id"], name: "index_seminar_tags_on_seminar_id"
   end
 
-  create_table "seminars", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "seminars", force: :cascade do |t|
     t.string "title"
     t.text "description"
     t.datetime "start_at", precision: nil
@@ -166,7 +166,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_04_150000) do
     t.index ["seminar_status_id"], name: "index_seminars_on_seminar_status_id"
   end
 
-  create_table "settings", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "settings", force: :cascade do |t|
     t.string "label"
     t.string "key"
     t.text "value"

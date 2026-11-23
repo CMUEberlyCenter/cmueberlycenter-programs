@@ -6,7 +6,6 @@
 /tmp/**/*
 
 # Ignore the database configuration
-/config/database.yml
 
 # Ignore sass cache
 /.sass-cache/
@@ -29,3 +28,5 @@
 /public/dev-assets/
 /vendor/cache/
 /storage/*
+
+!/storage/.keep

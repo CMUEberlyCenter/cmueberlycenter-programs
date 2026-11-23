@@ -5,13 +5,12 @@ ruby "~> 3.4.12"
 gem "rails", "~> 8.1.4", ">= 8.1.4.1"
 gem "rack", "~> 3.2", ">= 3.2.8"
 gem "propshaft"
-gem "mysql2"
+gem "sqlite3", ">= 2.1"
 gem "puma", "~> 7.2", ">= 7.2.1"
 gem "importmap-rails"
 gem "turbo-rails"
 gem "stimulus-rails"
 gem "jbuilder"
-gem "redis", "~> 4.0"
 gem "tzinfo-data", platforms: %i[windows jruby]
 gem "bootsnap", require: false
 
@@ -37,5 +36,4 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
   gem "minitest", "~> 5.25"
-  gem "sqlite3", ">= 2.1"
 end

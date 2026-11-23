@@ -1,4 +1,4 @@
-name: seminars
+name: programs
 
 services:
   rails:
@@ -13,50 +13,8 @@ services:
     command: ["sh", "-c", "bin/rails db:prepare && exec bin/rails server -b 0.0.0.0"]
     environment:
       RAILS_ENV: development
-      DATABASE_HOST: mysql
-      DATABASE_USERNAME: seminars
-      DATABASE_PASSWORD: development
-      REDIS_URL: redis://redis:6379/1
-      PIDFILE: /tmp/seminars-server.pid
-      LDAP_BIND_DN: ${LDAP_BIND_DN:-}
-      LDAP_PASSWORD: ${LDAP_PASSWORD:-}
-      REMOTE_USER: ${REMOTE_USER:-}
+      PIDFILE: /tmp/programs-server.pid
     volumes:
       - .:/app
-      - ./config/database.yml.example:/app/config/database.yml:ro
     ports:
       - "127.0.0.1:${PORT:-3000}:3000"
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_DATABASE: seminars_development
-      MYSQL_USER: seminars
-      MYSQL_PASSWORD: development
-      MYSQL_ROOT_PASSWORD: development-root
-    volumes:
-      - mysql-data:/var/lib/mysql
-      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/01-test-database.sql:ro
-    healthcheck:
-      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysql --protocol=TCP -h 127.0.0.1 -u$$MYSQL_USER -D seminars_test -e 'SELECT 1' >/dev/null"]
-      interval: 5s
-      timeout: 5s
-      retries: 30
-      start_period: 30s
-
-  redis:
-    image: redis:7.4-bookworm
-    command: ["redis-server", "--save", "", "--appendonly", "no"]
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-
-volumes:
-  mysql-data:

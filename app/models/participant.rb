@@ -216,27 +216,27 @@ class Participant < ApplicationRecord
   }
 
   def ffp_obs
-    activities.where('memo_completed_on is not null and type="Participant::Activities::TeachingObservation"').size
+    activities.where(type: 'Participant::Activities::TeachingObservation').where.not(memo_completed_on: nil).size
   end
 
   def ffp_ecf
-    activities.where('memo_completed_on is not null and type="Participant::Activities::EarlyCourseFeedback"').size
+    activities.where(type: 'Participant::Activities::EarlyCourseFeedback').where.not(memo_completed_on: nil).size
   end
 
   def ffp_micro
-    activities.where('memo_completed_on is not null and type="Participant::Activities::MicroteachingWorkshop"').size
+    activities.where(type: 'Participant::Activities::MicroteachingWorkshop').where.not(memo_completed_on: nil).size
   end
 
   def ffp_lpr
-    activities.where('memo_completed_on is not null and type="Participant::Activities::LessonPlanReview"').size
+    activities.where(type: 'Participant::Activities::LessonPlanReview').where.not(memo_completed_on: nil).size
   end
 
   def ffp_csd
-    activities.where('completed_on is not null and type="Participant::Activities::CourseAndSyllabusDesignProject"').size
+    activities.where(type: 'Participant::Activities::CourseAndSyllabusDesignProject').where.not(completed_on: nil).size
   end
 
   def ffp_tp
-    activities.where('completed_on is not null and type="Participant::Activities::TeachingStatementProject"').size
+    activities.where(type: 'Participant::Activities::TeachingStatementProject').where.not(completed_on: nil).size
   end
 
   def ffp_seminar_size

@@ -1,4 +1,4 @@
-name: seminars-production
+name: programs-production
 
 services:
   rails:
@@ -8,10 +8,8 @@ services:
     init: true
     restart: unless-stopped
     environment:
-      DATABASE_URL: ${DATABASE_URL:?Set the production MySQL DATABASE_URL}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE:?Set a persistent production SECRET_KEY_BASE}
       RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:-}
-      REDIS_URL: ${REDIS_URL:?Set the production REDIS_URL}
       LDAP_BIND_DN: ${LDAP_BIND_DN:-}
       LDAP_PASSWORD: ${LDAP_PASSWORD:-}
     ports:

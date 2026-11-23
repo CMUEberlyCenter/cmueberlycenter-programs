@@ -1,11 +1,9 @@
+# Nothing broadcasts yet; the async adapter keeps Action Cable in the process
 development:
-  adapter: redis
-  url: <%= ENV.fetch("REDIS_URL", "redis://localhost:6379/1") %>
+  adapter: async
 
 test:
   adapter: test
 
 production:
-  adapter: redis
-  url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" } %>
-  channel_prefix: seminars_production
+  adapter: async

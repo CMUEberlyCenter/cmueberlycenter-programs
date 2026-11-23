@@ -174,8 +174,6 @@ GEM
     mini_portile2 (2.8.9)
     minitest (5.25.4)
     msgpack (1.8.2)
-    mysql2 (0.5.7)
-      bigdecimal
     net-imap (0.6.8)
       date
       net-protocol
@@ -263,7 +261,6 @@ GEM
       prism (>= 1.6.0)
       rbs (>= 4.0.0)
       tsort
-    redis (4.6.0)
     regexp_parser (2.11.3)
     reline (0.7.0)
       io-console (~> 0.5)
@@ -348,14 +345,12 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   minitest (~> 5.25)
-  mysql2
   net-ldap
   pagy (~> 5.10)
   propshaft
   puma (~> 7.2, >= 7.2.1)
   rack (~> 3.2, >= 3.2.8)
   rails (~> 8.1.4, >= 8.1.4.1)
-  redis (~> 4.0)
   rubocop-rails
   selenium-webdriver
   sqlite3 (>= 2.1)
