@@ -86,6 +86,40 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_select 'nav#nav a', { text: 'Future Faculty Program', count: 0 }
   end
 
+  test "the home page's sidebar note and Learn More are for participants, not staff" do
+    Setting.create!(key: 'sidebar-participant', label: 'Sidebar Note', value: '<h2>Questions?</h2><p>Email us.</p>')
+    sign_in('pp00')
+    get root_path
+    assert_select '.sidebar .grey h2', 'Questions?'
+    assert_select '.sidebar .list h1', 'Learn More'
+
+    sign_in('cc00')
+    get root_path
+    assert_select '.sidebar', count: 0
+  end
+
+  test 'a participant registers with a full-size button and cancels with a link button' do
+    participant = sign_in('pp00')
+    get root_path
+    assert_select 'form button.btn:not(.small)', text: /\A(Register|Request a Seat)\z/
+
+    Registration.create!(participant:, seminar: @seminar,
+                         waitlist_status: Registration::WaitlistStatusType.find_by!(key: 'confirmed'))
+    get root_path
+    assert_select 'button.cmu-link-button', text: /\ACancel (Registration|Request)\z/
+  end
+
+  test 'an unknown address gets the app\'s 404 page' do
+    Rails.application.env_config['action_dispatch.show_exceptions'] = :all
+    Rails.application.env_config['action_dispatch.show_detailed_exceptions'] = false
+    get '/no-such-page'
+    assert_response :not_found
+    assert_select 'h1', "We Can't Find That Page"
+  ensure
+    Rails.application.env_config['action_dispatch.show_exceptions'] = :rescuable
+    Rails.application.env_config['action_dispatch.show_detailed_exceptions'] = true
+  end
+
   test 'staff tabs' do
     sign_in('aa00')
     get root_path
@@ -121,7 +155,8 @@ class PagesTest < ActionDispatch::IntegrationTest
 
     get profile_path
     assert_response :success
-    assert_select 'h1', participant.name
+    assert_select 'h1', 'My Activities'
+    assert_select 'dd', participant.name
     assert_select 'button', 'Print This Record'
 
     [seminars_path, participants_path, settings_path, admin_seminar_path(@seminar)].each do |path|

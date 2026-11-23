@@ -1,5 +1,5 @@
 <% own = @participant == Current.user %>
-<% cmu_title "Participation Record", (own ? nil : @participant.name) %>
+<% cmu_title (own ? "My Activities" : "Participation Record"), (own ? nil : @participant.name) %>
 <% if own %>
   <% cmu_breadcrumb "My Activities" %>
 <% else %>
@@ -8,25 +8,40 @@
 <% end %>
 <% version = @participant.future_faculty_enrollment || Programs::FutureFaculty::RequirementsVersion.find_by(key: "2023") %>
 <% requirements = version ? version.requirements.group_by(&:requirement_category) : {} %>
-<div class="content">
+<div class="content wide">
   <div class="prg-record">
-    <p class="cmu-label">Eberly Center Record of Teaching Development Activities</p>
-    <h1><%= @participant.name %></h1>
-    <p class="cmu-lead"><%= [@participant.pretty_depts.presence, @participant.andrewid].compact.join(", ") %></p>
-    <% if @participant.future_faculty_enrollment %>
-      <p><strong>Future Faculty Program:</strong> <%= ffp_status_name(@participant.future_faculty_progress_status) %><%= ", #{ap_date(@participant.future_faculty_program_graduated_on)}" if @participant.future_faculty_program_graduated_on %></p>
-    <% end %>
+    <p class="cmu-eyebrow">Eberly Center Record of Teaching Development Activities</p>
+    <h1><%= own ? "My Activities" : @participant.name %></h1>
+    <p class="cmu-lead">Seminars, workshops and Future Faculty Program activities with the Eberly Center, as of <%= ap_date(Time.zone.today) %>.</p>
+    <p class="cmu-cta-row prg-no-print" data-controller="print">
+      <button type="button" class="btn" data-action="print#print">Print This Record</button>
+      <span class="cmu-cta-note">To save it as a PDF, choose Save as PDF in the print dialog.</span>
+    </p>
+    <dl class="prg-facts">
+      <dt>Name</dt>
+      <dd><%= @participant.name %></dd>
+      <dt>Andrew ID</dt>
+      <dd><%= @participant.andrewid %></dd>
+      <% if @participant.pretty_depts.present? %>
+        <dt>Department</dt>
+        <dd><%= @participant.pretty_depts %></dd>
+      <% end %>
+      <% if @participant.future_faculty_enrollment %>
+        <dt>Future Faculty Program</dt>
+        <dd><%= ffp_status_pill(@participant.future_faculty_progress_status) %><%= " #{ap_date(@participant.future_faculty_program_graduated_on)}" if @participant.future_faculty_program_graduated_on %></dd>
+      <% end %>
+    </dl>
 
-    <h2>Seminars</h2>
+    <h2 class="rule-top">Seminars</h2>
     <p class="cmu-hint">Attend at least eight seminars. If you began the program before July 1, 2023, at least four must be core seminars (*); otherwise, at least two must focus on diversity, equity, inclusion and belonging.</p>
-    <%= render "record_list", seminars: @participant.attended_seminars %>
+    <%= render "record_list", seminars: @participant.attended_seminars, noun: "Seminar" %>
 
-    <h2>Workshops and Other Programs</h2>
+    <h2 class="rule-top">Workshops and Other Programs</h2>
     <p class="cmu-hint">Optional. They don't count toward the program.</p>
-    <%= render "record_list", seminars: @participant.attended_workshops + @participant.attended_other %>
+    <%= render "record_list", seminars: @participant.attended_workshops + @participant.attended_other, noun: "Program" %>
 
     <% version&.categories&.each do |category| %>
-      <h2><%= category.label %></h2>
+      <h2 class="rule-top"><%= category.label %></h2>
       <% if category.key == "projects" %>
         <p class="cmu-hint">Design a syllabus for a university-level course in your discipline and write a statement of teaching philosophy.</p>
       <% elsif category.key == "teaching_consultations" %>
@@ -34,34 +49,35 @@
       <% end %>
       <% done = requirements.fetch(category, []).flat_map { |r| @participant.activities.where(type: r.activity_class).where.not(completed_on: nil).map { |a| [r, a] } } %>
       <% if done.any? %>
-        <ul class="prg-attended">
-          <% done.each do |requirement, activity| %>
-            <li><%= requirement.label %> <span class="cmu-muted">(<%= ap_date(activity.completed_on) %>)</span><% if activity.course.present? %><br>Course: <%= activity.course %><% end %></li>
-          <% end %>
-        </ul>
+        <table class="alternate cmu-full">
+          <thead><tr><th scope="col">Requirement</th><th scope="col">Completed</th><th scope="col">Course</th></tr></thead>
+          <tbody>
+            <% done.each do |requirement, activity| %>
+              <tr><td><%= requirement.label %></td><td><%= ap_date(activity.completed_on) %></td><td><%= activity.course %></td></tr>
+            <% end %>
+          </tbody>
+        </table>
       <% else %>
         <p class="cmu-empty">None yet.</p>
       <% end %>
     <% end %>
 
-    <h2>Other Activities and Consultations</h2>
+    <h2 class="rule-top">Other Activities and Consultations</h2>
     <p class="cmu-hint">The program overview and any other activities or consultations. They don't count toward the program.</p>
     <% others = @participant.activities.additional %>
     <% if others.any? %>
-      <ul class="prg-attended">
-        <% others.each do |activity| %>
-          <li><%= activity.title %><% if activity.completed_on %> <span class="cmu-muted">(<%= ap_date(activity.completed_on) %>)</span><% end %><% if activity.description.present? %><br><%= activity.description %><% end %></li>
-        <% end %>
-      </ul>
+      <table class="alternate cmu-full">
+        <thead><tr><th scope="col">Activity</th><th scope="col">Date</th><th scope="col">Notes</th></tr></thead>
+        <tbody>
+          <% others.each do |activity| %>
+            <tr><td><%= activity.title %></td><td><%= ap_date(activity.completed_on) if activity.completed_on %></td><td><%= activity.description %></td></tr>
+          <% end %>
+        </tbody>
+      </table>
     <% else %>
       <p class="cmu-empty">None yet.</p>
     <% end %>
 
     <p class="prg-record-footer">This record lists activities with the Eberly Center for Teaching Excellence &amp; Educational Innovation, Carnegie Mellon University, as of <%= ap_date(Time.zone.today) %>. www.cmu.edu/teaching, eberly-ctr@andrew.cmu.edu</p>
-  </div><div class="sidebar prg-no-print">
-    <div class="simple" data-controller="print">
-      <p><button type="button" class="btn wide" data-action="print#print">Print This Record</button></p>
-      <p class="cmu-hint">To save it as a PDF, choose Save as PDF in the print dialog.</p>
-    </div>
   </div>
 </div>

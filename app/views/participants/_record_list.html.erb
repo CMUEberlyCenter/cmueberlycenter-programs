@@ -1,10 +1,13 @@
-<%# locals: (seminars:) -%>
+<%# locals: (seminars:, noun:) -%>
 <% if seminars.any? %>
-  <ul class="prg-attended">
-    <% seminars.sort_by { |s| s.start_at || s.end_at }.each do |seminar| %>
-      <li><%= seminar.title_with_indicia %> <span class="cmu-muted">(<%= seminar_day(seminar) %>)</span></li>
-    <% end %>
-  </ul>
+  <table class="alternate cmu-full">
+    <thead><tr><th scope="col"><%= noun %></th><th scope="col">Date</th></tr></thead>
+    <tbody>
+      <% seminars.sort_by { |s| s.start_at || s.end_at }.each do |seminar| %>
+        <tr><td><%= seminar.title_with_indicia %></td><td><%= seminar_day(seminar) %></td></tr>
+      <% end %>
+    </tbody>
+  </table>
 <% else %>
   <p class="cmu-empty">None yet.</p>
 <% end %>

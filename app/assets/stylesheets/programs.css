@@ -93,13 +93,22 @@
   .prg-record h2 {
     break-after: avoid;
   }
-  .prg-record li,
+  .prg-record tr,
   .prg-sign-in-sheet tr {
     break-inside: avoid;
   }
   .prg-sign-in-sheet thead {
     display: table-header-group;
   }
+}
+
+/* A button_to form inside a line of text, such as a Link Button's */
+.prg-inline-form {
+  display: inline;
+}
+/* A card's links and Link Buttons on one line, spaced like a paragraph */
+.prg-card-links {
+  margin: 0 0 1rem;
 }
 
 /* A button_to form on its own line, spaced like a paragraph */
