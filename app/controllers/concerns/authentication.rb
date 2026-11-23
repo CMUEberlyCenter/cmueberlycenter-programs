@@ -41,8 +41,11 @@ module Authentication
     redirect_to login_path(return_to: request.fullpath) unless Current.user
   end
 
-  def require_administrator
-    return if Current.user&.admin?
+  def require_administrator = require_role(:admin?)
+  def require_staff = require_role(:staff?)
+
+  def require_role(role)
+    return if Current.user&.public_send(role)
 
     if Current.user
       redirect_to root_url

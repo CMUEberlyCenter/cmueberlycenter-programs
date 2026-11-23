@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Programs::FutureFacultyController < ApplicationController
-  before_action :require_administrator
+  before_action :require_staff
 
   def index
     respond_to do |format|

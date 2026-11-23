@@ -11,7 +11,7 @@ class WelcomeController < ApplicationController
       SeminarGroup.new(title: 'Self-Paced Programs',
                        seminars: Seminar.registerable.asynchronous, color: 'blue')
     ]
-    if Current.user&.admin?
+    if Current.user&.staff?
       @seminar_groups << SeminarGroup.new(title: 'Past Programs', seminars: recent_past_seminars, color: 'grey')
       @seminar_groups << SeminarGroup.new(title: 'Programs Not Open for Registration',
                                           seminars: Seminar.present.closed, color: 'grey')

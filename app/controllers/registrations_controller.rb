@@ -5,10 +5,10 @@ class RegistrationsController < ApplicationController
 
   before_action :require_authentication, only: %i[index create destroy]
 
-  # Administrators get everyone's registrations; everyone else gets their own
+  # Staff get everyone's registrations; everyone else gets their own
   # coming up (My Registrations)
   def index
-    return mine unless Current.user.admin?
+    return mine unless Current.user.staff?
 
     @q = params[:q].to_s.strip
     registrations = Registration.includes(:waitlist_status, :attendance_status,
@@ -33,12 +33,12 @@ class RegistrationsController < ApplicationController
 
   def create
     @seminar = Seminar.find(params[:seminar_id])
-    Current.user.admin? && params.key?(:participants) ? register_attendees : register_self
+    Current.user.staff? && params.key?(:participants) ? register_attendees : register_self
   end
 
   def destroy
     registration = Registration.find(params[:id])
-    return redirect_to(root_path) unless Current.user.admin? || registration.participant == Current.user
+    return redirect_to(root_path) unless Current.user.staff? || registration.participant == Current.user
 
     ParticipantMailer.canceled_registration_email(registration).deliver
     registration.destroy

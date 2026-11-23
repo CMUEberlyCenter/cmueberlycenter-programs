@@ -6,5 +6,7 @@
 <p class="prg-links">
   <%= link_to "Manage Registrations", admin_seminar_path(seminar), class: "cta" %>
   <%= link_to "Take Attendance", attendance_admin_seminar_path(seminar), class: "cta" %>
-  <%= link_to "Edit Seminar", edit_admin_seminar_path(seminar), class: "cta" %>
+  <% if Current.user.admin? %>
+    <%= link_to "Edit Seminar", edit_admin_seminar_path(seminar), class: "cta" %>
+  <% end %>
 </p>

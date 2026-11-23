@@ -26,7 +26,7 @@ class ParticipantsControllerTest < ActionController::TestCase
         attendance_status: tags == 'not-attended' ? nil : Registration::AttendanceStatusType.find_by!(key: 'attended'))
     end
 
-    admin = Struct.new(:admin?).new(true)
+    admin = Struct.new(:admin?, :staff?).new(true, true)
     Current.stub(:user, admin) { get :index, format: :xlsx }
 
     assert_response :success

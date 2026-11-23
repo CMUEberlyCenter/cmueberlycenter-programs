@@ -16,7 +16,9 @@
 </div>
 <% emails = registrations.confirmed.filter_map { |r| r.participant&.email }.join(", ") %>
 <div class="simple">
-  <p><%= link_to "Edit Seminar", edit_admin_seminar_path(seminar), class: "btn wide" %></p>
+  <% if Current.user.admin? %>
+    <p><%= link_to "Edit Seminar", edit_admin_seminar_path(seminar), class: "btn wide" %></p>
+  <% end %>
   <p><%= link_to "Print the Sign-In Sheet", sign_in_sheet_admin_seminar_path(seminar), class: "btn ghost wide" %></p>
   <% if emails.present? %>
     <p><%= mail_to "seminars@eberly.cmu.edu", "Email Confirmed Participants", bcc: emails, class: "btn ghost wide" %></p>

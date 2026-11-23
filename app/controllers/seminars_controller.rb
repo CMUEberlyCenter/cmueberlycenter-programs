@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class SeminarsController < ApplicationController
-  before_action :require_administrator
+  before_action :require_staff, only: :index
+  before_action :require_administrator, except: :index
 
   def index
     @seminars = Seminar.includes(:seminar_status, :seminar_tags, registrations: %i[waitlist_status attendance_status])

@@ -14,9 +14,9 @@ module CmuHelper
     profile_path if Current.user
   end
 
-  # Administrators search participants from the roof
+  # Staff search participants from the roof
   def cmu_search_path
-    participants_path if Current.user&.admin?
+    participants_path if Current.user&.staff?
   end
 
   def cmu_acting_as?

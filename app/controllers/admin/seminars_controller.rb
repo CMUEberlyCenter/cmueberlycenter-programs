@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class Admin::SeminarsController < ApplicationController
-  before_action :require_administrator
+  before_action :require_staff, only: %i[show attendance sign_in_sheet]
+  before_action :require_administrator, except: %i[show attendance sign_in_sheet]
   before_action :set_seminar, except: %i[new create]
 
   def show; end

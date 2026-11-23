@@ -2,7 +2,7 @@
 
 # A participant's activities, edited in a dialog on their page
 class ActivitiesController < ApplicationController
-  before_action :require_administrator
+  before_action :require_staff
 
   def new
     @participant = Participant.find_by!(andrewid: params[:participant_id])

@@ -9,8 +9,7 @@
 - andrew_id: cc00
   name: Connie Consultant
   role: Teaching Consultant
-  can: Everything an administrator can, and listed as a consultant on observations and consultations.
-  admin: true
+  can: Seminars, attendance, participants and their activities; not settings or creating and editing seminars.
   consultant: true
 - andrew_id: pp00
   name: Polly Participant

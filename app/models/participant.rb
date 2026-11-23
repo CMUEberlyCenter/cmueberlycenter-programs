@@ -77,6 +77,8 @@ class Participant < ApplicationRecord
 
   def admin? = is_admin
   def consultant? = is_consultant
+  # Eberly staff who work with participants: administrators and consultants
+  def staff? = admin? || consultant?
   def was_consultant? = observations.present? || lead_consultations.present?
   def eberly_flavored? = admin? || consultant? || was_consultant?
   def note? = note.to_s.present?

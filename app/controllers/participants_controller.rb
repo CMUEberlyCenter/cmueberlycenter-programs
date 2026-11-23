@@ -2,7 +2,7 @@
 
 class ParticipantsController < ApplicationController
   before_action :require_authentication
-  before_action :require_administrator, except: :record
+  before_action :require_staff, except: :record
 
   def index
     @participants = Participant.all
@@ -29,7 +29,7 @@ class ParticipantsController < ApplicationController
   # A participation record, for printing: anyone's for an administrator,
   # otherwise the signed-in user's own (/profile)
   def record
-    @participant = if Current.user.admin? && params[:id].present?
+    @participant = if Current.user.staff? && params[:id].present?
                      find_or_create_participant(params[:id]) or return
                    else
                      Current.user

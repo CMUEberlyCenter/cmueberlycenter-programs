@@ -2,7 +2,7 @@
 
 # One registration's waitlist status or attendance, from its row
 class Admin::RegistrationsController < ApplicationController
-  before_action :require_administrator
+  before_action :require_staff
   before_action { @registration = Registration.find(params[:id]) }
 
   def status

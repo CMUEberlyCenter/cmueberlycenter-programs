@@ -4,7 +4,9 @@
   <div>
     <h1>Seminars</h1>
     <p class="cmu-cta-row">
-      <%= link_to "Create Seminar", new_admin_seminar_path, class: "btn" %>
+      <% if Current.user.admin? %>
+        <%= link_to "Create Seminar", new_admin_seminar_path, class: "btn" %>
+      <% end %>
       <%= link_to "Download Seminars (.xlsx)", seminars_path(format: :xlsx), class: "btn ghost", download: true %>
     </p>
     <div class="cmu-search-bar">

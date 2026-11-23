@@ -37,6 +37,22 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_redirected_to login_path(return_to: registrations_path)
   end
 
+  test 'a consultant works with seminars and participants but not settings' do
+    sign_in('cc00')
+
+    get participants_path
+    assert_response :success
+    get seminars_path
+    assert_response :success
+    assert_select 'a', { text: 'Create Seminar', count: 0 }
+    assert_select 'nav#nav a', { text: 'Settings', count: 0 }
+
+    get settings_path
+    assert_redirected_to root_url
+    get new_admin_seminar_path
+    assert_redirected_to root_url
+  end
+
   test 'an administrator sees every admin page' do
     participant = sign_in('pp00')
     admin = sign_in('aa00')

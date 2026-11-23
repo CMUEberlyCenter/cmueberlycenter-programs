@@ -264,7 +264,7 @@ class DemoData
 
   def staff
     person('aa00').update!(is_admin: true)
-    person('cc00').update!(is_admin: true, is_consultant: true)
+    person('cc00').update!(is_admin: false, is_consultant: true)
     person('lc00').update!(is_consultant: true)
   end
 
