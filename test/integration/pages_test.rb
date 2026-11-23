@@ -53,6 +53,28 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_url
   end
 
+  test 'opening a person who is not in Programs yet offers to add them, and adds only on the button' do
+    sign_in('aa00')
+
+    get participant_path('newp02')
+    assert_response :success
+    assert_select 'form[action=?] button', participants_path, text: /Add /
+    assert_nil Participant.find_by(andrewid: 'newp02')
+
+    post participants_path, params: { participant: { andrewid: 'newp02' } }
+    assert_redirected_to participant_path('newp02')
+    assert Participant.find_by(andrewid: 'newp02')
+  end
+
+  test 'opening an Andrew ID no one has is a 404 and adds no one' do
+    sign_in('aa00')
+    count = Participant.count
+
+    get participant_path('bad*id')
+    assert_response :not_found
+    assert_equal count, Participant.count
+  end
+
   test 'staff tabs' do
     sign_in('aa00')
     get root_path

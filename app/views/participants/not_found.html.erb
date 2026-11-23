@@ -1,0 +1,10 @@
+<% cmu_title "No One Found", "People" %>
+<% cmu_breadcrumb link_to("People", participants_path), "No One Found" %>
+<% cmu_nav "people" %>
+<div class="content">
+  <div>
+    <h1>No One Found</h1>
+    <p class="cmu-lead">There's no one at CMU with the Andrew ID <%= params[:id] %>.</p>
+    <p><%= link_to "Find Someone in People", participants_path, class: "cta" %></p>
+  </div>
+</div>

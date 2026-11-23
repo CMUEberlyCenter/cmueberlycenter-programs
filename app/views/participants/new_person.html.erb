@@ -1,0 +1,11 @@
+<% cmu_title @directory_entry.name, "People" %>
+<% cmu_breadcrumb link_to("People", participants_path), @directory_entry.name %>
+<% cmu_nav "people" %>
+<div class="content">
+  <div>
+    <h1><%= @directory_entry.name %></h1>
+    <p class="cmu-lead"><%= @directory_entry.name %> isn't in Programs yet.</p>
+    <%= button_to "Add #{@directory_entry.name}", participants_path,
+                  params: { participant: { andrewid: @directory_entry.uid } }, class: "btn" %>
+  </div>
+</div>
