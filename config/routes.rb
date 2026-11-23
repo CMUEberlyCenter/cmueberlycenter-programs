@@ -23,7 +23,10 @@ Rails.application.routes.draw do
   # Signing in: developer sign-in in development and test, drawn only there
   # (DevSessionsController refuses everywhere else too). In production /login
   # says sign-in isn't set up; single sign-on (Entra ID) goes there later.
-  direct(:login) { |options| "/login#{"?#{options.to_query}" if options.any?}" }
+  direct(:login) do |options|
+    query = options.slice(:return_to).compact
+    "/login#{"?#{query.to_query}" if query.any?}"
+  end
   if DemoMode.on?
     match 'login', to: 'dev_sessions#new', as: :dev_login, via: %i[get post]
     post 'login/:andrew_id', to: 'dev_sessions#create', as: :dev_login_as

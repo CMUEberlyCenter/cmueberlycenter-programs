@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 # The site's navigation, drawn by the kit's layout (cmu-web-kilt) on every
-# page. Administrators get the admin pages; everyone else gets the
-# seminars and, signed in, their own record.
+# page. Administrators get the admin pages; everyone else, signed in or
+# not, gets their own record.
 module NavigationItemsHelper
   def cmu_nav_tree
     admin = -> { Current.user&.admin? }
-    participant = -> { Current.user && !Current.user.admin? }
+    # Signed out, the tabs a participant gets; My Activities signs them in on the way
+    participant = -> { !Current.user&.admin? }
     [
       { label: 'Seminars', url: seminars_path, if: admin },
       { label: 'Participants', url: participants_path, if: admin },
