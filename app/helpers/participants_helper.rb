@@ -66,7 +66,8 @@ module ParticipantsHelper
        ] }].freeze
 
   def participants_table_config
-    { footerElement: "<button id=\"download-csv\">Download #{Participant.all.size} Participants (.xlsx)</button>",
+    { footerElement: link_to("Download #{@participants.size} Participants (.xlsx)",
+                             participants_path(format: :xlsx, ffp_status: @ffp_status)),
       placeholder: '<h2>No Data Available</h2>',
       paginationCounter: 'rows',
       pagination: true,

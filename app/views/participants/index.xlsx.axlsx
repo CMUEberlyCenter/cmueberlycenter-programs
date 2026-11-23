@@ -1,8 +1,11 @@
 wb = xlsx_package.workbook
+count_fields = %w[ffp_seminar_size ffp_dei_size ffp_obs ffp_ecf ffp_micro ffp_lpr ffp_csd ffp_tp]
+counts_by_participant = Participant.table_rows(@participants).index_by { |row| row['id'] }
 wb.add_worksheet(name: "Participants") do |sheet|
-  sheet.add_row [ "Last Change","Name","Andrew ID","Department","School","Student Class","First Consultation On","FFP Graduation Date","FFP Status" ]
+  sheet.add_row [ "Last Change","Name","Andrew ID","Department","School","Student Class","First Consultation On","FFP Graduation Date","FFP Status",
+                  "Seminars", "DEI Seminars", "Obs", "ECFs", "Micros", "LPRs", "CSDs", "TPs" ]
   @participants.each do |p|
-    future_faculty_progress = p.future_faculty_progress_status.label if p.future_faculty_progress_status.present?
+    future_faculty_progress = p.future_faculty_progress_status&.label
     sheet.add_row [   p.updated_at, 
                       p.name,
                       p.andrewid,
@@ -12,7 +15,7 @@ wb.add_worksheet(name: "Participants") do |sheet|
      	              p.first_consultation_on,
                       p.future_faculty_program_graduated_on,
   		      future_faculty_progress
-      ]
+      ] + counts_by_participant.fetch(p.id).values_at(*count_fields)
   end # participants
   #.to_formatted_s(:short),
 end # sheet
