@@ -1,107 +1,71 @@
-<% update_document_title(add: "#{@seminar.title}") %>
-<% update_breadcrumbs(add: link_to('Seminars', seminars_path)) %>
-<% update_breadcrumbs(add: "#{@seminar.title}") %>
-<% content_for :nav do %>
-<li class="parent ancestor">
-  <%= link_to('Seminars', seminars_path) %>
-  <ul>
-    <li>
-      <%= link_to('Create New Seminar', new_seminar_path) %>
-    </li>
-    <li class="active">
-      <%= link_to("#{@seminar.title}", admin_seminar_url(@seminar)) %>
-    </li>
-  </ul>
-</li><li>
-  <%= link_to('Registrations', registrations_path) %>
-</li><li>
-  <%= link_to('Participants', participants_path) %>
-</li><li>
-  <%= link_to('Future Faculty Program', future_faculty_path) %>
-</li><li>
-  <%= link_to('Application Settings', settings_path) %>
-</li>
-<% end %>
-
+<% cmu_title @seminar.title, "Seminars" %>
+<% cmu_breadcrumb link_to("Seminars", seminars_path), @seminar.title %>
+<% cmu_nav "seminars" %>
+<% order = { "confirmed" => 0, "pending" => 1, "canceled" => 2 } %>
+<% registrations = @seminar.registrations.includes(:waitlist_status).reject { |r| r.participant.nil? }
+                     .sort_by { |r| [order.fetch(r.waitlist_status&.key, 3), r.participant.sortable_name.downcase] } %>
 <div class="content">
   <div>
-    <h1><%= @seminar.title %></h1>
-    <p class="date"><%= raw @seminar.formatted_timespan %></p>
-    <p class="description"><%= raw @seminar.description %></p>
+    <%= render "heading", seminar: @seminar %>
 
-    <h2>Registration Management</h2>
-
-        <%= form_tag change_registration_status_multiple_path(seminar: @seminar), method: :patch do %>
-  <div>
-
-    <p>
-      <%= hidden_field_tag "selected", "" %>
-      <%= select_tag 'registration_status_key', options_for_select(Registration::WaitlistStatusType.actions_dropdown), class: 'inline' %>
-      <%= submit_tag "Update Selected", class: "small" %>
-    </p>
-  </div>
-
-
-  <table>
-      <tr class="invert">
-          <th class="p_select"><%= check_box_tag("all_participants","") %></th>
-          <th style="width:50%">Name</th>
-          <th>Status</th>
-	  <th>Affiliation</th>
-	  <th style="width:100%">Actions</th>
-      </tr>
-
-      <%# @seminar.registrations.confirmed.sort { |a,b| a.participant.name <=> b.participant.name }.each do |registration| %>
-      <% @seminar.registrations.confirmed.each do |registration| %>
-      <tr>
-        <td class="p_select"><%= check_box_tag("participants[select_#{registration.participant.andrewid}]", registration.participant.andrewid, false, class: 'participant') %></td>
-        <td><%= link_to "#{registration.participant.name} ( #{registration.participant.andrewid })", participant_path(registration.participant) %></td>
-	<td>Confirmed</td>
-	<td><%= registration.participant.student_class %></td>
-	<td>
-	  <%= button_to("Waitlist", { action: "change_status", id: registration, params: {new_status: 'pending'} },method: :patch) %>
-	  <%= button_to("Cancel", { action: "change_status", id: registration, params: {new_status: 'canceled'} },method: :patch) %>
-	</td>
-      </tr>
-      <% end%>
-
-      <% @seminar.registrations.pending.sort { |a,b| a.participant.name <=> b.participant.name }.each do |registration| %>
-      <tr>
-        <td class="p_select"><%= check_box_tag("participants[select_#{registration.participant.andrewid}]", registration.participant.andrewid, false, class: 'participant') %></td>
-	<td><%= link_to "#{registration.participant.name} ( #{registration.participant.andrewid })", participant_path(registration.participant) %></td>
-	<td>Pending</td>
-	<td><%= registration.participant.student_class %></td>
-	<td><%= button_to("Confirm", { action: "change_status", id: registration, params: {new_status: 'confirmed'} },method: :patch,  class: "at-btn", style: "float: left") %>
-	<%= button_to("Cancel", { action: "change_status", id: registration, params: {new_status: 'canceled'} },method: :patch,  class: "at-btn", style: "float: left") %></td>
-      </tr>
-      <% end%>
-
-      <% @seminar.registrations.canceled.sort { |a,b| a.participant.name <=> b.participant.name }.each do |registration| %>
+    <h2>Registrations</h2>
+    <% if registrations.empty? %>
+      <p class="cmu-empty">No one has registered yet.</p>
+    <% else %>
+      <div data-controller="selection">
+        <%= form_with url: statuses_admin_seminar_path(@seminar), method: :patch, id: "prg-bulk", class: "cmu-bulk-bar" do %>
+          <span class="cmu-selection-count" aria-live="polite" data-selection-target="count">No people selected</span>
+          <button class="btn small" type="submit" name="status" value="confirmed" data-selection-target="action" hidden>Confirm</button>
+          <button class="btn small ghost" type="submit" name="status" value="pending" data-selection-target="action" hidden>Move to Waitlist</button>
+          <button class="btn small ghost" type="submit" name="status" value="canceled" data-selection-target="action" hidden>Cancel</button>
+        <% end %>
+        <table class="alternate cmu-full">
+          <thead>
             <tr>
-        <td class="p_select"><%= check_box_tag("participants[select_#{registration.participant.andrewid}]", registration.participant.andrewid, false, class: 'participant') %></td>
-	<td><%= link_to "#{registration.participant.name} ( #{registration.participant.andrewid })", participant_path(registration.participant) %></td>
-        <td>Canceled</td>
-	<td><%= registration.participant.student_class %></td>
-	<td><%= button_to("Pending", { action: "change_status", id: registration, params: {new_status: 'pending'} },method: :patch,  class: "at-btn", style: "float: left") %>
-	  <%= button_to("Confirm", { action: "change_status", id: registration, params: {new_status: 'confirmed'} },method: :patch,  class: "at-btn", style: "float: left") %>
-	  <%= button_to("Destroy", { action: "change_status", id: registration, params: {new_status: 'nil'} },method: :patch,  class: "at-btn", style: "float: left") %></td>
-	</td>
-      </tr>
-	    <% end%>
-  </table>
+              <th class="cmu-select-cell"><label><input type="checkbox" aria-label="Select all" data-selection-target="all" data-action="selection#toggleAll"></label></th>
+              <th scope="col">Name</th>
+              <th scope="col" class="cmu-fit">Andrew ID</th>
+              <th scope="col" class="cmu-fit">Student Class</th>
+              <th scope="col" class="cmu-fit">Status</th>
+              <th scope="col" class="cmu-fit"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% registrations.each do |registration| %>
+              <% participant = registration.participant %>
+              <% status = registration.waitlist_status&.key %>
+              <tr>
+                <td class="cmu-select-cell"><label><input type="checkbox" name="registration_ids[]" value="<%= registration.id %>" form="prg-bulk"
+                  aria-label="Select <%= participant.name %>" data-selection-target="row" data-action="selection#update"></label></td>
+                <td><%= link_to participant.name, participant_path(participant) %></td>
+                <td class="cmu-fit"><%= participant.andrewid %></td>
+                <td class="cmu-fit"><%= participant.student_class %></td>
+                <td class="cmu-fit"><%= render "registration_pill", status: %></td>
+                <td class="cmu-fit">
+                  <div class="cmu-row-buttons">
+                    <% path = status_admin_registration_path(registration) %>
+                    <% if status == "confirmed" %>
+                      <%= button_to "Move to Waitlist", path, method: :patch, params: { status: "pending" }, class: "btn small ghost" %>
+                      <%= render "row_menu", id: "prg-menu-#{registration.id}", name: participant.name,
+                                 buttons: [["Cancel", path, { status: "canceled" }]] %>
+                    <% elsif status == "pending" %>
+                      <%= button_to "Confirm", path, method: :patch, params: { status: "confirmed" }, class: "btn small" %>
+                      <%= render "row_menu", id: "prg-menu-#{registration.id}", name: participant.name,
+                                 buttons: [["Cancel", path, { status: "canceled" }]] %>
+                    <% else %>
+                      <%= button_to "Confirm", path, method: :patch, params: { status: "confirmed" }, class: "btn small ghost" %>
+                      <%= render "row_menu", id: "prg-menu-#{registration.id}", name: participant.name,
+                                 buttons: [["Move to Waitlist", path, { status: "pending" }], ["Remove", path, { status: "remove" }]] %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     <% end %>
-</div><div class="sidebar">
-    <%= render "sidebar" %>
+  </div><div class="sidebar">
+    <%= render "sidebar", seminar: @seminar %>
   </div>
 </div>
-
-
-<script
-                          src="https://code.jquery.com/jquery-3.6.0.slim.js"
-                          integrity="sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY="
-                          crossorigin="anonymous"></script>
-  <script defer>
-    $("#all_participants").click(function(){
-        $('input:checkbox').not(this).prop('checked', this.checked);
-    });
-  </script>

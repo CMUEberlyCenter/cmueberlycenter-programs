@@ -1,3 +1,2 @@
-<div>
-  <%= render partial: 'form' %>
-</div>
+<% title = @activity.type == "Participant::Activities::Additional" ? "Add an Activity or Consultation" : "Add #{activity_name(@activity)}" %>
+<%= render "form", activity: @activity, participant: @participant, url: participant_activities_path(@participant), title: %>

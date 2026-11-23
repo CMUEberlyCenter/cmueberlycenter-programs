@@ -2,36 +2,33 @@
 
 class WelcomeController < ApplicationController
   def index
-    homepage_note_setting = Setting.find_by(key: 'homepage-participant')
-    @homepage_note = homepage_note_setting.value unless homepage_note_setting.blank?
-    sidebar_note_setting = Setting.find_by(key: 'sidebar-participant')
-    @sidebar_note = sidebar_note_setting.value unless sidebar_note_setting.blank?
+    @homepage_note = Setting.find_by(key: 'homepage-participant')&.value
+    @sidebar_note = Setting.find_by(key: 'sidebar-participant')&.value
+    @tag = params[:tag].presence
 
     @seminar_groups = [
-      SeminarGroup.new(title: 'Programs Open for Registration: Synchronous',
+      SeminarGroup.new(title: 'Live Programs Open for Registration',
                        seminars: Seminar.registerable.in_person),
-      SeminarGroup.new(title: 'Programs Open for Registration: Asynchronous',
+      SeminarGroup.new(title: 'Asynchronous Programs Open for Registration',
                        seminars: Seminar.registerable.asynchronous)
     ]
-
     if Current.user&.admin?
-      @seminar_groups.append(
-        SeminarGroup.new(title: 'Past Programs',
-                         seminars: recent_past_seminars))
-      @seminar_groups.append(
-        SeminarGroup.new(title: 'Programs Unavailable for Registration',
-                         seminars: Seminar.closed))
+      @seminar_groups << SeminarGroup.new(title: 'Past Programs', seminars: recent_past_seminars)
+      @seminar_groups << SeminarGroup.new(title: 'Programs Not Open for Registration',
+                                          seminars: Seminar.present.closed)
     end
 
-    seminars = @seminar_groups.map{ |g| g.seminars }.flatten
-    @seminar_tags = [seminars.map{ |s| s.tags}].flatten.uniq.sort
+    @seminar_tags = @seminar_groups.flat_map(&:seminars).flat_map(&:tags).uniq.sort
+    return unless @tag
+
+    @seminar_groups.each { |group| group.seminars = group.seminars.select { |s| s.tag?(@tag) } }
   end
-end
 
-private
+  private
 
-def recent_past_seminars
-  tag_setting = Setting.find_by_key('admin-list-tag').value.downcase
-  filter_tags = tag_setting.split(',').map{|t| t.strip}
-  filter_tags.map { |t| Seminar.past.with_tag(t)}.flatten
+  # Past seminars with the tags the admin-list-tag setting names
+  def recent_past_seminars
+    tags = Setting.find_by(key: 'admin-list-tag')&.value.to_s.downcase.split(',').map(&:strip).compact_blank
+    tags.flat_map { |t| Seminar.past.with_tag(t).to_a }.uniq.sort_by(&:end_at).reverse
+  end
 end

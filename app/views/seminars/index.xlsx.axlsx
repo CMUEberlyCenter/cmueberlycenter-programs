@@ -1,18 +1,8 @@
 wb = xlsx_package.workbook
 wb.add_worksheet(name: "Seminars") do |sheet|
-  sheet.add_row [ "ID","Title","Max Capacity","Status","Location","Start At", "End At","Tags" ]
+  sheet.add_row ["ID", "Title", "Maximum Capacity", "Status", "Location", "Starts", "Ends", "Tags"]
   @seminars.each do |s|
-      start_at = s.start_at
-      start_at = "Async" unless start_at.is_a? (DateTime)
-      sheet.add_row [ s.id,
-                      s.title,
-		      s.maximum_capacity,
-		      s.seminar_status ? s.seminar_status.key : "",
-		      s.location,
-		      start_at,
-                      s.end_at.to_formatted_s,
-		      s.tags.join(",")
-      ]
-                                                                                                                                     
+    sheet.add_row [s.id, s.title, s.maximum_capacity, s.seminar_status&.key, s.location,
+                   s.start_at || "Asynchronous", s.end_at, s.tags.join(",")]
   end
 end

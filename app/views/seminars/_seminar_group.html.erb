@@ -1,6 +1,8 @@
-<h1><%= seminar_group.title %></h1>
-<% if seminar_group.seminars %>
-<%= render seminar_group.seminars %>
+<h2 class="rule-top"><%= seminar_group.title %></h2>
+<% if seminar_group.seminars.any? %>
+  <div class="grid column2 boxes prg-seminars">
+    <%= render partial: "seminars/seminar", collection: seminar_group.seminars %>
+  </div>
 <% else %>
-<div>No available seminars.</div>
+  <p class="cmu-empty">None right now.</p>
 <% end %>

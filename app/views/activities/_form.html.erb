@@ -1,76 +1,29 @@
-<%= render "layouts/modal" do %>
-
-<%= form_with(model: @activity, scope: :activity, url: @url || participant_activities_path(@participant)) do |f| %>
-
-<h1><%= @title || 'Activities' %></h1>
-  <%= f.hidden_field :type %>
-  <%= f.hidden_field :future_faculty_requirement_id %>
-  
-  <% if @activity.type == 'Participant::Activities::Additional' %>
-  <h2>Title</h2><br/> <%= f.text_field( :title ) %>
-  <h2>Description</h2>
-  <%= f.text_area( :description ) %>
-  <h2>Lead Consultant</h2>
-  <% @consultants = Participant.consultants %>
-  <%= select_tag "activity[lead_consultant_id]", options_from_collection_for_select(@consultants, "id", "name",@activity.lead_consultant_id), include_blank: true %>
-  <% end %>
-
-  <% if ['Participant::Activities::CourseAndSyllabusDesignProject',
-     'Participant::Activities::ClassroomObservation',
-     'Participant::Activities::LessonPlanReview',
-     'Participant::Activities::TeachingObservation',
-     'Participant::Activities::EarlyCourseFeedback'].include? @activity.type %>
-  <h2>Course</h2> <%= f.text_field( :course ) %>
-  <% end %>
-
-  <% if ['Participant::Activities::IndividualProject',
-     'Participant::Activities::CourseAndSyllabusDesignProject',
-     'Participant::Activities::TeachingStatementProject'
-     ].include? @activity.type %>
-  <h2>First Consultation On</h2>
-  <%= f.date_field( :first_consultation_on, class: "completed_on") %>
-
-  <h2>Consultant</h2>
-  <% @consultants = Participant.consultants %>
-  <%= select_tag "activity[lead_consultant_id]", options_from_collection_for_select(@consultants, "id", "name",@activity.lead_consultant_id), include_blank: true %>
-  <% end %>
-  
-
-  <% if ['Participant::Activities::Additional',
-     'Participant::Activities::IndividualProject',
-     'Participant::Activities::CourseAndSyllabusDesignProject',
-     'Participant::Activities::TeachingStatementProject'
-     ].include? @activity.type %>
-  <h2>Completed On</h2>
-  <%= f.date_field( :completed_on, class: "completed_on", id: "completed_on") %>
-  <% end %>
-
-  <% if ['Participant::Activities::MicroteachingObservation',
-     'Participant::Activities::ClassroomObservation',
-     'Participant::Activities::MicroteachingWorkshop',
-     'Participant::Activities::TeachingObservation',
-     'Participant::Activities::LessonPlanReview',
-     'Participant::Activities::EarlyCourseFeedback'].include? @activity.type %>
-  <h2>Consultant</h2>
-  <% @consultants = Participant.consultants %>
-  <%= select_tag "activity[observer_id]", options_from_collection_for_select(@consultants, "id", "name",@activity.observer_id), include_blank: true %>
-
-  <h2>Date of Service</h2>
-  <%= f.date_field( :completed_on, class: "completed_on", id: "completed_on") %>
-  
-  <h2>Memo Completed On</h2>
-  <%= f.date_field( :memo_completed_on, id: "memo_completed_on") %>
-  <% end %>
-
-    
-  <h2>Internal Notes</h2>
-  <%= f.text_area( :internal_notes ) %>
-
-  <p></p>
-
-  <%= f.submit @submit_text || "Create", class: ["btn"] %>
-  <%= link_to 'Cancel', participant_path(@participant), class: ['btn', 'ghost'] %>
-
-  <% end %>
-  <% end %>
-
+<%# locals: (activity:, participant:, url:, title:) -%>
+<%= turbo_frame_tag "modal" do %>
+  <dialog class="cmu-dialog prg-activity-dialog" aria-labelledby="prg-activity-title" data-controller="dialog">
+    <%= form_with model: activity, scope: :activity, url: do |f| %>
+      <h2 id="prg-activity-title"><%= title %></h2>
+      <%= f.hidden_field :type %>
+      <%= f.hidden_field :future_faculty_requirement_id %>
+      <% consultants = Participant.consultants.reorder(:sortable_name) %>
+      <% activity_fields(activity).each do |field| %>
+        <% label = activity_field_label(activity, field) %>
+        <% case field %>
+        <% when :title, :course %>
+          <%= f.label field, label %><%= f.text_field field %>
+        <% when :description, :internal_notes %>
+          <%= f.label field, label %><%= f.text_area field, rows: 3 %>
+        <% when :lead_consultant_id, :observer_id %>
+          <%= f.label field, label %>
+          <%= f.collection_select field, consultants, :id, :name, { include_blank: "None" }, class: "inline" %>
+        <% else %>
+          <%= f.label field, label %><%= f.date_field field, class: "inline" %>
+        <% end %>
+      <% end %>
+      <div class="cmu-dialog-buttons">
+        <%= f.submit activity.persisted? ? "Save Activity" : "Add Activity", class: "btn" %>
+        <button type="submit" class="btn ghost" formmethod="dialog" formnovalidate>Cancel</button>
+      </div>
+    <% end %>
+  </dialog>
+<% end %>

@@ -1,37 +1,18 @@
-<% update_document_title(add: "Edit #{@seminar.title}") %>
-<% update_breadcrumbs(add: link_to('Seminars', seminars_path)) %>
-<% update_breadcrumbs(add: "Edit #{@seminar.title}") %>
-<% content_for :nav do %>
-<ul>
-  <li class="parent ancestor">
-    <%= link_to('Seminars', seminars_path) %>
-    <ul>
-      <li>
-        <%= link_to('Create New Seminar', new_seminar_path) %>
-      </li>
-      <li class="active">
-        <%= link_to("Edit #{@seminar.title}", edit_admin_seminar_url(@seminar)) %>
-      </li>
-    </ul>
-  </li><li>
-    <%= link_to('Registrations', registrations_path) %>
-  </li><li>
-    <%= link_to('Participants', participants_path) %>
-  </li><li>
-    <%= link_to('Future Faculty Program', future_faculty_path) %>
-  </li><li>
-    <%= link_to('Application Settings', settings_path) %>
-  </li>
-</ul>
-<% end %>
-
+<% cmu_title "Edit", @seminar.title, "Seminars" %>
+<% cmu_breadcrumb link_to("Seminars", seminars_path), link_to(@seminar.title, admin_seminar_path(@seminar)), "Edit" %>
+<% cmu_nav "seminars" %>
 <div class="content">
   <div>
-    <%= turbo_frame_tag @seminar do %>
-    <h1><%= @seminar.title %></h1>
-    <%= render "seminar_form" %>
-    <% end %>
+    <h1>Edit <%= @seminar.title %></h1>
+    <%= render "form", seminar: @seminar %>
   </div><div class="sidebar">
-    <%= render "form_sidebar" %>
+    <div class="simple">
+      <% if @seminar.registrations.any? %>
+        <p class="cmu-hint">To delete this seminar, remove its registrations first.</p>
+      <% else %>
+        <%= button_to "Delete Seminar", seminar_path(@seminar), method: :delete, class: "btn ghost wide",
+                      data: { turbo_confirm: "Delete #{@seminar.title}?" } %>
+      <% end %>
+    </div>
   </div>
 </div>

@@ -1,0 +1,77 @@
+<% cmu_title "Attendance", @seminar.title, "Seminars" %>
+<% cmu_breadcrumb link_to("Seminars", seminars_path), link_to(@seminar.title, admin_seminar_path(@seminar)), "Attendance" %>
+<% cmu_nav "seminars" %>
+<% registrations = @seminar.registrations.confirmed.includes(:attendance_status).reject { |r| r.participant.nil? }
+                     .sort_by { |r| r.participant.sortable_name.downcase } %>
+<div class="content">
+  <div>
+    <%= render "heading", seminar: @seminar %>
+
+    <h2>Attendance</h2>
+    <% if registrations.empty? %>
+      <p class="cmu-empty">No one has a confirmed seat yet. Add attendees below.</p>
+    <% else %>
+      <div data-controller="selection">
+        <%= form_with url: attendances_admin_seminar_path(@seminar), method: :patch, id: "prg-bulk", class: "cmu-bulk-bar" do %>
+          <span class="cmu-selection-count" aria-live="polite" data-selection-target="count">No people selected</span>
+          <button class="btn small" type="submit" name="status" value="attended" data-selection-target="action" hidden>Mark Attended</button>
+          <button class="btn small ghost" type="submit" name="status" value="absent" data-selection-target="action" hidden>Mark Absent</button>
+        <% end %>
+        <table class="alternate cmu-full">
+          <thead>
+            <tr>
+              <th class="cmu-select-cell"><label><input type="checkbox" aria-label="Select all" data-selection-target="all" data-action="selection#toggleAll"></label></th>
+              <th scope="col">Name</th>
+              <th scope="col" class="cmu-fit">Andrew ID</th>
+              <th scope="col" class="cmu-fit">Student Class</th>
+              <th scope="col" class="cmu-fit">Attendance</th>
+              <th scope="col" class="cmu-fit"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% registrations.each do |registration| %>
+              <% participant = registration.participant %>
+              <% key = registration.attendance_status&.key %>
+              <% path = attendance_admin_registration_path(registration) %>
+              <tr>
+                <td class="cmu-select-cell"><label><input type="checkbox" name="registration_ids[]" value="<%= registration.id %>" form="prg-bulk"
+                  aria-label="Select <%= participant.name %>" data-selection-target="row" data-action="selection#update"></label></td>
+                <td><%= link_to participant.name, participant_path(participant) %></td>
+                <td class="cmu-fit"><%= participant.andrewid %></td>
+                <td class="cmu-fit"><%= participant.student_class %></td>
+                <td class="cmu-fit">
+                  <% if key == "attended" %><span class="cmu-pill cmu-pill--green">Attended</span>
+                  <% elsif key %><span class="cmu-pill cmu-pill--amber">Absent</span>
+                  <% else %><span class="cmu-pill cmu-pill--outline">Not Marked</span><% end %>
+                </td>
+                <td class="cmu-fit">
+                  <div class="cmu-row-buttons">
+                    <% if key == "attended" %>
+                      <%= button_to "Mark Absent", path, method: :patch, params: { status: "absent" }, class: "btn small ghost" %>
+                    <% else %>
+                      <%= button_to "Mark Attended", path, method: :patch, params: { status: "attended" }, class: ["btn small", ("ghost" if key)] %>
+                      <% unless key %>
+                        <%= render "row_menu", id: "prg-menu-#{registration.id}", name: participant.name,
+                                   buttons: [["Mark Absent", path, { status: "absent" }]] %>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+
+    <h2 class="rule-top">Add Attendees</h2>
+    <%= form_with url: seminar_registrations_path(@seminar) do %>
+      <label for="prg-attendees">Andrew IDs</label>
+      <textarea id="prg-attendees" name="participants" rows="3" aria-describedby="prg-attendees-hint"></textarea>
+      <p class="cmu-hint" id="prg-attendees-hint">Separate them with commas or spaces. Each person gets a confirmed seat and is marked attended.</p>
+      <p><button type="submit" class="btn">Add Attendees</button></p>
+    <% end %>
+  </div><div class="sidebar">
+    <%= render "sidebar", seminar: @seminar %>
+  </div>
+</div>

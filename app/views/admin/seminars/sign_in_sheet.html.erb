@@ -1,0 +1,24 @@
+<% cmu_title "Sign-In Sheet", @seminar.title, "Seminars" %>
+<% cmu_breadcrumb link_to("Seminars", seminars_path), link_to(@seminar.title, admin_seminar_path(@seminar)), "Sign-In Sheet" %>
+<% cmu_nav "seminars" %>
+<div class="content wide prg-record">
+  <div>
+    <p class="cmu-label">Eberly Center Sign-In Sheet</p>
+    <h1><%= @seminar.title %></h1>
+    <p class="cmu-lead"><%= seminar_when(@seminar) %><%= ", #{@seminar.location}" if @seminar.location.present? %></p>
+    <p class="prg-no-print" data-controller="print"><button type="button" class="btn" data-action="print#print">Print the Sign-In Sheet</button></p>
+    <% if @participants.empty? %>
+      <p class="cmu-empty">No one has a confirmed seat yet.</p>
+    <% else %>
+      <table class="alternate cmu-full prg-sign-in-sheet">
+        <thead><tr><th scope="col">Name</th><th scope="col">Department</th><th scope="col">Signature</th></tr></thead>
+        <tbody>
+          <% @participants.each do |participant| %>
+            <tr><td><%= participant.name %> (<%= participant.andrewid %>)</td><td><%= participant.pretty_depts %></td><td></td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+    <p class="prg-record-footer">Printed <%= ap_date(Time.zone.today) %>. Eberly Center, www.cmu.edu/teaching, eberly-ctr@andrew.cmu.edu, 412-268-2896</p>
+  </div>
+</div>

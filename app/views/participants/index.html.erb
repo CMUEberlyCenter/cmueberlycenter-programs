@@ -1,43 +1,68 @@
-<% update_document_title(add: "Participants") %>
-<% update_breadcrumbs(add: "Participants") %>
-<% content_for :nav do %>
-<li class="parent">
-  <%= link_to('Seminars', seminars_path) %>
-  <ul>
-    <li>
-      <%= link_to('Create New Seminar', new_seminar_path) %>
-    </li>
-  </ul>
-</li><li class="active">
-  <%= link_to('Participants', participants_path) %>
-</li><li>
-  <%= link_to('Registrations', registrations_path) %>
-</li><li>
-  <%= link_to('Future Faculty Program', future_faculty_path) %>
-</li><li>
-  <%= link_to('Application Settings', settings_path) %>
-</li>
-<% end %>
-
+<% cmu_title "Participants" %>
+<% cmu_breadcrumb "Participants" %>
+<% complete = @ffp_status == "complete" %>
 <div class="content wide">
-  <h1><%= @ffp_status == 'complete' ? 'Participants With Completed FFP Requirements' : 'Participants' %></h1>
-  <script>
-  function nameFilter(headerValue, rowValue, rowData, filterParams) {
-  if (!headerValue) return true;
-  if (!rowData.name) return false;
-  return rowData.name.toLowerCase().includes(headerValue.toLowerCase());
-}
-  </script>
-  <%= content_tag :div, id: 'example-table', style: 'width: 100%', data: {controller: 'table', config: participants_table_config } do %>
-  <style>
-    table.on("dataProcessed", function(e, row){
-    var firstRow = table.getRows()[0];
+  <div>
+    <h1><%= complete ? "Participants Who Met the FFP Requirements" : "Participants" %></h1>
+    <% if complete %>
+      <p><%= link_to "Show All Participants", participants_path, class: "cta" %></p>
+    <% end %>
+    <div class="cmu-cta-row">
+      <%= link_to "Download #{pluralize(@rows.size, 'Participant')} (.xlsx)", participants_path(format: :xlsx, ffp_status: @ffp_status),
+                  class: "btn ghost", download: true %>
+    </div>
 
-    if(firstRow){
-        firstRow.freeze();
-    }
-    });
-    </style>
-  Loading...
-  <% end %>
+    <%= form_with url: participants_path, method: :get, data: { controller: "people-search", people_search_url_value: search_participants_path } do %>
+      <label for="prg-look-up">Look Up Someone at CMU</label>
+      <div class="cmu-suggest">
+        <input type="search" id="prg-look-up" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="prg-look-up-list"
+               autocomplete="off" aria-describedby="prg-look-up-hint" data-people-search-target="input"
+               data-action="input->people-search#suggest cmu-suggest-pick->people-search#open">
+        <ul class="cmu-suggest-list" id="prg-look-up-list" role="listbox" aria-label="Suggestions" hidden data-people-search-target="list"></ul>
+      </div>
+      <p class="cmu-hint" id="prg-look-up-hint">By name or Andrew ID. Picking someone opens their page and adds them as a participant.</p>
+    <% end %>
+
+    <h2 class="rule-top">Everyone</h2>
+    <div class="cmu-search-bar">
+      <p>Search by name, Andrew ID, department or school.</p>
+      <label for="prg-participant-search" class="sr-only">Find a Participant</label>
+      <input type="text" id="prg-participant-search" placeholder="Find a participant&hellip;" data-cmu-filter="prg-participants">
+    </div>
+    <table class="alternate cmu-full cmu-sticky prg-wide-table" id="prg-participants" data-cmu-table data-cmu-noun="participant">
+      <thead>
+        <tr>
+          <th scope="col" data-sort-key="name"><button type="button" class="cmu-sort">Name<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="andrewid"><button type="button" class="cmu-sort">Andrew ID<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="department"><button type="button" class="cmu-sort">Department<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="school"><button type="button" class="cmu-sort">School<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="class"><button type="button" class="cmu-sort">Student Class<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="first"><button type="button" class="cmu-sort">First Consultation<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="status"><button type="button" class="cmu-sort">FFP Status<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="graduated"><button type="button" class="cmu-sort">Graduated<span class="cmu-sort-arrow"></span></button></th>
+          <% ParticipantsHelper::COUNT_COLUMNS.each do |field, title| %>
+            <th scope="col" class="num" data-sort-key="<%= field %>"><button type="button" class="cmu-sort"><%= title %><span class="cmu-sort-arrow"></span></button></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% @rows.each do |row| %>
+          <tr>
+            <td data-sort-value="<%= row['sortable_name'] %>"><%= link_to row['name'] || row['andrewid'], participant_path(row['andrewid']) %></td>
+            <td><%= row['andrewid'] %></td>
+            <td><%= row['pretty_depts'] %></td>
+            <td><%= row['pretty_colleges'] %></td>
+            <td><%= row['student_class'] %></td>
+            <td data-sort-value="<%= row['first_consultation_on'] %>"><%= ap_date(row['first_consultation_on']&.to_date) %></td>
+            <td><%= ParticipantsHelper::FFP_STATUS_NAMES[row['ffp_status']] %></td>
+            <td data-sort-value="<%= row['future_faculty_program_graduated_on'] %>"><%= ap_date(row['future_faculty_program_graduated_on']&.to_date) %></td>
+            <% ParticipantsHelper::COUNT_COLUMNS.each_key do |field| %>
+              <td class="num"><%= row[field] %></td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <p class="cmu-results-count" data-cmu-count="prg-participants" aria-live="polite">Showing all <%= pluralize(@rows.size, "participant") %></p>
+  </div>
 </div>

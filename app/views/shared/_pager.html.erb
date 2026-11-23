@@ -1,0 +1,28 @@
+<%# locals: (pagy:, slots:) -%>
+<%# The kit's pager (lists.html#pagination) %>
+<% link = ->(page) { url_for(request.query_parameters.merge(page:)) } %>
+<div class="cmu-pager" role="navigation" aria-label="Pages">
+  <ol>
+    <% if pagy.prev %>
+      <li class="cmu-pager-end"><a class="cmu-pager-arrow" href="<%= link.(1) %>" aria-label="First page">&laquo;</a></li>
+      <li><a class="cmu-pager-arrow" href="<%= link.(pagy.prev) %>" rel="prev" aria-label="Previous page">&lsaquo;</a></li>
+    <% else %>
+      <li class="cmu-pager-end"><a class="cmu-pager-arrow" aria-disabled="true" aria-label="First page">&laquo;</a></li>
+      <li><a class="cmu-pager-arrow" aria-disabled="true" aria-label="Previous page">&lsaquo;</a></li>
+    <% end %>
+    <% slots.each do |slot| %>
+      <% if slot == :gap %>
+        <li><span>&hellip;</span></li>
+      <% else %>
+        <li><a href="<%= link.(slot) %>"<%= ' aria-current="page"'.html_safe if slot == pagy.page %>><%= slot %></a></li>
+      <% end %>
+    <% end %>
+    <% if pagy.next %>
+      <li><a class="cmu-pager-arrow" href="<%= link.(pagy.next) %>" rel="next" aria-label="Next page">&rsaquo;</a></li>
+      <li class="cmu-pager-end"><a class="cmu-pager-arrow" href="<%= link.(pagy.last) %>" aria-label="Last page">&raquo;</a></li>
+    <% else %>
+      <li><a class="cmu-pager-arrow" aria-disabled="true" aria-label="Next page">&rsaquo;</a></li>
+      <li class="cmu-pager-end"><a class="cmu-pager-arrow" aria-disabled="true" aria-label="Last page">&raquo;</a></li>
+    <% end %>
+  </ol>
+</div>

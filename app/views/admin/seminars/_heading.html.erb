@@ -1,0 +1,7 @@
+<%# locals: (seminar:) -%>
+<h1><%= seminar.title %></h1>
+<p class="date"><strong><%= seminar_when(seminar) %></strong><% if seminar.location.present? %><br><%= seminar.location %><% end %></p>
+<p>
+  <span class="cmu-pill <%= seminar.open? ? 'cmu-pill--green' : 'cmu-pill--amber' %>"><%= seminar.open? ? "Open for Registration" : "Not Open for Registration" %></span>
+  <%= tag_pills(seminar.tags) %>
+</p>

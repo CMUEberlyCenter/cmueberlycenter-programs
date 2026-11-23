@@ -1,52 +1,31 @@
-<div class="list red invert" id="future-faculty-participant-sidebar">
+<%# locals: (participant:) -%>
+<% enrolled = participant.future_faculty_enrollment.present? %>
+<% status = participant.future_faculty_progress_status&.key %>
+<div class="red invert" id="future-faculty-participant-sidebar">
   <h1>Future Faculty Program</h1>
-
-  <p>
-  <% unless Programs::FutureFaculty::Enrollment.find( @participant ).nil? %>  
-  <strong>Status:</strong> <%= @participant.future_faculty_progress_status.label %>
-  <% if @participant.future_faculty_progress_status_id == 3 %>
-  <br/>
-  Completion Date: <%= @participant.future_faculty_program_graduated_on || 'N/A' %>
-  &nbsp;&nbsp;<%= link_to 'Edit', '', class: 'cta' %>
-  <% end %>
-  <% else %>
-
-  Status: Not enrolled<br/>
-
-  <%= button_to( "Enroll in Future Faculty",
-      enroll_future_faculty_path( @participant ),
-      class: ['btn', 'wide'],
-      method: :patch ) %>
-  <% end %>
-  </p>
-
-  <ul>
-<% if not Programs::FutureFaculty::Enrollment.find( @participant ).nil? %>
-    <% if @participant.future_faculty_progress_status_id == 2 %>
-      <%= button_to( "Graduate from Future Faculty",
-          graduate_future_faculty_path( @participant ),
-          data: { confirm: "Are you sure?" },
-	  class: ['btn', 'wide'],
-          method: :patch ) %>
-    <% elsif @participant.future_faculty_progress_status_id == 1 %>
-      <%= button_to( "Drop from Future Faculty",
-          drop_future_faculty_path( @participant ),
-          data: { confirm: "Are you sure?" },
-          class: ['btn', 'ghost', 'wide'],
-          method: :patch ) %>
-      <%= button_to( "Force-Graduate from Future Faculty",
-          graduate_future_faculty_path( @participant ),
-          data: { confirm: "Are you sure?" },
-          class: ['btn', 'ghost', 'wide'],
-          method: :patch ) %>
-    <% elsif @participant.future_faculty_progress_status_id == 4 %>
-       <%= button_to( "Re-Enroll into Future Faculty",
-           reenroll_future_faculty_path( @participant ),
-           data: { confirm: "Are you sure?" },
-           class: ['btn', 'wide'],
-           method: :patch ) %>
+  <% if enrolled %>
+    <p><strong>Status:</strong> <%= ffp_status_name(participant.future_faculty_progress_status) %>
+      <% if status == "graduated" %><br><strong>Completed:</strong> <%= ap_date(participant.future_faculty_program_graduated_on) || "Not recorded" %><% end %>
+      <br><strong>Requirements:</strong> <%= participant.future_faculty_enrollment.key %>
+    </p>
+    <% case status %>
+    <% when "complete" %>
+      <%= button_to "Graduate #{participant.name}", graduate_future_faculty_path(participant), method: :patch, class: "btn ghost wide",
+                    data: { turbo_confirm: "Graduate #{participant.name} from the Future Faculty Program?" } %>
+    <% when "incomplete" %>
+      <%= button_to "Graduate Anyway", graduate_future_faculty_path(participant), method: :patch, class: "btn ghost wide",
+                    data: { turbo_confirm: "Graduate #{participant.name} before they meet the requirements?" } %>
+      <%= button_to "Mark as Left CMU", drop_future_faculty_path(participant), method: :patch, class: "btn ghost wide",
+                    data: { turbo_confirm: "Mark #{participant.name} as no longer at CMU?" } %>
+    <% when "graduated" %>
+      <%= button_to "Undo Graduation", ungraduate_future_faculty_path(participant), method: :patch, class: "btn ghost wide",
+                    data: { turbo_confirm: "Undo #{participant.name}'s graduation?" } %>
+    <% when "dropout" %>
+      <%= button_to "Re-Enroll #{participant.name}", reenroll_future_faculty_path(participant), method: :patch, class: "btn ghost wide",
+                    data: { turbo_confirm: "Re-enroll #{participant.name} in the Future Faculty Program?" } %>
     <% end %>
-<% end %>
-    
-  </ul>
+  <% else %>
+    <p>Not enrolled.</p>
+    <%= button_to "Enroll #{participant.name}", enroll_future_faculty_path(participant), method: :patch, class: "btn ghost wide" %>
+  <% end %>
 </div>

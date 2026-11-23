@@ -41,22 +41,6 @@ class Registration < ApplicationRecord
 
 
 
-  def search_string
-  end
-
-  def search_string=(search)
-    participant=Participant.find_by_andrewid(search)
-    CarnegieMellonPerson.find_by_andrewid(search)
-
-    participant||=Participant.new(:andrewid =>search, :is_admin => false)
-    participant.save!
-    self.participant_id = Participant.find_by_andrewid(search).id
-    #self.participant_id=64
-
-  end
-
-
-
   #filterrific(
   #  default_filter_params: { sorted_by: 'created_at_desc' },
   #  available_filters: [
@@ -92,6 +76,17 @@ class Registration < ApplicationRecord
   validates :participant, :presence => true
   validates :participant_id, uniqueness: { scope: :seminar_id,
                                         message: "You have already registered for this seminar." }
+
+  # A new waitlist status; confirming a seat in a seminar that hasn't ended
+  # tells the participant
+  def change_waitlist_status(status)
+    return if waitlist_status == status
+
+    update!(waitlist_status: status)
+    return unless confirmed? && seminar.end_at&.future?
+
+    ParticipantMailer.registration_confirmed_email(participant, self).deliver
+  end
 
   # Delegate any unknown method to the registration's seminar
   def method_missing(method, *args)

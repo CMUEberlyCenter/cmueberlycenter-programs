@@ -1,30 +1,9 @@
-<% update_document_title(add: 'Create New Seminar') %>
-<% update_breadcrumbs(add: link_to('Seminars', seminars_path)) %>
-<% update_breadcrumbs(add: 'Create New Seminar') %>
-<% content_for :nav do %>
-<li class="parent ancestor">
-  <%= link_to('Seminars', seminars_path) %>
-  <ul>
-    <li class="active">
-      <%= link_to('Create New Seminar', new_seminar_path) %>
-    </li>
-  </ul>
-</li><li>
-  <%= link_to('Registrations', registrations_path) %>
-</li><li>
-  <%= link_to('Participants', participants_path) %>
-</li><li>
-  <%= link_to('Future Faculty Program', future_faculty_path) %>
-</li><li>
-  <%= link_to('Application Settings', settings_path) %>
-</li>
-<% end %>
-
+<% cmu_title "Create Seminar", "Seminars" %>
+<% cmu_breadcrumb link_to("Seminars", seminars_path), "Create Seminar" %>
+<% cmu_nav "seminars" %>
 <div class="content">
   <div>
-    <h1>Create New Seminar</h1>
-    <%= render "seminar_form" %>
-  </div><div class="sidebar">
-    <%= render "form_sidebar" %>
+    <h1>Create Seminar</h1>
+    <%= render "form", seminar: @seminar %>
   </div>
 </div>

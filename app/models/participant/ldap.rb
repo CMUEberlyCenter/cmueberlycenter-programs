@@ -44,7 +44,7 @@ module Participant::Ldap
   # initialize ldap_entry if needed
   attr_accessor :ldap_entry
 
-  def ldap = self.ldap_entry ||= Participant::AndrewPerson.find_by(uid: andrewid)
+  def ldap = self.ldap_entry ||= Participant.directory.find_by(uid: andrewid)
 
   # Sync particular user attributes to LDAP
   def update_ldap_attrs(attrs: LDAP_ATTRS)

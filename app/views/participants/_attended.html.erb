@@ -1,0 +1,11 @@
+<%# locals: (seminars:) -%>
+<% if seminars.any? %>
+  <p class="cmu-muted"><%= pluralize(seminars.size, "program") %></p>
+  <ul class="prg-attended">
+    <% seminars.sort_by { |s| s.start_at || s.end_at }.reverse_each do |seminar| %>
+      <li><%= seminar.title_with_indicia %> <span class="cmu-muted">(<%= seminar_day(seminar) %>)</span> <%= tag_pills(seminar.tags) %></li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="cmu-empty">None yet.</p>
+<% end %>

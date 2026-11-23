@@ -1,0 +1,11 @@
+<%# locals: (id:, name:, buttons:) -%>
+<%# The kit's ⋯ menu for a row's other actions; buttons are [label, path, params] %>
+<div class="cmu-row-menu">
+  <button class="btn small ghost" type="button" data-cmu-menu aria-controls="<%= id %>" aria-expanded="false"
+          aria-label="More actions for <%= name %>" title="More actions"></button>
+  <div class="cmu-row-menu-list" id="<%= id %>" hidden>
+    <% buttons.each do |label, path, params| %>
+      <%= button_to label, path, method: :patch, params: %>
+    <% end %>
+  </div>
+</div>

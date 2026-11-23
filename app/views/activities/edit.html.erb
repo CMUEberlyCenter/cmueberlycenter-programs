@@ -1,4 +1,1 @@
-<div>
-  <% @submit_text = 'Update' %>
-  <%= render partial: 'form', locals: {submit_text: 'Update'} %>
-</div>
+<%= render "form", activity: @activity, participant: @participant, url: activity_path(@activity), title: "Edit #{activity_name(@activity)}" %>

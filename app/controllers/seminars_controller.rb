@@ -1,53 +1,29 @@
 # frozen_string_literal: true
 
 class SeminarsController < ApplicationController
-  before_action :require_administrator #, except: [:index]
+  before_action :require_administrator
 
   def index
-    if Current.user&.admin?
-      #flash.keep
-      #redirect_to admin_seminars_url
-#    else
-#      note_setting = Setting.find_by(key: 'sidebar-participant')
-#      @sidebar_note = note_setting.value unless note_setting.nil?
-#      @seminars = Seminar.active
-      @seminars = Seminar.all
+    @seminars = Seminar.includes(:seminar_status, :seminar_tags, registrations: %i[waitlist_status attendance_status])
     respond_to do |format|
-      format.html { render 'admin'}
-      format.json do
-        render json: @seminars.to_json(methods:
-                                             %i[tags confirmed_registrations_size attended_registrations_size])
-      end
+      format.html
       format.xlsx { response.headers.merge! file_export_headers }
     end
-
-
-    end
-  end
-
-  def show
-    @seminar = Seminar.find(params[:id])
-  end
-
-  def update
-    @seminar = Seminar.find(params[:id])
   end
 
   def destroy
     seminar = Seminar.find(params[:id])
-    title = seminar.title
     if seminar.destroy
-      flash[:success] = "<strong>Seminar #{title} was successfully destroyed.</strong>"
+      redirect_to seminars_path, notice: "You deleted #{seminar.title}."
     else
-      flash[:error] = "<strong>Please remove all registrations before deletion.</strong>"
+      redirect_to edit_admin_seminar_path(seminar), alert: 'Remove its registrations before you delete a seminar.'
     end
-    redirect_to seminars_path
-  rescue ActiveRecord::RecordNotFound
-    redirect_to seminars_path
   end
 
+  private
+
   def file_export_headers
-    filename = "Seminars-#{DateTime.now.to_fs(:db)}.xlsx"
+    filename = "Seminars-#{Time.zone.now.to_fs(:db)}.xlsx"
     { 'Content-Disposition': "attachment; filename=\"#{filename}\"" }
   end
 end

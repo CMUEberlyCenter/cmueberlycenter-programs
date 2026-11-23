@@ -1,3 +1,6 @@
 <%= turbo_stream.replace "future-faculty-participant-sidebar" do %>
-    <%= render 'participant_sidebar' %>
+  <%= render "participant_sidebar", participant: @participant %>
+<% end %>
+<%= turbo_stream.update "ffp_activities" do %>
+  <%= render "activities/future_faculty_program", participant: @participant %>
 <% end %>

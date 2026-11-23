@@ -23,7 +23,7 @@ module Seminar::Common
     end
     scope :registerable, -> { present.merge(open) }
     scope :asynchronous, -> { present.merge(where(is_async: true)) }
-    scope :in_person, -> { present.merge(where(is_async: false)) }
+    scope :in_person, -> { present.merge(where(is_async: [false, nil])) }
     scope :upcoming, -> { present.merge(closed) }
 
     scope :with_tag, lambda { |tag|

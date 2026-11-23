@@ -26,22 +26,18 @@ class Programs::FutureFacultyControllerTest < ActionController::TestCase
   end
 
   test 're-enrollment restores status without restarting enrollment or adding an overview' do
-    participant = Minitest::Mock.new
-    participant.expect(:future_faculty_progress_status_id=, 1, [1])
-    participant.expect(:save, true)
-    original_enrollment = Object.new
-    prevent_new_enrollment = ->(*) { flunk 'Re-enrollment must preserve the existing requirements version' }
-    skip_response = ->(&block) {}
+    load Rails.root.join('db/seeds.rb')
+    admin = Participant.create!(andrewid: 'ffpadmin', is_admin: true, ldap_entry: Object.new)
+    participant = Participant.create!(andrewid: 'ffpold', ldap_entry: Object.new)
+    version = Programs::FutureFaculty::RequirementsVersion.find_by!(key: '2015')
+    participant.update_columns(future_faculty_enrollment_id: version.id,
+                               future_faculty_progress_status_id: ProgressStatusType.find('dropout').id)
 
-    @controller.params = { participant_id: 'existing' }
-    Participant.stub(:find, participant) do
-      Programs::FutureFaculty::Enrollment.stub(:find, original_enrollment) do
-        Programs::FutureFaculty::Enrollment.stub(:new, prevent_new_enrollment) do
-          @controller.stub(:respond_to, skip_response) { @controller.reenroll }
-        end
-      end
-    end
+    Current.stub(:user, admin) { patch :reenroll, params: { participant_id: participant.andrewid } }
 
-    assert participant.verify
+    participant.reload
+    assert_equal 'incomplete', participant.future_faculty_progress_status.key
+    assert_equal version, participant.future_faculty_enrollment
+    assert_empty participant.activities
   end
 end

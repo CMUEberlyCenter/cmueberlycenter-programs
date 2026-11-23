@@ -4,8 +4,8 @@ wb.add_worksheet(name: "Event Registrations") do |sheet|
   @registrations.each do |r|
       s = r.seminar
       p = r.participant
-      start_at = s.start_at
-      start_at = "Async" unless start_at.is_a? (DateTime)
+      next if s.nil? || p.nil?
+      start_at = s.start_at || "Asynchronous"
       sheet.add_row [ r.updated_at.to_formatted_s(:short_date),
                       p.name,
                       p.andrewid,
@@ -26,7 +26,7 @@ wb.add_worksheet(name: "Event Registrations") do |sheet|
                       s.title,
                       s.tags.include?("core") ? "core" : "",
 		      start_at,
-                      s.end_at.to_formatted_s,
+                      s.end_at,
 		      s.tags.join(",")
       ]
                                                                                                                                      

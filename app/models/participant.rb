@@ -20,12 +20,14 @@ class Participant < ApplicationRecord
   # Find user by their andrew id unless id is a number
   def self.find(id) = id.to_i.zero? ? find_by(andrewid: id) : super
 
-  # TODO: prioritize exesting people
+  # Where people are looked up: CMU's LDAP directory, or the made-up
+  # people of development and test (DemoMode)
+  def self.directory = DemoMode.on? ? Participant::DemoPerson : Participant::AndrewPerson
+
+  # People in the directory whose Andrew ID, name or email starts with the
+  # keyword, as { andrewid:, name: }
   def self.filter(keyword: nil)
-    x = AndrewPerson.filter(keyword: keyword)
-    return if x.blank?
-    #   x.map{|p| {id: p.uid.downcase, label: p.name + " (" + p.uid.downcase + ")"} }
-       x.map{|p| {id: p.uid.downcase, label: "#{p.name} <span class=\"uid\">(#{p.uid.downcase})</span>" } }
+    Array(directory.filter(keyword:)).map { |person| { andrewid: person.uid.downcase, name: person.name } }
   end
 
   # Participant filters (e.g.: Participant.admins)
@@ -164,15 +166,6 @@ class Participant < ApplicationRecord
 #  default_scope { order("udpate") }
   # TODO: default to fetching active students
   #  default_scope :active
-
-  def self.find_andrew_user search_string
-    u = self.find_by_andrewid search_string
-    u ||= self.find_or_create_by( andrewid: CarnegieMellonPerson.
-                                    find_by_andrewid( search_string )[:cmuandrewid] )
-  rescue ActiveLdap::EntryNotFound
-  end
-
-
 
 #  def completed_seminars
 #    self.registrations.credited.collect(&:seminar)

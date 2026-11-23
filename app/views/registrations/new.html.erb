@@ -1,8 +1,0 @@
-<%= turbo_frame_tag @seminar do %>
-<%= form_tag seminar_registrations_path(@seminar) do %>
-<label>Participants (csv):</label>
-
-<%= text_area_tag :'participants' %>
-<%= submit_tag "Register" %>
-<% end %>
-<% end %>

@@ -1,0 +1,132 @@
+# Made-up people for the demo's directory (Participant::DemoPerson), in place
+# of CMU's LDAP directory. The test accounts in config/test_accounts.yml and
+# the demo data (bin/rails demo:seed) use them.
+- andrew_id: ac00
+  name: Andrew Carnegie
+  affiliation: staff
+  college: Eberly Center
+  dept: Eberly Center for Teaching Excellence & Educational Innovation
+- andrew_id: mm00
+  name: Margaret Morrison
+  affiliation: staff
+  college: Eberly Center
+  dept: Eberly Center for Teaching Excellence & Educational Innovation
+- andrew_id: lc00
+  name: Louise Carnegie
+  affiliation: staff
+  college: Eberly Center
+  dept: Eberly Center for Teaching Excellence & Educational Innovation
+- andrew_id: am00
+  name: Andrew Mellon
+  affiliation: student
+  college: Mellon College of Science
+  dept: Chemistry
+  student_class: Doctoral
+- andrew_id: hf00
+  name: Henry Clay Frick
+  affiliation: student
+  college: College of Engineering
+  dept: Mechanical Engineering
+  student_class: Doctoral
+- andrew_id: hs00
+  name: Herbert Simon
+  affiliation: student
+  college: Dietrich College of Humanities and Social Sciences
+  dept: Psychology
+  student_class: Doctoral
+- andrew_id: an00
+  name: Allen Newell
+  affiliation: student
+  college: School of Computer Science
+  dept: Computer Science
+  student_class: Doctoral
+- andrew_id: ap00
+  name: Alan Perlis
+  affiliation: student
+  college: Mellon College of Science
+  dept: Mathematical Sciences
+  student_class: Doctoral
+- andrew_id: ah00
+  name: Arthur Hamerschlag
+  affiliation: student
+  college: College of Engineering
+  dept: Electrical and Computer Engineering
+  student_class: Doctoral
+- andrew_id: tb00
+  name: Thomas Baker
+  affiliation: student
+  college: Mellon College of Science
+  dept: Physics
+  student_class: Doctoral
+- andrew_id: rd00
+  name: Robert Doherty
+  affiliation: student
+  college: College of Engineering
+  dept: Civil and Environmental Engineering
+  student_class: Doctoral
+- andrew_id: jw00
+  name: John Warner
+  affiliation: student
+  college: College of Engineering
+  dept: Chemical Engineering
+  student_class: Doctoral
+- andrew_id: rw00
+  name: Raymond Wean
+  affiliation: student
+  college: College of Engineering
+  dept: Engineering and Public Policy
+  student_class: Masters
+- andrew_id: rc00
+  name: Richard Cyert
+  affiliation: student
+  college: Tepper School of Business
+  dept: Economics
+  student_class: Doctoral
+- andrew_id: hh00
+  name: Henry Hornbostel
+  affiliation: student
+  college: College of Fine Arts
+  dept: Architecture
+  student_class: Doctoral
+- andrew_id: aw00
+  name: Andy Warhol
+  affiliation: student
+  college: College of Fine Arts
+  dept: Art
+  student_class: Masters
+- andrew_id: hc00
+  name: Helen Clay Frick
+  affiliation: student
+  college: Dietrich College of Humanities and Social Sciences
+  dept: History
+  student_class: Doctoral
+- andrew_id: tm00
+  name: Thomas Mellon
+  affiliation: student
+  college: Dietrich College of Humanities and Social Sciences
+  dept: Statistics and Data Science
+  student_class: Doctoral
+- andrew_id: pm00
+  name: Paul Mellon
+  affiliation: student
+  college: Dietrich College of Humanities and Social Sciences
+  dept: English
+  student_class: Doctoral
+- andrew_id: jh00
+  name: John Heinz
+  affiliation: student
+  college: Heinz College
+  dept: Public Policy and Management
+  student_class: Doctoral
+- andrew_id: rm00
+  name: Richard King Mellon
+  affiliation: student
+  college: Mellon College of Science
+  dept: Biological Sciences
+  student_class: Doctoral
+- andrew_id: as00
+  name: Alan Scaife
+  affiliation: student
+  college: College of Engineering
+  dept: Biomedical Engineering
+  student_class: Doctoral

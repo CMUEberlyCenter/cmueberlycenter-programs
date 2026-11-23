@@ -1,101 +1,90 @@
+# frozen_string_literal: true
+
 class RegistrationsController < ApplicationController
   include Pagy::Backend
 
-  before_action :require_administrator, except: [:create, :destroy]
+  before_action :require_administrator, only: :index
+  before_action :require_authentication, only: %i[create destroy]
 
   def index
+    @q = params[:q].to_s.strip
+    registrations = Registration.includes(:waitlist_status, :attendance_status,
+                                          seminar: :seminar_tags,
+                                          participant: :future_faculty_progress_status)
+                                .order(updated_at: :desc)
+    if @q.present?
+      like = "%#{Registration.sanitize_sql_like(@q)}%"
+      registrations = registrations.joins(:participant, :seminar)
+                                   .where('participants.name LIKE :like OR participants.andrewid LIKE :like ' \
+                                          'OR seminars.title LIKE :like', like:)
+    end
+
     respond_to do |format|
-      format.html do
-        @pagy, @registrations = pagy(
-          Registration.includes(:participant, :seminar).order(updated_at: :desc),
-          items: 50
-        )
-      end
-      format.js
+      format.html { @pagy, @registrations = pagy(registrations, items: 50) }
       format.xlsx do
-        @registrations = Registration.all
+        @registrations = registrations
         response.headers['Content-Disposition'] = 'attachment; filename="Participant-Registrations.xlsx"'
       end
     end
   end
 
-  def new
-    @seminar = Seminar.find(params[:seminar_id])
-    @seminar.registrations.build
-  end
-
-  # TODO: Add to calendar link?
   def create
-    if Current.user.admin?
-      @seminar = Seminar.find(params[:seminar_id])
-      @uids = ""
-      @bad_uids = ""
-      ws = Registration::WaitlistStatusType.find_by_key('confirmed')
-      as = Registration::AttendanceStatusType.find_by_key('attended')
-      params[:participants].to_s.split(',').map { |uid| uid.strip.downcase }.reject(&:blank?).uniq.each do |uid|
-        p = Participant.find_or_initialize_by(andrewid: uid)
-        if p.new_record?
-          unless p.save
-            @bad_uids += "<li>#{ERB::Util.html_escape(uid)}</li>"
-            next
-          end
-          p.update_ldap_attrs
-        end
-
-        r = Registration.new(seminar: @seminar, waitlist_status: ws, attendance_status: as, participant: p)
-        if r.save
-          @uids += "<li>#{ERB::Util.html_escape(p.name)} (#{ERB::Util.html_escape(uid)})</li>"
-        else
-          @bad_uids += "<li>#{ERB::Util.html_escape(uid)}</li>"
-        end
-      end
-      
-      #flash[:success] = "<div><h2>Bulk Registrations:</h2><ul>#{uids}</ul></div>"
-      #redirect_to seminar_path(seminar)
-      render 'seminars/show'
-    else
-      seminar = Seminar.find(params[:seminar_id])
-      status_key = seminar.enable_waitlist? ? 'pending' : 'confirmed'
-      status = Registration::WaitlistStatusType.find_by_key( status_key || 'pending' )
-      #status = Registration::WaitlistStatusType.find_by_key( 'pending' )
-      #status = Registration::WaitlistStatusType.find_by_key( 'confirmed' )
-
-      r = Registration.new(seminar: seminar, waitlist_status: status)
-      r.save
-      accomodations_url = contact_email_url(subject: "Accomodations%20Request%20for%20#{r.title}")
-      accomodations_link = "<a href=\"#{accomodations_url}\" class=\"cta\" target=\"blank\">Request Accomodations</a>"
-      flash[:success] = "<strong>Successfully requested registration for #{r.title}.</strong><br/>#{accomodations_link}"
-      
-      if seminar.enable_waitlist?
-        ParticipantMailer.registration_pending_email( Current.user,r).deliver
-      else
-        ParticipantMailer.registration_confirmed_email( Current.user, r).deliver
-      end
-      
-      #respond_to do |format|
-      #format.js
-      #  format.html { redirect_to root_url }
-      #end
-      redirect_to root_url
-    end
-
+    @seminar = Seminar.find(params[:seminar_id])
+    Current.user.admin? && params.key?(:participants) ? register_attendees : register_self
   end
 
   def destroy
-    #Current.user.cancel_registration( params[:id] )
-
-    #registration = self.registrations.find( registration_id )
     registration = Registration.find(params[:id])
-    registration_copy = registration.clone
-    registration.destroy
-    #registration.registration_status = RegistrationStatus.find_by_key "cancelled"
-    #registration.save
-    ParticipantMailer.canceled_registration_email( registration_copy ).deliver
-    flash[:success] = "<strong>Canceled your seminar registration for #{registration.title}.</strong>"
-    respond_to do |format|
-      #format.js
-      format.html { redirect_to root_url }
-    end
-  end 
+    return redirect_to(root_path) unless Current.user.admin? || registration.participant == Current.user
 
+    ParticipantMailer.canceled_registration_email(registration).deliver
+    registration.destroy
+    redirect_to root_path, notice: "You canceled your registration for #{registration.seminar.title}."
+  end
+
+  private
+
+  # A signed-in participant asks for a seat: confirmed, or waitlisted when
+  # the seminar has a waitlist
+  def register_self
+    return redirect_to(root_path, alert: "#{@seminar.title} isn't open for registration.") unless @seminar.open?
+
+    status = Registration::WaitlistStatusType.find_by!(key: @seminar.enable_waitlist? ? 'pending' : 'confirmed')
+    registration = Registration.new(seminar: @seminar, participant: Current.user, waitlist_status: status)
+    unless registration.save
+      return redirect_to(root_path, alert: registration.errors.full_messages.to_sentence)
+    end
+
+    if registration.pending?
+      ParticipantMailer.registration_pending_email(Current.user, registration).deliver
+      redirect_to root_path, notice: "You asked for a seat in #{@seminar.title}. You're on the waitlist until the Eberly Center confirms it."
+    else
+      ParticipantMailer.registration_confirmed_email(Current.user, registration).deliver
+      redirect_to root_path, notice: "You registered for #{@seminar.title}."
+    end
+  end
+
+  # An administrator records attendance for a list of Andrew IDs: each is
+  # registered, confirmed and marked attended
+  def register_attendees
+    confirmed = Registration::WaitlistStatusType.find_by!(key: 'confirmed')
+    attended = Registration::AttendanceStatusType.find_by!(key: 'attended')
+    added = []
+    failed = []
+    params[:participants].to_s.split(/[\s,]+/).map(&:downcase).compact_blank.uniq.each do |andrewid|
+      participant = Participant.find_or_initialize_by(andrewid:)
+      if participant.new_record?
+        next failed << andrewid unless participant.save
+
+        participant.update_ldap_attrs
+      end
+      registration = Registration.find_or_initialize_by(seminar: @seminar, participant:)
+      registration.assign_attributes(waitlist_status: confirmed, attendance_status: attended)
+      registration.save ? added << andrewid : failed << andrewid
+    end
+
+    flash[:notice] = "Marked #{added.size} #{'person'.pluralize(added.size)} attended." if added.any?
+    flash[:alert] = "Couldn't add #{failed.to_sentence}." if failed.any?
+    redirect_to attendance_admin_seminar_path(@seminar)
+  end
 end

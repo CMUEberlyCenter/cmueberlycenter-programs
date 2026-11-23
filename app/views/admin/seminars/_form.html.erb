@@ -1,0 +1,62 @@
+<%# locals: (seminar:) -%>
+<%= form_with model: seminar, url: seminar.persisted? ? admin_seminar_path(seminar) : admin_seminars_path, scope: :seminar do |f| %>
+  <% if seminar.errors.any? %>
+    <div class="cmu-flash cmu-flash--error" role="alert">
+      <p><strong>Fix these to save the seminar:</strong></p>
+      <ul><% seminar.errors.full_messages.each do |message| %><li><%= message %></li><% end %></ul>
+    </div>
+  <% end %>
+
+  <%= f.label :title %>
+  <%= f.text_field :title, required: true %>
+
+  <%= f.label :seminar_status_id, "Registration" %>
+  <%= f.collection_select :seminar_status_id, Seminar::StatusType.all, :id,
+                          ->(status) { status.key == "open" ? "Open for Registration" : "Not Open for Registration" }, {}, class: "inline" %>
+
+  <%= f.label :tags %>
+  <%= f.text_field :tags, value: seminar.tags.join(", "), "aria-describedby": "prg-tags-hint" %>
+  <p class="cmu-hint" id="prg-tags-hint">Separate them with commas, such as core, dei, workshop.</p>
+
+  <fieldset>
+    <legend>When</legend>
+    <ul>
+      <li><%= f.check_box :is_async %><%= f.label :is_async, "Asynchronous: people take it on their own schedule" %></li>
+    </ul>
+    <div class="cmu-field-row">
+      <div><%= f.label :start_at, "Starts" %><%= f.datetime_local_field :start_at %></div>
+      <span aria-hidden="true">to</span>
+      <div><%= f.label :end_at, "Ends" %><%= f.datetime_local_field :end_at, required: true %></div>
+    </div>
+    <p class="cmu-hint">An asynchronous program uses only its end, the last day it's available.</p>
+  </fieldset>
+
+  <%= f.label :location %>
+  <%= f.text_field :location %>
+
+  <fieldset>
+    <legend>Seats</legend>
+    <ul>
+      <li><%= f.check_box :enable_waitlist %><%= f.label :enable_waitlist, "Waitlist: each request waits until you confirm it" %></li>
+    </ul>
+    <%= f.label :maximum_capacity, "Maximum Capacity" %>
+    <%= f.number_field :maximum_capacity, min: 0, class: "inline" %>
+  </fieldset>
+
+  <%= f.label :description %>
+  <%= f.text_area :description, rows: 8, "aria-describedby": "prg-description-hint" %>
+  <p class="cmu-hint" id="prg-description-hint">HTML, such as &lt;p&gt; for each paragraph.</p>
+
+  <%= f.label :pending_email_insert, "Waitlist Email Text" %>
+  <%= f.text_area :pending_email_insert, rows: 4, "aria-describedby": "prg-pending-hint" %>
+  <p class="cmu-hint" id="prg-pending-hint">Added to the email people get when they're on the waitlist.</p>
+
+  <%= f.label :confirmed_email_insert, "Confirmation Email Text" %>
+  <%= f.text_area :confirmed_email_insert, rows: 4, "aria-describedby": "prg-confirmed-hint" %>
+  <p class="cmu-hint" id="prg-confirmed-hint">Added to the email people get when their seat is confirmed.</p>
+
+  <p>
+    <%= f.submit seminar.persisted? ? "Save Seminar" : "Create Seminar", class: "btn" %>
+    <%= link_to "Cancel", seminar.persisted? ? admin_seminar_path(seminar) : seminars_path, class: "btn ghost" %>
+  </p>
+<% end %>

@@ -1,0 +1,26 @@
+# Test accounts for developer sign-in, one per role, each with a sentence on
+# what it can do, starting with what that person sees. Made-up people from
+# config/demo_directory.yml only.
+- andrew_id: ac00
+  name: Andrew Carnegie
+  role: Administrator
+  can: Every seminar, participant and setting.
+  admin: true
+- andrew_id: mm00
+  name: Margaret Morrison
+  role: Consultant
+  can: Everything an administrator can, and listed as a consultant.
+  admin: true
+  consultant: true
+- andrew_id: am00
+  name: Andrew Mellon
+  role: Future Faculty Program Participant
+  can: Their own record, partway through the program, and registration.
+- andrew_id: hs00
+  name: Herbert Simon
+  role: Future Faculty Program Graduate
+  can: Their own record, with the program finished, and registration.
+- andrew_id: hf00
+  name: Henry Clay Frick
+  role: Graduate Student
+  can: Seminars open for registration and their own record.

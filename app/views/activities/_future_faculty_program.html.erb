@@ -1,29 +1,11 @@
-<h1>Future Faculty Program Activities</h1>
-<% if Programs::FutureFaculty::Enrollment.find( @participant ).nil?  %>
-<% category_requirements = Programs::FutureFaculty::RequirementsVersion.last.requirements.group_by(&:requirement_category) %>
-<% ffp_categories = Programs::FutureFaculty::RequirementsVersion.last.categories %>
-<% else %>
-    <% category_requirements = @participant.future_faculty_enrollment.requirements.group_by(&:requirement_category) %>
-    <% ffp_categories = @participant.future_faculty_enrollment.categories %>
-<% end %>
-
-<% ffp_categories.each do |c| %>
-<h2><%= c.label %></h2>
-
-<%#= render( "participants/activities/select_form",
-    activity: participant.activities.build, type_options: category_requirements[c] ) %>
-
-<%= turbo_frame_tag 'future_faculty_program_activities' do %>
-
-  <% category_requirements[c].each do |r| %>
-<div>
-  <%= render( partial: "activities/activity", collection: @participant.activities.where(type: r.activity_class ) ) %>
-  <%= link_to "Add #{r.label}", new_participant_activity_path(participant, type: r.activity_class, requirement_id: r.id), data: { "turbo-frame": "modal" }, class: 'cta' %>
-</div>
-  <%#||
-      content_tag(:p, "None.") %>
-<% end %>
-<% end %>
-<hr/>
-
+<%# locals: (participant:) -%>
+<% version = participant.future_faculty_enrollment || Programs::FutureFaculty::RequirementsVersion.last %>
+<% requirements = version.requirements.group_by(&:requirement_category) %>
+<% version.categories.each do |category| %>
+  <h3><%= category.label %></h3>
+  <% requirements.fetch(category, []).each do |requirement| %>
+    <%= render partial: "activities/activity", collection: participant.activities.where(type: requirement.activity_class) %>
+    <p><%= link_to "Add #{requirement.label}", new_participant_activity_path(participant, type: requirement.activity_class, requirement_id: requirement.id),
+                   class: "btn small ghost", data: { turbo_frame: "modal" } %></p>
+  <% end %>
 <% end %>

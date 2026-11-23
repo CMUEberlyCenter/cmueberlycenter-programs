@@ -1,112 +1,56 @@
-<% update_document_title(add: "Application Settings") %>
-<% update_breadcrumbs(add: "Application Settings") %>
-<% content_for :nav do %>
-<li class="parent">
-  <%= link_to('Seminars', seminars_path) %>
-  <ul>
-    <li>
-      <%= link_to('Create New Seminar', new_seminar_path) %>
-    </li>
-  </ul>
-</li><li>
-  <%= link_to('Participants', participants_path) %>
-</li><li>
-  <%= link_to('Registrations', registrations_path) %>
-</li><li>
-  <%= link_to('Future Faculty Program', future_faculty_path) %>
-</li><li class="active">
-  <%= link_to('Application Settings', settings_path) %>
-</li>
-<% end %>
-
+<% cmu_title "Settings" %>
+<% cmu_breadcrumb "Settings" %>
 <div class="content">
   <div>
-    <h1>Application Settings</h1>
-
-    <h2>Display Settings</h2>
+    <h1>Settings</h1>
+    <h2>Display</h2>
     <% @settings.each do |setting| %>
-    <%= form_for setting do |f| %>
-    <p>
-      <%= f.label :value, "#{setting.label}:" %>
-      <%= f.text_field :value, class: 'inline' %>
-      <%= f.submit "Update", class: 'small' %>
-    </p>
+      <%= form_with model: setting, url: setting_path(setting), method: :patch do |f| %>
+        <%= f.label :value, setting.label, for: "setting-#{setting.id}" %>
+        <div class="cmu-field-button">
+          <% if setting.key.start_with?("homepage-", "sidebar-") %>
+            <%= f.text_area :value, id: "setting-#{setting.id}", rows: 3 %>
+          <% else %>
+            <%= f.text_field :value, id: "setting-#{setting.id}" %>
+          <% end %>
+          <%= f.submit "Save", class: "btn" %>
+        </div>
+      <% end %>
     <% end %>
-    <% end %>
-
   </div><div class="sidebar">
-    <h1>Sidebar Note Previews</h1>
-    <% @settings.sidebar_settings.each do |s| %>
-    <h2><%= s.label %></h2>
-    <div class="left-rule">
-      <%= s.value.to_s.html_safe %>
-    </div>
+    <% @settings.sidebar_settings.each do |setting| %>
+      <h2><%= setting.label %></h2>
+      <div class="left-rule"><%= sanitize setting.value.to_s %></div>
     <% end %>
   </div>
 </div>
 <div class="grid column2">
-  <div>
-    <h2>Consultants</h2>
-    <%= form_with model: Participant.new do |f| %>
-    <p>
-      <%= f.label :andrewid, 'Add Consultant:' %>
-      <%= f.text_field :andrewid, class: 'inline' %>
-      <%= f.hidden_field :is_consultant, value: true %>
-      <%= f.submit 'Add Consultant', class: "btn small" %>
-    </p>
-    <% end %>
-    
-    <table class="alternate">
-      <thead>
-      <tr class="invert">
-	<th>Name</th>
-	<th>Andrew ID</th>
-	<th>Actions</th>
-      </tr>
-      </thead>
-	<tbody>
-      <% @consultants.each do |c| %>
-      <tr>
-        <td><%= c.name %></td>
-        <td><%= c.andrewid %></td>
-        <td>
-          <%= button_to "Remove", participant_path(c,:participant => { :is_consultant => false}), :method => :put, class: 'small' %>
-        </td>
-      </tr>
+  <% [["Administrators", @admins, :is_admin], ["Consultants", @consultants, :is_consultant]].each do |title, people, flag| %>
+    <div>
+      <h2><%= title %></h2>
+      <%= form_with model: Participant.new, url: participants_path do |f| %>
+        <%= f.label :andrewid, "Add by Andrew ID", for: "add-#{flag}" %>
+        <div class="cmu-field-button">
+          <%= f.text_field :andrewid, id: "add-#{flag}", autocomplete: "off" %>
+          <%= f.hidden_field flag, value: true, id: nil %>
+          <%= f.submit "Add", class: "btn" %>
+        </div>
       <% end %>
-      </tbody>
-    </table>
-      </div>
-      <div>
-    <h2>Admins</h2>
-    <%= form_with model: Participant.new do |g| %>
-    <p>
-      <%= g.label :andrewid, 'Add Admin:' %>
-      <%= g.text_field :andrewid, class: 'inline' %>
-      <%= g.hidden_field :is_admin, value: true %>
-      <%= g.submit 'Add Admin', class: "btn small" %>
-    </p>
-    <% end %>
-    
-    <table class="alternate">
-      <thead>
-	<tr class="invert">
-	  <th>Name</th>
-	  <th>Andrew ID</th>
-	  <th>Actions</th>
-	</tr>
-      </thead>
-      <tbody>
-      <% @admins.each do |c| %>
-      <tr>
-        <td><%= c.name %></td>
-        <td><%= c.andrewid %></td>
-        <td>
-          <%= button_to "Remove", participant_path(c,:participant => { :is_admin => false}), :method => :put, class: 'small' %>
-        </td>
-      </tr>
-      <% end %>
-      </tbody>
-    </table>
-      </div>
+      <table class="alternate cmu-full">
+        <thead><tr><th scope="col">Name</th><th scope="col" class="cmu-fit">Andrew ID</th><th scope="col" class="cmu-fit"><span class="sr-only">Actions</span></th></tr></thead>
+        <tbody>
+          <% people.each do |person| %>
+            <tr>
+              <td><%= link_to person.name, participant_path(person) %></td>
+              <td class="cmu-fit"><%= person.andrewid %></td>
+              <td class="cmu-fit">
+                <%= button_to "Remove", participant_path(person), method: :patch, params: { participant: { flag => false } },
+                              class: "btn small ghost", data: { turbo_confirm: "Remove #{person.name} from #{title.downcase}?" } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
 </div>

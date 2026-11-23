@@ -1,70 +1,53 @@
-<% update_document_title(add: [@participant.name,'Participants']) %>
-<% update_breadcrumbs(add: [link_to('Participants',participants_path),"#{@participant.name}"]) %>
-<% content_for :nav do %>
-<li class="parent">
-  <%= link_to('Seminars', seminars_path) %>
-  <ul>
-    <li>
-      <%= link_to('Create New Seminar', new_seminar_path) %>
-    </li>
-  </ul>
-</li><li>
-  <%= link_to('Registrations', registrations_path) %>
-</li><li class="active">
-  <%= link_to('Participants', participants_path) %>
-</li><li>
-  <%= link_to('Future Faculty Program', future_faculty_path) %>
-</li><li>
-  <%= link_to('Application Settings', settings_path) %>
-</li>
-<% end %>
-
+<% cmu_title @participant.name, "Participants" %>
+<% cmu_breadcrumb link_to("Participants", participants_path), @participant.name %>
+<% cmu_nav "participants" %>
+<%= turbo_frame_tag "modal" %>
 <div class="content">
   <div>
     <h1><%= @participant.name %></h1>
-    <p>
-      <strong>Andrew ID:</strong> <%= @participant.andrewid %><br/>
-      <strong>Email:</strong> <%= mail_to @participant.email, @participant.email %><br/><br/>
+    <dl class="prg-facts">
+      <dt>Andrew ID</dt><dd><%= @participant.andrewid %></dd>
+      <dt>Email</dt><dd><%= @participant.email.present? ? mail_to(@participant.email) : "None" %></dd>
+      <dt>Student Class</dt><dd><%= @participant.student_class.presence || "None" %></dd>
+      <dt>School</dt><dd><%= @participant.pretty_colleges.presence || "None" %></dd>
+      <dt>Department</dt><dd><%= @participant.pretty_depts.presence || "None" %></dd>
+      <% if @participant.student_class_archive.present? || @participant.pretty_colleges_archive.present? || @participant.pretty_depts_archive.present? %>
+        <dt>Before</dt>
+        <dd><%= [@participant.student_class_archive, @participant.pretty_colleges_archive, @participant.pretty_depts_archive].compact_blank.join("; ") %></dd>
+      <% end %>
+      <dt>First Consultation</dt><dd><%= ap_date(@participant.first_consultation_on) || "None" %></dd>
+    </dl>
 
-      <strong>College:</strong> <%= @participant.pretty_colleges.blank? ? "N/A" : @participant.pretty_colleges %><br/>
-      <strong>Former College:</strong> <%= @participant.pretty_colleges_archive.blank? ? "N/A" : @participant.pretty_colleges_archive %><br/></br>
-      <strong>Department:</strong> <%= @participant.pretty_depts.blank? ? "N/A" : @participant.pretty_depts %><br/>
-      <strong>Former Department:</strong> <%= @participant.pretty_depts_archive.blank? ? "N/A" : @participant.pretty_depts_archive %><br/></br>
-      <strong>Student Class:</strong> <%= @participant.student_class || "N/A" %><br/>
-      <strong>Former Student Class:</strong> <%= @participant.student_class_archive || "N/A" %><br/>
-    </p>
-    <hr/>
-    <%= turbo_frame_tag 'ffp_activities' do %>
-    <%# unless Programs::FutureFaculty::Enrollment.find( @participant ).nil? %>
- 
-    <%= render('activities/future_faculty_program', participant: @participant ) %>
-    <%# end %>
-
+    <h2 class="rule-top">Future Faculty Program Activities</h2>
+    <%= turbo_frame_tag "ffp_activities" do %>
+      <%= render "activities/future_faculty_program", participant: @participant %>
     <% end %>
-    <%= render "activities/additional", participant: @participant %>
-    <hr/>
-    <%= render partial: "seminars", object: @participant.attended_seminars, locals: { title: "Seminars" } %>
-    <hr/>
-    <% workshops_and_other = @participant.attended_workshops + @participant.attended_other %>
-    <%= render partial: "seminars", object: workshops_and_other, locals: { title: "Workshops and Other Programming" } %>
-    <hr/>
-    <%= render "notes", participant: @participant %>
-</div><div class="sidebar">
+
+    <h2 class="rule-top">Other Activities and Consultations</h2>
+    <%= turbo_frame_tag "activities" do %>
+      <%= render "activities/additional_list", participant: @participant %>
+    <% end %>
+
+    <h2 class="rule-top">Seminars Attended</h2>
+    <%= render "attended", seminars: @participant.attended_seminars %>
+
+    <h2 class="rule-top">Workshops and Other Programs Attended</h2>
+    <%= render "attended", seminars: @participant.attended_workshops + @participant.attended_other %>
+
+    <h2 class="rule-top">Internal Notes</h2>
+    <%= form_with model: @participant, scope: :participant, url: participant_path(@participant), method: :patch do |f| %>
+      <%= f.label :note, "Notes", class: "sr-only" %>
+      <%= f.text_area :note, rows: 4, "aria-describedby": "prg-note-hint" %>
+      <p class="cmu-hint" id="prg-note-hint">Only administrators see these.</p>
+      <p><%= f.submit "Save Notes", class: "btn" %></p>
+    <% end %>
+  </div><div class="sidebar">
     <div class="simple">
-      <p><%= link_to("Download Participation Record (.pdf)",
-             participant_path(:id => @participant.andrewid, :format => :pdf), class: "btn wide") %></p>
-      <p>
-	<% if Current.imposter %>
-	<%= button_to("Stop Impersonating #{Current.user.name}",
-            unimpersonate_path,{ method: :post, class: "ghost wide"}) %>
-	<% else %>
-	<%= button_to("Impersonate #{@participant.name}",
-            impersonate_path( @participant.andrewid ),{ method: :post, class: "ghost wide"}) %>
-	<% end %>
-      </p>
+      <p><%= link_to "View Participation Record", record_participant_path(@participant), class: "btn wide" %></p>
+      <% unless @participant == Current.user || Current.imposter %>
+        <p><%= button_to "Act as #{@participant.name}", act_as_path(@participant), class: "btn ghost wide", form: { data: { turbo: false } } %></p>
+      <% end %>
     </div>
-    <div class="simple">
-      <%= render "programs/future_faculty/participant_sidebar" %>
-    </div>
+    <%= render "programs/future_faculty/participant_sidebar", participant: @participant %>
   </div>
 </div>

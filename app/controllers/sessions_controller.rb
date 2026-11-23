@@ -1,42 +1,28 @@
 # frozen_string_literal: true
 
+# Signing out, and an administrator acting as someone else. Signing in is
+# developer sign-in (DevSessionsController) in development and test; single sign-on
+# (Entra ID) takes /login once it's set up, and until then /login says so.
 class SessionsController < ApplicationController
-  def login
-    uid = remote_user
-    #Current.user = Participant.find(uid)
-    #Current.user ||= Participant.create!(andrewid: uid)
-    Current.user = Participant.find_or_create_by! andrewid: uid
-    Current.user.update_ldap_attrs
+  before_action :require_administrator, only: :create_acting
 
-    cookies.encrypted[:uid] = uid
-    redirect_to params[:return_url] || root_path
+  def new
+    render :unavailable, status: :service_unavailable
   end
 
-  def logout
-    cookies.encrypted[:uid] = nil
-    cookies.encrypted[:imposter_uid] = nil
-    flash[:success] = '<strong>Logout completed successfully.</strong>'
-    redirect_to sso_logout_url(return_url: root_url)
+  def destroy
+    sign_out_participant
+    redirect_to root_path, notice: 'You signed out.'
   end
 
-  def impersonate
-    cookies.encrypted[:imposter_uid] = cookies.encrypted[:uid]
-    cookies.encrypted[:uid] = params[:participant_id]
-    # TODO: Flip redirect_to return_url (former request.url)
-    # when profile is more than just a pdf
-    redirect_to root_url
+  def create_acting
+    participant = Participant.find_by!(andrewid: params[:participant_id])
+    start_acting_as(participant)
+    redirect_to root_path
   end
 
-  def unimpersonate
-    cookies.encrypted[:uid] = cookies.encrypted[:imposter_uid]
-    cookies.encrypted[:imposter_uid] = nil
-    redirect_to params[:return_url] || root_url
-  end
-
-  private
-
-  def remote_user
-    eppn = request.env['REMOTE_USER'] || ENV.fetch('REMOTE_USER', nil)
-    eppn.split('@')[0] unless eppn.nil?
+  def destroy_acting
+    stop_acting if Current.imposter
+    redirect_to safe_return_to(request.referer) || root_path
   end
 end

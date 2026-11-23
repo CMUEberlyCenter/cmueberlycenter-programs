@@ -20,22 +20,22 @@ Rails.application.routes.draw do
     "mailto:seminars@eberly.cmu.edu#{params}"
   end
 
-  # Shibboleth logout path (with optional return url)
-  direct :sso_logout, return_url: nil do |options|
-    if Rails.env.staging? || Rails.env.production?
-      "/Shibboleth.sso/Logout?return=#{options[:return_url]}"
-    else
-      options[:return_url] || root_url
-    end
+  # Signing in: developer sign-in in development and test, drawn only there
+  # (DevSessionsController refuses everywhere else too). In production /login
+  # says sign-in isn't set up; single sign-on (Entra ID) goes there later.
+  direct(:login) { |options| "/login#{"?#{options.to_query}" if options.any?}" }
+  if DemoMode.on?
+    match 'login', to: 'dev_sessions#new', as: :dev_login, via: %i[get post]
+    post 'login/:andrew_id', to: 'dev_sessions#create', as: :dev_login_as
+  else
+    match 'login', to: 'sessions#new', via: %i[get post], as: nil
   end
+  get 'logout', to: 'sessions#destroy'
+  delete 'logout', to: 'sessions#destroy'
 
-  # Session management
-  scope module: :sessions do
-    get 'login'
-    get 'logout'
-    post 'impersonate/:participant_id', as: :impersonate, action: :impersonate
-    get 'unimpersonate'
-  end
+  # An administrator acting as someone else (the kit's Acting as Another User)
+  post 'participants/:participant_id/act-as', to: 'sessions#create_acting', as: :act_as
+  post 'stop-acting', to: 'sessions#destroy_acting', as: :stop_acting
 
   # Application settings
   resources :settings, only: [:index, :update]
@@ -58,40 +58,38 @@ Rails.application.routes.draw do
     end
   end
 
-  # Participants resource route
-  resources :participants, except: :new do
+  # Participants: administrators see everyone; anyone signed in sees their
+  # own record at /profile
+  resources :participants, only: %i[index show create update] do
     get 'search', on: :collection
-    resources :activities, shallow: true
+    get 'record', on: :member
+    resources :activities, only: %i[new create edit update destroy], shallow: true
   end
+  get 'profile', to: 'participants#record', as: :profile
 
-  # Direct link to a participant's own resource
-  get 'profile', to: 'participants#show', as: :profile
-
-
-
-
-  resources :seminars do
-    resources :registrations, shallow: true
+  resources :seminars, only: %i[index destroy] do
+    resources :registrations, only: :create
   end
-  get 'registrations', to: 'registrations#index', :as => 'registrations'  
+  resources :registrations, only: %i[index destroy]
 
-
-  patch 'admin/seminars/update_seminar' => 'admin/seminars#update_seminar', :as => 'update_whole_seminar'
-  get 'admin/seminars/:id/attendance' => 'admin/seminars#show_attendance', :as => 'seminar_attendance'
-
-  patch 'admin/seminars/change_status' => 'admin/seminars#change_status', :as => 'change_registration_status'
-  patch 'admin/seminars/change_status_multiple' => 'admin/seminars#change_status_multiple', :as => 'change_registration_status_multiple'
-
-  patch 'admin/seminars/change_attendance_status' => 'admin/seminars#change_attendance_status', :as => 'change_attendance_status'
-  patch 'admin/seminars/change_attendance_status_multiple' => 'admin/seminars#change_attendance_status_multiple', :as => 'change_attendance_status_multiple'
-
-
-
+  # Running seminars: registrations, attendance and the sign-in sheet
   namespace :admin do
-    root '/seminars#index'
-    # Directs /admin/seminars/* to Admin::SeminarController
-    # (app/controllers/admin/seminars_controller.rb)
-    resources :seminars
-
+    get '/', to: redirect('/seminars')
+    resources :seminars, only: %i[new create show edit update] do
+      member do
+        get :attendance
+        get 'sign-in-sheet', action: :sign_in_sheet, as: :sign_in_sheet
+        patch :statuses
+        patch :attendances
+      end
+    end
+    resources :registrations, only: [] do
+      member do
+        patch :status
+        patch :attendance
+      end
+    end
   end
+
+  get 'up', to: 'rails/health#show', as: :rails_health_check
 end

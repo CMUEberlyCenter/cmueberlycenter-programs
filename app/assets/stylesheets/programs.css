@@ -1,0 +1,106 @@
+/* Seminars & Workshops' own styles, after CMU's template and the Web Kilt */
+
+/* Tag filter links over the seminar cards */
+.prg-tags .btn {
+  margin: 0 0.25rem 0.5rem 0;
+}
+
+/* Links and buttons side by side, such as a card's links or a row's
+   button_to forms */
+.prg-links .cta {
+  display: inline-block;
+  margin-right: 1.25rem;
+}
+.prg-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.prg-actions form {
+  display: inline;
+  margin: 0;
+}
+
+/* Label and value pairs: a participant's details, an activity's fields */
+.prg-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1.25rem;
+  margin: 0 0 1rem;
+}
+.prg-facts dt {
+  font-weight: 600;
+}
+.prg-facts dd {
+  margin: 0;
+}
+
+/* One activity in a participant's lists */
+.prg-activity {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--cmu-line);
+}
+.prg-activity h4 {
+  margin: 0 0 0.5rem;
+}
+.prg-activity .prg-facts {
+  margin-bottom: 0.5rem;
+}
+.prg-activity-dialog {
+  width: min(36rem, calc(100vw - 2rem));
+}
+
+/* Programs someone attended */
+.prg-attended {
+  margin-bottom: 1.5rem;
+}
+.prg-attended li {
+  margin-bottom: 0.4rem;
+}
+
+/* Tables with many columns scroll sideways inside the page */
+.prg-wide-table {
+  font-size: 0.9rem;
+}
+
+/* The participation record and sign-in sheet */
+.prg-record-footer {
+  margin-top: 2rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--cmu-line);
+  color: var(--cmu-muted);
+  font-size: 0.85rem;
+}
+.prg-sign-in-sheet td {
+  height: 2.75rem;
+}
+.prg-sign-in-sheet td:last-child {
+  width: 40%;
+}
+
+@media print {
+  .cmu-site-bar,
+  header .roof,
+  #nav,
+  footer,
+  .breadcrumbs,
+  .cmu-flash,
+  .sidebar,
+  .prg-no-print,
+  .cmu-acting-bar {
+    display: none !important;
+  }
+  .prg-record h1 {
+    margin-top: 0;
+  }
+  .prg-record h2 {
+    break-after: avoid;
+  }
+  .prg-record li,
+  .prg-sign-in-sheet tr {
+    break-inside: avoid;
+  }
+  .prg-sign-in-sheet thead {
+    display: table-header-group;
+  }
+}

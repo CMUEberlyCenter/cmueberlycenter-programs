@@ -51,36 +51,17 @@ class ParticipantsControllerTest < ActionController::TestCase
       future_faculty_enrollment_id: Programs::FutureFaculty::RequirementsVersion.find_by!(key: '2023').id,
       future_faculty_progress_status_id: ProgressStatusType.find_by!(key: 'complete').id)
     Participant.create!(andrewid: 'notcompleted', ldap_entry: Object.new)
-    admin = Struct.new(:admin?, :name).new(true, 'Admin')
+    admin = Participant.create!(andrewid: 'listadmin', is_admin: true, ldap_entry: Object.new)
 
     Current.stub(:user, admin) { get :index, params: { ffp_status: 'complete' } }
     assert_response :success
-    config = JSON.parse(Nokogiri::HTML(response.body).at_css('#example-table')['data-config'])
-    link = Nokogiri::HTML.fragment(config.fetch('footerElement')).at_css('a')
+    link = Nokogiri::HTML(response.body).at_css('a[download]')
     assert_equal participants_path(format: :xlsx, ffp_status: 'complete'), link['href']
-    assert_equal 'Download 1 Participants (.xlsx)', link.text
+    assert_equal 'Download 1 Participant (.xlsx)', link.text
 
     Current.stub(:user, admin) { get :index, params: { ffp_status: 'complete' }, format: :xlsx }
     assert_response :success
     assert_equal [participant.andrewid], spreadsheet_rows.drop(1).map { |row| row[2] }
-  end
-
-  test 'a participation record renders as PDF with the upgraded renderer' do
-    load Rails.root.join('db/seeds.rb')
-    participant = Participant.create!(andrewid: 'pdfsample', name: 'Example Participant',
-                                      is_admin: true, ldap_entry: Object.new)
-
-    Current.stub(:user, participant) do
-      Participant.stub(:find_or_create_by!, participant) do
-        participant.stub(:update_ldap_attrs, nil) do
-          get :show, params: { id: participant.andrewid }, format: :pdf
-        end
-      end
-    end
-
-    assert_response :success
-    assert_equal 'application/pdf', response.media_type
-    assert response.body.start_with?('%PDF-')
   end
 
   private

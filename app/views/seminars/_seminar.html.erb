@@ -1,18 +1,13 @@
-<div class="item <%= seminar.tags.join(' ') %>">
-  <h2><%= seminar.title %></h2>
-  <h3><%= seminar.formatted_timespan %></h3>
-  <h3>
-    <%= "This seminar is asynchronous." if seminar.async? %>
-    <%= seminar.location %>
-  </h3>
-  <p><%= seminar.description&.html_safe %></p>
-  <h4 class="alignright">Tags: <%= seminar.tags.join(', ') %></h4>
-
+<div class="grey">
+  <h3><%= seminar.title %></h3>
+  <p class="date"><strong><%= seminar_when(seminar) %></strong><% if seminar.location.present? %><br><%= seminar.location %><% end %></p>
+  <%= sanitize seminar.description %>
+  <p><%= tag_pills(seminar.tags) %></p>
   <% if Current.user&.admin? %>
-    <%= admin_options(seminar) %>
+    <%= render "seminars/admin_options", seminar: %>
   <% elsif Current.user %>
-    <%= registration_options(seminar) %>
-  <% else %>
-    <%= guest_options(seminar) %>
+    <%= render "seminars/registration_options", seminar: %>
+  <% elsif seminar.open? %>
+    <p><%= button_to "Sign In to Register", login_path(return_to: root_path), class: "btn small ghost", form: { data: { turbo: false } } %></p>
   <% end %>
 </div>

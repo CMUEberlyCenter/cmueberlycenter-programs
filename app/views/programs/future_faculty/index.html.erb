@@ -1,40 +1,61 @@
-<% update_document_title(add: "Future Faculty Program") %>
-<% update_breadcrumbs(add: "Future Faculty Program") %>
-<% content_for :nav do %>
-<li class="parent">
-  <%= link_to('Seminars', seminars_path) %>
-  <ul>
-    <li>
-      <%= link_to('Create New Seminar', new_seminar_path) %>
-    </li>
-  </ul>
-</li>
-<li>
-  <%= link_to('Participants', participants_path) %>
-</li><li>
-  <%= link_to('Registrations', registrations_path) %>
-</li>
-<li class="active">
-  <%= link_to('Future Faculty Program', future_faculty_path) %>
-</li>
-<li>
-  <%= link_to('Application Settings', settings_path) %>
-</li>
-<% end %>
-
+<% cmu_title "Future Faculty Program" %>
+<% cmu_breadcrumb "Future Faculty Program" %>
 <div class="content">
-  <div style="min-width: 0">
-    <h1>Future Faculty Participant Activities</h1>
-    <%= content_tag :div, id: 'example-table', style: 'width: 100%', data: { controller: 'table', config: future_faculty_table_config } do %>
-      Loading...
-    <% end %>
+  <div>
+    <h1>Future Faculty Program</h1>
+    <p>Every program activity recorded for a participant, newest first.</p>
   </div><div class="sidebar">
-    <div class="list red invert">
-      <h2>Review FFP Participants</h2>
+    <div class="list grey">
+      <h2>Review Participants</h2>
       <ul>
-        <li><%= link_to "With Completed Requirements (#{@completed_requirements_count})", participants_path(ffp_status: 'complete') %></li>
-        <li><%= link_to "Near Completion ()" %></li>
+        <li><%= link_to "Met the Requirements (#{@completed_requirements_count})", participants_path(ffp_status: "complete") %></li>
       </ul>
+      <p><%= link_to "Download Program Data (.xlsx)", future_faculty_path(format: :xlsx), class: "btn ghost wide", download: true %></p>
     </div>
+  </div>
+</div>
+<div class="content wide">
+  <div>
+    <h2>Activities</h2>
+    <div class="cmu-search-bar">
+      <p>Search by participant, activity, course or consultant.</p>
+      <label for="prg-activity-search" class="sr-only">Find an Activity</label>
+      <input type="text" id="prg-activity-search" placeholder="Find an activity&hellip;" data-cmu-filter="prg-activities">
+    </div>
+    <table class="alternate cmu-full cmu-sticky prg-wide-table" id="prg-activities" data-cmu-table data-cmu-noun="activity|activities">
+      <thead>
+        <tr>
+          <th scope="col" data-sort-key="added" aria-sort="descending"><button type="button" class="cmu-sort">Added<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="name"><button type="button" class="cmu-sort">Name<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="status"><button type="button" class="cmu-sort">Status<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="category"><button type="button" class="cmu-sort">Category<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="activity"><button type="button" class="cmu-sort">Activity<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="course"><button type="button" class="cmu-sort">Course<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="consultant"><button type="button" class="cmu-sort">Consultant<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="completed"><button type="button" class="cmu-sort">Completed<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-sort-key="memo"><button type="button" class="cmu-sort">Memo Completed<span class="cmu-sort-arrow"></span></button></th>
+          <th scope="col" data-cmu-column="notes">Internal Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @activities.each do |activity| %>
+          <% participant = activity.participant %>
+          <% requirement = activity.future_faculty_requirement %>
+          <tr>
+            <td data-sort-value="<%= activity.created_at&.iso8601 %>"><%= ap_date(activity.created_at) %></td>
+            <td data-sort-value="<%= participant.sortable_name %>"><%= link_to participant.name, participant_path(participant) %></td>
+            <td><%= ffp_status_name(participant.future_faculty_progress_status) %></td>
+            <td><%= requirement&.requirement_category&.label || "Other Activities" %></td>
+            <td><%= activity_name(activity) %></td>
+            <td><%= activity.course %></td>
+            <td><%= (activity.observer || activity.lead_consultant)&.name %></td>
+            <td data-sort-value="<%= activity.completed_on %>"><%= ap_date(activity.completed_on) %></td>
+            <td data-sort-value="<%= activity.memo_completed_on %>"><%= ap_date(activity.memo_completed_on) %></td>
+            <td><%= activity.internal_notes %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <p class="cmu-results-count" data-cmu-count="prg-activities" aria-live="polite">Showing all <%= pluralize(@activities.size, "activity") %></p>
   </div>
 </div>

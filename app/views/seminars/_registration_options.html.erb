@@ -1,0 +1,19 @@
+<%# locals: (seminar:) -%>
+<% registration = Current.user.registrations.find_by(seminar:) %>
+<% if registration&.confirmed? %>
+  <p><span class="cmu-pill cmu-pill--green">Registered</span></p>
+  <p><%= button_to "Cancel Registration", registration_path(registration), method: :delete, class: "btn small ghost",
+                   data: { turbo_confirm: "Cancel your registration for #{seminar.title}?" } %></p>
+<% elsif registration&.pending? %>
+  <p><span class="cmu-pill cmu-pill--amber">Waitlisted</span></p>
+  <p><%= button_to "Cancel Request", registration_path(registration), method: :delete, class: "btn small ghost",
+                   data: { turbo_confirm: "Cancel your request for #{seminar.title}?" } %></p>
+<% elsif seminar.open? %>
+  <% if Current.user.registrations.joins(:seminar).where(seminars: { title: seminar.title }).exists? %>
+    <p class="cmu-hint">You may have taken this program before. Check your record before you register again.</p>
+  <% end %>
+  <p><%= button_to(seminar.enable_waitlist? ? "Request a Seat" : "Register", seminar_registrations_path(seminar), class: "btn small") %></p>
+<% end %>
+<% if registration %>
+  <p><%= mail_to "seminars@eberly.cmu.edu", "Request Accommodations", subject: "Accommodations for #{seminar.title}" %></p>
+<% end %>

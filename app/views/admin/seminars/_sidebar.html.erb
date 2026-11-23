@@ -1,49 +1,26 @@
-    <div class="list grey">
-      <h1>Registrations</h1>
-      <p><strong><%= @seminar.registrations.size %></strong> Total</p>
-      <p><strong><%= @seminar.registrations.pending.size %></strong> Pending</p>
-      <p><strong><%= @seminar.registrations.confirmed.size %></strong> Confirmed</p>
-      <p>
-	<%= link_to "Manage Registrations", admin_seminar_path(@seminar), class: 'cta' %>
-      </p>
-
-      <h1>Attended</h1>
-      <p><strong><%= @seminar.registrations.attended.size %></strong> Total</p>
-
+<%# locals: (seminar:) -%>
+<% registrations = seminar.registrations %>
+<div class="grey">
+  <h2>Registrations</h2>
   <p>
-    <%= link_to "Manage Attendance", seminar_attendance_path(@seminar), class: 'cta' %>
+    <strong><%= registrations.confirmed.size %></strong> confirmed<br>
+    <strong><%= registrations.pending.size %></strong> waitlisted<br>
+    <strong><%= registrations.canceled.size %></strong> canceled<br>
+    <strong><%= registrations.attended.size %></strong> attended
+    <% if seminar.maximum_capacity.present? %><br>Capacity: <%= seminar.maximum_capacity %><% end %>
   </p>
-
+  <p>
+    <%= link_to "Manage Registrations", admin_seminar_path(seminar), class: "cta" unless current_page?(admin_seminar_path(seminar)) %>
+    <%= link_to "Take Attendance", attendance_admin_seminar_path(seminar), class: "cta" unless current_page?(attendance_admin_seminar_path(seminar)) %>
+  </p>
 </div>
-
-    <div class="simple">
-      <p><%= link_to("Edit Seminar",
-             edit_admin_seminar_url(@seminar), class: "btn wide") %></p>
-      <p><%= link_to("Download Sign-In Sheet (.pdf)",
-             admin_seminar_url(@seminar, :format => 'pdf', :profile => 'sign-in'), class: "btn ghost wide") %></p>
-      <script>
-	function copyToClipboard(text) {
-  navigator.clipboard.writeText(text)
-    .then(() => {
-      console.log('Text copied to clipboard');
-    })
-    .catch(err => {
-      console.error('Failed to copy: ', err);
-    });
-}
-      </script>
-      
-
-      <p><% emails = @seminar.registrations.confirmed.reject {|r| r.participant.nil? }.map {|r| r.participant.email}.compact.join(",") %>
-        <%= mail_to "seminars@eberly.cmu.edu","Email Participants",
-            :bcc => emails, class: "btn ghost wide" %></p>
-      <p><%= link_to 'Copy Participant Emails', '#',
-             :onclick => "copyToClipboard(\"#{emails}\")",
-	     class: "btn ghost wide" %></p>
-
-      <p>
-	<%= turbo_frame_tag @seminar do %>
-	<%= link_to "Manual Attendance CSV", new_seminar_registration_path(@seminar), class: 'btn ghost wide' %>
-	<% end %>
-      </p>
-    </div>
+<% emails = registrations.confirmed.filter_map { |r| r.participant&.email }.join(", ") %>
+<div class="simple">
+  <p><%= link_to "Edit Seminar", edit_admin_seminar_path(seminar), class: "btn wide" %></p>
+  <p><%= link_to "Print the Sign-In Sheet", sign_in_sheet_admin_seminar_path(seminar), class: "btn ghost wide" %></p>
+  <% if emails.present? %>
+    <p><%= mail_to "seminars@eberly.cmu.edu", "Email Confirmed Participants", bcc: emails, class: "btn ghost wide" %></p>
+    <p><button type="button" class="btn ghost wide" data-cmu-copy="#prg-emails">Copy Their Email Addresses</button></p>
+    <p class="sr-only" id="prg-emails"><%= emails %></p>
+  <% end %>
+</div>

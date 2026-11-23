@@ -1,0 +1,9 @@
+<%# locals: (participant:) -%>
+<% activities = participant.activities.additional %>
+<% if activities.any? %>
+  <%= render partial: "activities/activity", collection: activities %>
+<% else %>
+  <p class="cmu-empty">None yet.</p>
+<% end %>
+<p><%= link_to "Add Activity", new_participant_activity_path(participant, type: "Participant::Activities::Additional"),
+               class: "btn small", data: { turbo_frame: "modal" } %></p>

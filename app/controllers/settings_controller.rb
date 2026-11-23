@@ -10,10 +10,9 @@ class SettingsController < ApplicationController
   end
 
   def update
-    setting = Setting.find params[:id]
-    setting.update setting_params
-    setting.save
-    redirect_to action: 'index'
+    setting = Setting.find(params[:id])
+    setting.update!(setting_params)
+    redirect_to settings_path, notice: "You saved the setting."
   end
 
   private

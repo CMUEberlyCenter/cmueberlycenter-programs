@@ -1,117 +1,59 @@
 require 'test_helper'
-require 'minitest/mock'
 
-class RegistrationsControllerTest < ActionController::TestCase
-  self.fixture_table_names = []
+class RegistrationsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    load Rails.root.join('db/seeds.rb')
+    @seminar = Seminar.create!(title: 'Grading With Rubrics', start_at: 1.week.from_now,
+                               end_at: 1.week.from_now + 2.hours,
+                               seminar_status: Seminar::StatusType.find_by!(key: 'open'))
+  end
 
-  test 'the registration list renders with pagination' do
-    admin = Struct.new(:admin?, :name).new(true, 'Test Admin')
-    Current.stub(:user, admin) { get :index }
+  test 'the registration list renders with the pager and a download' do
+    sign_in('ac00')
+    get registrations_path
 
     assert_response :success
-    assert_includes response.body, 'Participant Registrations'
-    assert_includes response.body, 'Download Registrations (.xlsx)'
+    assert_select 'h1', 'Registrations'
+    assert_select 'a[download]', 'Download Registrations (.xlsx)'
   end
 
   test 'the registration list exports a valid workbook' do
-    admin = Struct.new(:admin?, :name).new(true, 'Test Admin')
-    Current.stub(:user, admin) { get :index, format: :xlsx }
+    sign_in('ac00')
+    get registrations_path(format: :xlsx)
 
     assert_response :success
     assert_equal 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response.media_type
-    Zip::File.open_buffer(response.body) do |archive|
-      assert archive.find_entry('xl/workbook.xml')
-    end
+    Zip::File.open_buffer(response.body) { |archive| assert archive.find_entry('xl/workbook.xml') }
   end
 
-  test 'manual attendance creates and syncs a new participant' do
-    participant = Minitest::Mock.new
-    participant.expect(:new_record?, true)
-    participant.expect(:save, true)
-    participant.expect(:update_ldap_attrs, nil)
-    participant.expect(:name, 'New Person')
+  test 'a participant registers for an open seminar and can cancel only their own seat' do
+    other = sign_in('hs00')
+    post seminar_registrations_path(@seminar)
+    theirs = other.registrations.sole
 
-    import_attendance(' NewUser ', { 'newuser' => participant }, [true])
+    participant = sign_in('am00')
+    post seminar_registrations_path(@seminar)
 
-    assert_includes @controller.instance_variable_get(:@uids), 'New Person (newuser)'
-    assert_empty @controller.instance_variable_get(:@bad_uids)
-    participant.verify
+    assert_redirected_to root_path
+    assert participant.registrations.sole.confirmed?
+
+    delete registration_path(theirs)
+    assert Registration.exists?(theirs.id)
+
+    delete registration_path(participant.registrations.sole)
+    assert_empty participant.registrations.reload
   end
 
-  test 'manual attendance reuses existing participants and ignores duplicate and blank entries' do
-    participant = Minitest::Mock.new
-    participant.expect(:new_record?, false)
-    participant.expect(:name, 'Existing Person')
+  test 'adding attendees registers new and existing people once and reports bad IDs' do
+    existing = sign_in('am00')
+    sign_in('ac00')
 
-    import_attendance('existing, , EXISTING,', { 'existing' => participant }, [true])
+    post seminar_registrations_path(@seminar), params: { participants: " am00, NEWP01 , am00,, Bad*ID" }
 
-    assert_includes @controller.instance_variable_get(:@uids), 'Existing Person (existing)'
-    assert_empty @controller.instance_variable_get(:@bad_uids)
-    participant.verify
-  end
-
-  test 'manual attendance reports invalid participants and continues with the remaining entries' do
-    invalid = Minitest::Mock.new
-    invalid.expect(:new_record?, true)
-    invalid.expect(:save, false)
-    valid = Minitest::Mock.new
-    valid.expect(:new_record?, false)
-    valid.expect(:name, 'Valid Person')
-
-    import_attendance('invalid,valid', { 'invalid' => invalid, 'valid' => valid }, [true])
-
-    assert_equal '<li>invalid</li>', @controller.instance_variable_get(:@bad_uids)
-    assert_equal '<li>Valid Person (valid)</li>', @controller.instance_variable_get(:@uids)
-    invalid.verify
-    valid.verify
-  end
-
-  test 'manual attendance does not report failed registrations as successful' do
-    participant = Minitest::Mock.new
-    participant.expect(:new_record?, false)
-
-    import_attendance('existing', { 'existing' => participant }, [false])
-
-    assert_equal '<li>existing</li>', @controller.instance_variable_get(:@bad_uids)
-    assert_empty @controller.instance_variable_get(:@uids)
-    participant.verify
-  end
-
-  private
-
-  def import_attendance(input, participants, save_results)
-    seminar = Object.new
-    confirmed = Object.new
-    attended = Object.new
-    admin = Struct.new(:admin?).new(true)
-    registrations = []
-    lookup = ->(andrewid:) { participants.fetch(andrewid) }
-    build_registration = lambda do |**attributes|
-      assert_same seminar, attributes[:seminar]
-      assert_same confirmed, attributes[:waitlist_status]
-      assert_same attended, attributes[:attendance_status]
-      assert participants.values.any? { |p| p.object_id == attributes[:participant].object_id }
-      registration = Minitest::Mock.new
-      registration.expect(:save, save_results.fetch(registrations.length))
-      registrations << registration
-      registration
-    end
-
-    @controller.params = { seminar_id: '1', participants: input }
-    Current.stub(:user, admin) do
-      Seminar.stub(:find, seminar) do
-        Participant.stub(:find_or_initialize_by, lookup) do
-          Registration::WaitlistStatusType.stub(:find_by_key, confirmed) do
-            Registration::AttendanceStatusType.stub(:find_by_key, attended) do
-              Registration.stub(:new, build_registration) do
-                @controller.stub(:render, nil) { @controller.create }
-              end
-            end
-          end
-        end
-      end
-    end
-    assert_equal save_results.length, registrations.length
-    registrations.each(&:verify)
+    assert_redirected_to attendance_admin_seminar_path(@seminar)
+    assert_equal %w[am00 newp01], @seminar.registrations.map { |r| r.participant.andrewid }.sort
+    assert @seminar.registrations.all? { |r| r.confirmed? && r.attended? }
+    assert_equal existing, Participant.find_by(andrewid: 'am00')
+    assert_match 'bad*id', flash[:alert]
   end
 end

@@ -2,7 +2,7 @@
 
 class ParticipantsController < ApplicationController
   before_action :require_authentication
-  before_action :require_administrator, except: :show
+  before_action :require_administrator, except: :record
 
   def index
     @participants = Participant.all
@@ -11,105 +11,67 @@ class ParticipantsController < ApplicationController
       @participants = @participants.completed_future_faculty_requirements
     end
     respond_to do |format|
-      format.html
-      format.json do
-        render json: Participant.table_rows(@participants)
-      end
+      format.html { @rows = Participant.table_rows(@participants) }
+      format.json { render json: Participant.table_rows(@participants) }
       format.xlsx { response.headers.merge! file_export_headers }
     end
   end
 
+  # People in the directory, for the participants page's look-up
   def search
-    query = params["q"]
-    return if query.blank?
-
-    @andrew_people = Participant.filter(keyword: query)
-    p Participant.filter(keyword: "merib")
-
-    respond_to do |format|
-      format.json do
-        render json: @andrew_people.to_json
-      end
-    end
+    render json: Participant.filter(keyword: params[:q])
   end
 
   def show
-    @participant = show_participant(params[:id])
-    request.format = 'pdf' unless Current.user.admin?
-
-    respond_to do |format|
-      format.html
-      format.pdf
-    end
+    @participant = find_or_create_participant(params[:id]) or return
   end
 
-  def create
-    @participant = show_participant(participant_params[:andrewid])
-    @participant&.update!(participant_params)
+  # A participation record, for printing: anyone's for an administrator,
+  # otherwise the signed-in user's own (/profile)
+  def record
+    @participant = if Current.user.admin? && params[:id].present?
+                     find_or_create_participant(params[:id]) or return
+                   else
+                     Current.user
+                   end
+  end
 
-    respond_to do |format|
-      format.html { redirect_back fallback_location: root_path }
-    end
+  # Adds someone as an administrator or consultant, from Settings
+  def create
+    participant = find_or_create_participant(admin_participant_params[:andrewid]) or return
+    participant.update!(admin_participant_params)
+    redirect_back fallback_location: settings_path, notice: "You added #{participant.name}."
   end
 
   def update
-    @participant = show_participant(params[:id])
-    @participant.update!(participant_params)
-
-    respond_to do |format|
-      format.js
-      format.html { redirect_back fallback_location: root_path }
-      format.json { render json: @participant.to_json }
-    end
+    @participant = Participant.find_by!(andrewid: params[:id])
+    @participant.update!(admin_participant_params)
+    redirect_back fallback_location: participant_path(@participant), notice: "You saved #{@participant.name}."
   end
 
   private
 
-  def show_participant(uid = nil)
-    return Current.user unless Current.user.admin?
-    return Current.user if uid.blank?
-
-    find_or_create_participant(uid)
-  end
-
-  def find_or_create_participant(uid)
-    p = Participant.find_or_create_by! andrewid: uid
-    p.update_ldap_attrs
-    p
+  # The participant with this Andrew ID, added from the directory if they're
+  # new; nil, after sending the administrator back, if there's no such person
+  def find_or_create_participant(andrewid)
+    participant = Participant.find_or_create_by!(andrewid: andrewid.to_s.strip.downcase)
+    participant.update_ldap_attrs if participant.previously_new_record?
+    participant
   rescue ActiveRecord::RecordInvalid => e
-    # TODO: participants_url/did you mean? results
-    # redirect_to('/',
-    flash['error'] = '<strong>Participant does not exist.</strong> '\
-                     "#{e.record.errors.full_messages.join(', ')}"
-    redirect_to root_url
+    redirect_back fallback_location: participants_path, alert: "There's no one at CMU with the Andrew ID #{andrewid}. " \
+                                                               "#{e.record.errors.full_messages.to_sentence}"
+    nil
   rescue ActiveRecord::RecordNotUnique
-    # Mitigate the race condition if an unrelated insert happens after this
-    # lookup fails
     retry
   end
 
-  def participant_params
-    if Current.user.admin?
-      admin_participant_params
-    else
-      params.require(:participant).permit(nil)
-    end
-  end
-
   def admin_participant_params
-    params
-      .require(:participant)
-      .permit(:andrewid,
-              :note,
-              :is_admin,
-              :is_consultant,
-              :future_faculty_program_graduated_on,
-              activities_attributes: %i[type id title description],
-              additional_activities_attributes: %i[title description])
+    params.require(:participant).permit(:andrewid, :note, :is_admin, :is_consultant,
+                                        :future_faculty_program_graduated_on)
   end
 
   def file_export_headers
-    filename = "Participants-#{DateTime.now.to_fs(:db)}.xlsx"
+    filename = "Participants-#{Time.zone.now.to_fs(:db)}.xlsx"
     { 'Content-Disposition': "attachment; filename=\"#{filename}\"" }
   end
 end

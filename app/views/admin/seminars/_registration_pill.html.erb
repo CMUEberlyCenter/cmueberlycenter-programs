@@ -1,0 +1,6 @@
+<%# locals: (status:) -%>
+<% case status %>
+<% when "confirmed" %><span class="cmu-pill cmu-pill--green">Confirmed</span>
+<% when "pending" %><span class="cmu-pill cmu-pill--amber">Waitlisted</span>
+<% when "canceled" %><span class="cmu-pill">Canceled</span>
+<% end %>
