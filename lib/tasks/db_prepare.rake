@@ -2,7 +2,6 @@
 
 # db:prepare first loads the schema and seeds into a database with no
 # tables of its own, such as a SQLite file the server made by connecting.
-# Otherwise db:prepare would run every migration from 2012 on it.
 namespace :db do
   task load_schema_if_empty: :environment do
     next if (ActiveRecord::Base.connection.tables - %w[schema_migrations ar_internal_metadata]).any?

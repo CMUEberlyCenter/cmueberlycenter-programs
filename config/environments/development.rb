@@ -3,7 +3,7 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # The address the app answers to behind a proxy, such as the fleet's
   # nginx (APP_HOST=programs.eberly.cmu.edu), besides localhost. /up answers
-  # any host, for health checks inside the container.
+  # any host.
   config.hosts << ENV["APP_HOST"] if ENV["APP_HOST"].present?
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 

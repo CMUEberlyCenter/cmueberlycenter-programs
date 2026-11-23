@@ -18,7 +18,7 @@ module Authentication
     Current.imposter = nil unless Current.imposter&.admin?
   end
 
-  # A new session for each sign-in, so an old session ID can't carry over
+  # A new session for each sign-in
   def sign_in_participant(participant)
     reset_session
     session[:participant_id] = participant.id

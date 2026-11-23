@@ -9,7 +9,7 @@ module NavigationItemsHelper
   def cmu_nav_tree
     admin = -> { Current.user&.admin? }
     staff = -> { Current.user&.staff? }
-    # Signed out, the tabs a participant gets; their own pages sign them in on the way
+    # Signed out, a participant's tabs
     participant = -> { !Current.user&.staff? }
     [
       { label: 'Seminars', url: seminars_path, if: staff },
@@ -19,7 +19,7 @@ module NavigationItemsHelper
       { label: 'Settings', url: settings_path, if: admin },
       { label: 'My Registrations', url: registrations_path, if: participant },
       { label: 'My Activities', url: profile_path, if: participant },
-      # The Eberly Center's home page, for anyone who teaches
+      # The Eberly Center's home page
       { label: 'Teaching Resources', url: eberly_url, if: participant }
     ]
   end

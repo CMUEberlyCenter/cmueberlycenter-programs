@@ -9,7 +9,7 @@
 - andrew_id: cc00
   name: Connie Consultant
   role: Teaching Consultant
-  can: Seminars, attendance, participants and their activities; not settings or creating and editing seminars.
+  can: Seminars, attendance, participants and their activities.
   consultant: true
 - andrew_id: pp00
   name: Polly Participant

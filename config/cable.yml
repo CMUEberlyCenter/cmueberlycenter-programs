@@ -1,4 +1,4 @@
-# Nothing broadcasts yet; the async adapter keeps Action Cable in the process
+# Action Cable in the app's process (async)
 development:
   adapter: async
 

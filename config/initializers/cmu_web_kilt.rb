@@ -2,7 +2,7 @@
 # (cmu-web-kilt). See CmuWebKilt::Configuration for each one.
 CmuWebKilt.configure do |config|
   config.site_name = "Seminars & Programs"
-  # The parent, linked to its home page; the layout prints a safe string as is
+  # The parent, linked to its home page
   config.tagline = '<a href="https://www.cmu.edu/teaching/">Eberly Center</a>'.html_safe
   config.roof = :white
 

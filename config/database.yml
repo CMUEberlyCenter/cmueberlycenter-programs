@@ -1,5 +1,4 @@
-# SQLite, one file per environment under storage/, which the container
-# keeps on a volume
+# SQLite, one file per environment under storage/
 default: &default
   adapter: sqlite3
   max_connections: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>

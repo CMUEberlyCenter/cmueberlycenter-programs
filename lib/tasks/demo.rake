@@ -66,9 +66,8 @@ class DemoData
     'seminar' => 'A seminar on one part of teaching, with time to try it out.'
   }.freeze
 
-  # Full descriptions for the programs open now, shaped like real catalog
-  # entries: a bold line on logistics, paragraphs, a list, a note and who
-  # leads it. Made up, as is everything in the demo.
+  # Full descriptions for the programs open now: a bold line on logistics,
+  # paragraphs, a list, a note and the facilitators
   ASYNC_LEAD = 'This program is self-paced. Your confirmation email says how to join its Canvas course.'
   DETAILS = {
     'Engaging Students on the First Day' => {
