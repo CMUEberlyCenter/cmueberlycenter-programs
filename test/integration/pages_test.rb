@@ -75,6 +75,17 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_equal count, Participant.count
   end
 
+  test 'signed out and as a participant, no staff pages in the navigation' do
+    get root_path
+    assert_select 'nav#nav a', { text: 'All Registrations', count: 0 }
+    assert_select 'nav#nav a', { text: 'Future Faculty Program', count: 0 }
+
+    sign_in('pp00')
+    get root_path
+    assert_select 'nav#nav a', { text: 'All Registrations', count: 0 }
+    assert_select 'nav#nav a', { text: 'Future Faculty Program', count: 0 }
+  end
+
   test 'staff tabs' do
     sign_in('aa00')
     get root_path

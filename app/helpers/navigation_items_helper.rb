@@ -13,9 +13,9 @@ module NavigationItemsHelper
     participant = -> { !Current.user&.staff? }
     [
       { label: 'Seminars', url: seminars_path, if: staff,
-        children: [{ label: 'All Registrations', url: all_registrations_path }] },
+        children: [{ label: 'All Registrations', url: all_registrations_path, if: staff }] },
       { label: 'Programs', url: programs_path, if: staff,
-        children: [{ label: 'Future Faculty Program', url: future_faculty_path }] },
+        children: [{ label: 'Future Faculty Program', url: future_faculty_path, if: staff }] },
       { label: 'People', url: participants_path, if: staff },
       { label: 'Admin', url: settings_path, if: admin },
       { label: 'My Registrations', url: registrations_path, if: participant },
