@@ -1,13 +1,13 @@
-<% cmu_title "Participants" %>
-<% cmu_breadcrumb "Participants" %>
+<% cmu_title "People" %>
+<% cmu_breadcrumb "People" %>
 <% complete = @ffp_status == "complete" %>
 <div class="content wide">
   <div>
-    <h1><%= complete ? "Participants Who Met the FFP Requirements" : "Participants" %></h1>
+    <h1><%= complete ? "Participants Who Met the FFP Requirements" : "People" %></h1>
     <% if complete %>
-      <p><%= link_to "Show All Participants", participants_path, class: "cta" %></p>
+      <p><%= link_to "Show Everyone", participants_path, class: "cta" %></p>
     <% end %>
-    <p><%= link_to "#{pluralize(@rows.size, 'Participant')} Spreadsheet", participants_path(format: :xlsx, ffp_status: @ffp_status),
+    <p><%= link_to "Spreadsheet of #{pluralize(@rows.size, 'Person', plural: 'People')}", participants_path(format: :xlsx, ffp_status: @ffp_status),
                    download: true %> [XLSX]</p>
 
     <%= form_with url: participants_path, method: :get, data: { controller: "people-search", people_search_url_value: search_participants_path } do %>
