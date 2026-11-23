@@ -4,12 +4,16 @@ class RegistrationsController < ApplicationController
   include Pagy::Backend
 
   before_action :require_authentication, only: %i[index create destroy]
+  before_action :require_staff, only: :all
 
-  # Staff get everyone's registrations; everyone else gets their own
-  # coming up (My Registrations)
+  # Your registrations coming up (My Registrations)
   def index
-    return mine unless Current.user.staff?
+    @registrations = Current.user.registrations.present_seminars
+                            .includes(:waitlist_status, :seminar).order('seminars.start_at')
+  end
 
+  # Everyone's registrations, for staff
+  def all
     @q = params[:q].to_s.strip
     registrations = Registration.includes(:waitlist_status, :attendance_status,
                                           seminar: :seminar_tags,
@@ -47,11 +51,6 @@ class RegistrationsController < ApplicationController
 
   private
 
-  def mine
-    @registrations = Current.user.registrations.present_seminars
-                            .includes(:waitlist_status, :seminar).order('seminars.start_at')
-    render :mine
-  end
 
   # A signed-in participant asks for a seat: confirmed, or waitlisted when
   # the seminar has a waitlist

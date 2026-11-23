@@ -10,16 +10,16 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
   test 'the registration list renders with the pager and a download' do
     sign_in('aa00')
-    get registrations_path
+    get all_registrations_path
 
     assert_response :success
-    assert_select 'h1', 'Registrations'
+    assert_select 'h1', 'All Registrations'
     assert_select 'a[download]', 'Registrations Spreadsheet'
   end
 
   test 'the registration list exports a valid workbook' do
     sign_in('aa00')
-    get registrations_path(format: :xlsx)
+    get all_registrations_path(format: :xlsx)
 
     assert_response :success
     assert_equal 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response.media_type

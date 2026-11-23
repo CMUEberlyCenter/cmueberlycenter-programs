@@ -1,51 +1,46 @@
-<% cmu_title "Registrations" %>
-<% cmu_breadcrumb "Registrations" %>
+<% cmu_title "My Registrations" %>
+<% cmu_breadcrumb "My Registrations" %>
 <div class="content wide">
   <div>
-    <h1>Registrations</h1>
-    <p><%= link_to "Registrations Spreadsheet", registrations_path(format: :xlsx, q: @q.presence), download: true %> [XLSX]</p>
-    <%= form_with url: registrations_path, method: :get, class: "cmu-search-bar" do %>
-      <p>Search by name, Andrew ID or seminar title.</p>
-      <label for="prg-registration-search" class="sr-only">Find a Registration</label>
-      <div class="cmu-field-button">
-        <input type="text" id="prg-registration-search" name="q" value="<%= @q %>" placeholder="Find a registration&hellip;" data-cmu-filter="prg-registrations">
-        <button class="btn" type="submit">Search</button>
-      </div>
-    <% end %>
-    <p class="cmu-results-count"><%= cmu_results_count(@pagy, "registration", "registrations") %></p>
-    <table class="alternate cmu-full" id="prg-registrations" data-cmu-table data-cmu-table-server>
-      <thead>
-        <tr>
-          <th scope="col" class="cmu-fit">Last Change</th>
-          <th scope="col">Name</th>
-          <th scope="col" class="cmu-fit">Andrew ID</th>
-          <th scope="col">Department</th>
-          <th scope="col">Seminar</th>
-          <th scope="col" class="cmu-fit">Date</th>
-          <th scope="col" class="cmu-fit">Registration</th>
-          <th scope="col" class="cmu-fit">Attendance</th>
-          <th scope="col" class="cmu-fit">FFP Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @registrations.each do |r| %>
-          <% p = r.participant %>
-          <% s = r.seminar %>
-          <% next if p.nil? || s.nil? %>
+    <h1>My Registrations</h1>
+    <% if @registrations.any? %>
+      <p class="cmu-lead">The programs you're signed up for that haven't happened yet.</p>
+      <table class="alternate cmu-full">
+        <thead>
           <tr>
-            <td class="cmu-fit"><%= ap_date(r.updated_at) %></td>
-            <td><%= link_to p.name, participant_path(p) %></td>
-            <td class="cmu-fit"><%= p.andrewid %></td>
-            <td><%= p.pretty_depts %></td>
-            <td><%= link_to s.title, admin_seminar_path(s) %></td>
-            <td class="cmu-fit"><%= seminar_day(s) %></td>
-            <td class="cmu-fit"><%= render "admin/seminars/registration_pill", status: r.waitlist_status&.key %></td>
-            <td class="cmu-fit"><%= r.attendance_status&.label %></td>
-            <td class="cmu-fit"><%= p.future_faculty_progress_status&.key&.titleize %></td>
+            <th scope="col">Program</th>
+            <th scope="col">When</th>
+            <th scope="col">Where</th>
+            <th scope="col">Status</th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
-    <%= cmu_pager(@pagy) %>
+        </thead>
+        <tbody>
+          <% @registrations.each do |registration| %>
+            <% seminar = registration.seminar %>
+            <tr>
+              <td><%= seminar.title %></td>
+              <td><%= seminar_when(seminar) %></td>
+              <td><%= seminar.location %></td>
+              <td>
+                <% if registration.confirmed? %>
+                  <span class="cmu-pill cmu-pill--green">Registered</span>
+                <% else %>
+                  <span class="cmu-pill cmu-pill--amber">Waitlisted</span>
+                <% end %>
+              </td>
+              <td>
+                <%= button_to (registration.confirmed? ? "Cancel Registration" : "Cancel Request"), registration_path(registration),
+                              method: :delete, class: "btn small ghost",
+                              data: { turbo_confirm: "Cancel your #{registration.confirmed? ? 'registration' : 'request'} for #{seminar.title}?" } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="cmu-lead">You're not signed up for anything coming up.</p>
+      <p><%= link_to "Find a Program", root_path, class: "cta" %></p>
+    <% end %>
   </div>
 </div>

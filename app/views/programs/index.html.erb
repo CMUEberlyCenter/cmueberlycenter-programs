@@ -1,0 +1,21 @@
+<% cmu_title "Programs" %>
+<% cmu_breadcrumb "Programs" %>
+<div class="content wide">
+  <div>
+    <h1>Programs</h1>
+    <p class="cmu-lead">The Eberly Center's programs, each with its participants and their progress.</p>
+  </div>
+</div>
+<div class="grid column2 grey boxes cmu-cards-links">
+  <div>
+    <h3>Future Faculty Program</h3>
+    <p>Graduate students and postdocs preparing to teach as faculty: seminars, teaching feedback and a teaching statement.</p>
+    <p class="cmu-muted">
+      <%= pluralize(@future_faculty.values.sum, "participant") %>:
+      <%= @future_faculty.fetch("incomplete", 0) %> in progress,
+      <%= @future_faculty.fetch("complete", 0) %> met the requirements,
+      <%= @future_faculty.fetch("graduated", 0) %> graduated
+    </p>
+    <p><%= link_to "Open the Future Faculty Program", future_faculty_path, class: "cta" %></p>
+  </div>
+</div>

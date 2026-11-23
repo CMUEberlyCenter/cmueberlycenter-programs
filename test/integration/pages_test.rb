@@ -53,6 +53,20 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_url
   end
 
+  test 'staff tabs' do
+    sign_in('aa00')
+    get root_path
+    assert_select 'nav#nav > ul > li > a', text: 'Seminars'
+    assert_select 'nav#nav > ul > li > a', text: 'Programs'
+    assert_select 'nav#nav > ul > li > a', text: 'People'
+    assert_select 'nav#nav > ul > li > a', text: 'Admin'
+    assert_select 'nav#nav li li a', text: 'All Registrations'
+
+    get programs_path
+    assert_response :success
+    assert_select 'a.cta', 'Open the Future Faculty Program'
+  end
+
   test 'an administrator sees every admin page' do
     participant = sign_in('pp00')
     admin = sign_in('aa00')

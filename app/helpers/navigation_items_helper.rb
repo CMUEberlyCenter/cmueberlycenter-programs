@@ -12,11 +12,12 @@ module NavigationItemsHelper
     # Signed out, a participant's tabs
     participant = -> { !Current.user&.staff? }
     [
-      { label: 'Seminars', url: seminars_path, if: staff },
-      { label: 'Participants', url: participants_path, if: staff },
-      { label: 'Registrations', url: registrations_path, if: staff },
-      { label: 'Future Faculty Program', url: future_faculty_path, if: staff },
-      { label: 'Settings', url: settings_path, if: admin },
+      { label: 'Seminars', url: seminars_path, if: staff,
+        children: [{ label: 'All Registrations', url: all_registrations_path }] },
+      { label: 'Programs', url: programs_path, if: staff,
+        children: [{ label: 'Future Faculty Program', url: future_faculty_path }] },
+      { label: 'People', url: participants_path, if: staff },
+      { label: 'Admin', url: settings_path, if: admin },
       { label: 'My Registrations', url: registrations_path, if: participant },
       { label: 'My Activities', url: profile_path, if: participant },
       # The Eberly Center's home page

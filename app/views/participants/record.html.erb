@@ -3,8 +3,8 @@
 <% if own %>
   <% cmu_breadcrumb "My Activities" %>
 <% else %>
-  <% cmu_breadcrumb link_to("Participants", participants_path), link_to(@participant.name, participant_path(@participant)), "Participation Record" %>
-  <% cmu_nav "participants" %>
+  <% cmu_breadcrumb link_to("People", participants_path), link_to(@participant.name, participant_path(@participant)), "Participation Record" %>
+  <% cmu_nav "people" %>
 <% end %>
 <% version = @participant.future_faculty_enrollment || Programs::FutureFaculty::RequirementsVersion.find_by(key: "2023") %>
 <% requirements = version ? version.requirements.group_by(&:requirement_category) : {} %>

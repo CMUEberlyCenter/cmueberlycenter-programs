@@ -57,7 +57,7 @@ class ParticipantsControllerTest < ActionController::TestCase
     assert_response :success
     link = Nokogiri::HTML(response.body).at_css('a[download]')
     assert_equal participants_path(format: :xlsx, ffp_status: 'complete'), link['href']
-    assert_equal '1 Participant Spreadsheet', link.text
+    assert_equal 'Spreadsheet of 1 Person', link.text
 
     Current.stub(:user, admin) { get :index, params: { ffp_status: 'complete' }, format: :xlsx }
     assert_response :success

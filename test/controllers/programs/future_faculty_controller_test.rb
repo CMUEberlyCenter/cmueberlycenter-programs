@@ -20,7 +20,7 @@ class Programs::FutureFacultyControllerTest < ActionController::TestCase
 
   test 're-enrollment has its own PATCH route' do
     assert_routing(
-      { path: '/future-faculty/existing/reenroll', method: :patch },
+      { path: '/programs/future-faculty/existing/reenroll', method: :patch },
       { controller: 'programs/future_faculty', action: 'reenroll', participant_id: 'existing' }
     )
   end

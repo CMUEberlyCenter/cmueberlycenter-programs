@@ -1,0 +1,51 @@
+<% cmu_title "All Registrations", "Seminars" %>
+<% cmu_breadcrumb link_to("Seminars", seminars_path), "All Registrations" %>
+<div class="content wide">
+  <div>
+    <h1>All Registrations</h1>
+    <p><%= link_to "Registrations Spreadsheet", all_registrations_path(format: :xlsx, q: @q.presence), download: true %> [XLSX]</p>
+    <%= form_with url: all_registrations_path, method: :get, class: "cmu-search-bar" do %>
+      <p>Search by name, Andrew ID or seminar title.</p>
+      <label for="prg-registration-search" class="sr-only">Find a Registration</label>
+      <div class="cmu-field-button">
+        <input type="text" id="prg-registration-search" name="q" value="<%= @q %>" placeholder="Find a registration&hellip;" data-cmu-filter="prg-registrations">
+        <button class="btn" type="submit">Search</button>
+      </div>
+    <% end %>
+    <p class="cmu-results-count"><%= cmu_results_count(@pagy, "registration", "registrations") %></p>
+    <table class="alternate cmu-full" id="prg-registrations" data-cmu-table data-cmu-table-server>
+      <thead>
+        <tr>
+          <th scope="col" class="cmu-fit">Last Change</th>
+          <th scope="col">Name</th>
+          <th scope="col" class="cmu-fit">Andrew ID</th>
+          <th scope="col">Department</th>
+          <th scope="col">Seminar</th>
+          <th scope="col" class="cmu-fit">Date</th>
+          <th scope="col" class="cmu-fit">Registration</th>
+          <th scope="col" class="cmu-fit">Attendance</th>
+          <th scope="col" class="cmu-fit">FFP Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @registrations.each do |r| %>
+          <% p = r.participant %>
+          <% s = r.seminar %>
+          <% next if p.nil? || s.nil? %>
+          <tr>
+            <td class="cmu-fit"><%= ap_date(r.updated_at) %></td>
+            <td><%= link_to p.name, participant_path(p) %></td>
+            <td class="cmu-fit"><%= p.andrewid %></td>
+            <td><%= p.pretty_depts %></td>
+            <td><%= link_to s.title, admin_seminar_path(s) %></td>
+            <td class="cmu-fit"><%= seminar_day(s) %></td>
+            <td class="cmu-fit"><%= render "admin/seminars/registration_pill", status: r.waitlist_status&.key %></td>
+            <td class="cmu-fit"><%= r.attendance_status&.label %></td>
+            <td class="cmu-fit"><%= p.future_faculty_progress_status&.key&.titleize %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <%= cmu_pager(@pagy) %>
+  </div>
+</div>

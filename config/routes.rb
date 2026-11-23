@@ -37,14 +37,15 @@ Rails.application.routes.draw do
   delete 'logout', to: 'sessions#destroy'
 
   # An administrator acting as someone else (the kit's Acting as Another User)
-  post 'participants/:participant_id/act-as', to: 'sessions#create_acting', as: :act_as
+  post 'people/:participant_id/act-as', to: 'sessions#create_acting', as: :act_as
   post 'stop-acting', to: 'sessions#destroy_acting', as: :stop_acting
 
-  # Application settings
-  resources :settings, only: [:index, :update]
+  # Admin: the site's settings, for administrators
+  resources :settings, path: 'admin', only: [:index, :update]
 
-  # Future faculty program management
-  scope module: :programs do
+  # Programs: an index of them, then each program's own pages
+  get 'programs', to: 'programs#index', as: :programs
+  scope 'programs', module: :programs do
     resource :future_faculty, path: 'future-faculty', only: [] do
       member do
         get :index
@@ -61,15 +62,17 @@ Rails.application.routes.draw do
     end
   end
 
-  # Participants: administrators see everyone; anyone signed in sees their
-  # own record at /profile
-  resources :participants, only: %i[index show create update] do
+  # People: staff see everyone; anyone signed in sees their own record at
+  # /profile
+  resources :participants, path: 'people', only: %i[index show create update] do
     get 'search', on: :collection
     get 'record', on: :member
     resources :activities, only: %i[new create edit update destroy], shallow: true
   end
   get 'profile', to: 'participants#record', as: :profile
 
+  # Everyone's registrations, for staff, in the Seminars section
+  get 'seminars/registrations', to: 'registrations#all', as: :all_registrations
   resources :seminars, only: %i[index destroy] do
     resources :registrations, only: :create
   end
@@ -77,7 +80,6 @@ Rails.application.routes.draw do
 
   # Running seminars: registrations, attendance and the sign-in sheet
   namespace :admin do
-    get '/', to: redirect('/seminars')
     resources :seminars, only: %i[new create show edit update] do
       member do
         get :attendance
