@@ -1,107 +1,67 @@
 # Eberly Programs
 
 Seminar registration, attendance and Future Faculty Program records for the
-Eberly Center. The app uses Rails 8.1, Ruby 3.4, MySQL, Hotwire and Propshaft.
+Eberly Center. The app uses Rails 8.1, Ruby 3.4, SQLite, Hotwire, Propshaft and the
+Carnegie Mellon Web Kilt for its look.
 The deployment Ruby version is recorded in `.ruby-version`.
-
-## Containers
-
-The Dockerfile provides `development` and `production` targets using the pinned
-Ruby version. No host Ruby, Node or MySQL installation is needed for containers;
-JavaScript uses import maps. Docker Compose supplies MySQL 8.0 and Redis locally.
-
-In VS Code, choose **Dev Containers: Reopen in Container**. Setup installs the
-bundle and prepares separate development and test databases. Start Rails in
-the container terminal:
-
-```sh
-bin/rails server -b 0.0.0.0
-```
-
-Without VS Code:
-
-```sh
-docker compose up --build
-docker compose run --rm rails sh -c 'RAILS_ENV=test bin/rails db:prepare && bin/rails test'
-docker compose exec rails bin/rails console
-```
-
-Open <http://localhost:3000>. On Linux, if your UID/GID differ from 1000, export
-`LOCAL_UID=$(id -u)` and `LOCAL_GID=$(id -g)` before building with Compose.
-If port 3000 is occupied, use `PORT=3100 docker compose up` and open port 3100.
-The devcontainer adjusts the editor user's UID automatically. Rebuild after
-changing the Gemfile or lockfile. Source changes reload from the mounted checkout.
-Compose mounts the database example over `config/database.yml` inside the
-container, preserving any existing host configuration and encryption keys.
-
-MySQL data lives in a named volume. `docker compose down` preserves it;
-`docker compose down --volumes` deletes the development databases. The fixed
-database passwords in Compose are for this isolated local environment. Only
-Rails is published, on loopback; MySQL and Redis have no host ports.
-
-Public pages and tests work without CMU credentials. Login and directory-backed
-participant creation still require CMU LDAP access. Export `LDAP_BIND_DN`,
-`LDAP_PASSWORD` and, for local login, `REMOTE_USER=your-andrewid` before starting
-Compose. Administrator provisioning remains explicit through the seed command
-described below. Development mail uses Rails' default SMTP delivery configuration;
-no mail catcher is included.
-
-The production image contains the runtime bundle and precompiled assets and
-runs as a non-root user. Local environment files, keys, database dumps, cached
-gems and generated assets are excluded from the build context. Build and check
-it without supplying production credentials:
-
-```sh
-docker build --target production -t seminars:local .
-```
-
-An optional deployment Compose file uses externally managed MySQL and Redis.
-Export `DATABASE_URL`, `REDIS_URL` and a persistent `SECRET_KEY_BASE`; provide
-`RAILS_MASTER_KEY` if encrypted credentials are needed. For an existing site,
-retain its actual Rails secret to preserve sessions. Supply LDAP variables at
-runtime as needed. Then:
-
-```sh
-docker compose -f docker/production/compose.yml build
-docker compose -f docker/production/compose.yml run --rm rails bin/rails db:migrate
-docker compose -f docker/production/compose.yml up -d
-```
-
-For a new database, use `db:prepare` instead of `db:migrate`. Migrations never
-run automatically on production container startup. Uploaded files persist in
-the production storage volume. The web port binds to loopback for a host reverse
-proxy. Deployment still needs the site's trusted Shibboleth identity integration
-to populate `request.env['REMOTE_USER']`, SMTP relay access and the nightly
-`bin/rails cron:nightly_chores` job; the container does not configure these services.
-
-GitHub Actions builds both image targets and runs the Rails suite against MySQL.
-It does not publish images or deploy the app.
 
 ## Development
 
-1. Install the Ruby version in `.ruby-version` and MySQL development headers.
-2. Run `bundle install`.
-3. Copy `config/database.yml.example` to `config/database.yml` and configure
-   the database using environment variables. Development and test must use
-   separate databases from production.
-4. Provide `RAILS_MASTER_KEY` or a local `config/master.key` when using the
-   encrypted credentials. Alternatively, provide `SECRET_KEY_BASE` in production.
-5. Run `bin/rails db:prepare`, then `bin/rails server`.
+1. Install the Ruby version in `.ruby-version` and run `bundle install`.
+2. Run `bin/rails db:prepare demo:seed`, then `bin/rails server`.
+3. Open <http://localhost:3000> and choose Sign In.
 
-The seed data is safe to run repeatedly and preserves existing records and IDs.
+Development and test sign in through developer sign-in at `/login`: pick a
+test account from `config/test_accounts.yml` (Andrew Carnegie is an
+administrator, Andrew Mellon a participant). They also look people up in a
+made-up directory, `config/demo_directory.yml`, in place of CMU's LDAP
+directory. `demo:seed` loads made-up seminars, registrations and Future
+Faculty Program records with those people; it runs only in development and
+stops on a database with anyone else in it. Mail in development is logged,
+never sent.
+
+The seed data (`bin/rails db:seed`, which `db:prepare` runs on a new
+database) is safe to run repeatedly and preserves existing records and IDs.
 It provides status types and the 2012, 2015 and 2023 program reference data.
-`DEFAULT_SEMINAR_TAG` controls the initial seminar tag settings. To provision
-an administrator, explicitly set `BOOTSTRAP_ADMIN_ANDREWID` when running
-`bin/rails db:seed`; this requires access to CMU LDAP. Default seeds do not
-create personal accounts or contact LDAP.
+`DEFAULT_SEMINAR_TAG` sets the first seminar tag settings, and
+`BOOTSTRAP_ADMIN_ANDREWID` makes someone an administrator.
 
-The application retains Rails 7.0 compatibility defaults while the framework
-upgrade is validated. Adopt newer defaults separately, including any session
-or cache format changes.
+The application keeps Rails 7.0 compatibility defaults. Adopt newer defaults
+separately, including any session or cache format changes.
+
+## Containers
+
+The Dockerfile has four targets on the pinned Ruby: `development` (a
+devcontainer), `test` (runs every check), `production-build` and
+`production` (the published image). In VS Code, choose **Dev Containers:
+Reopen in Container**; without it, `docker compose up --build` runs the app
+on <http://localhost:3000> (`PORT=3100` for another port). On Linux, if your
+UID or GID isn't 1000, export `LOCAL_UID=$(id -u)` and `LOCAL_GID=$(id -g)`
+first.
+
+Publish Image runs the checks on every push and pull request, and pushes
+`ghcr.io/cmueberlycenter/cmueberlycenter-programs` for each version tag (a
+bare number such as 0.1.0) or a manual run.
+
+The image runs as production by default. With `RAILS_ENV=development` it
+runs with developer sign-in and the made-up directory, for a demo with
+made-up data. Either way the database is a SQLite file in `/app/storage`,
+which belongs on a volume, and the app listens on port 3000 (`PORT`). Set:
+
+| Variable | What it does |
+| --- | --- |
+| `RAILS_ENV` | `production` (the default) or `development` for a demo |
+| `SECRET_KEY_BASE` | A long random secret that stays the same between restarts |
+| `APP_HOST` | The address the app answers to behind a proxy, such as `programs.eberly.cmu.edu`, in development |
+| `LDAP_BIND_DN`, `LDAP_PASSWORD` | CMU LDAP, in production only |
+
+Set up or update the database as a one-off in the running container,
+`bin/rails db:prepare`, and for a demo `bin/rails db:prepare demo:seed`.
+Migrations never run when the container starts. The proxy in front of the
+app sends `X-Forwarded-Proto: https`, or signing in fails. `/up` answers 200
+once the database is set up, from any host.
 
 ## Checks
-
-With a separate test database configured:
 
 ```sh
 RAILS_ENV=test bin/rails db:prepare
@@ -109,14 +69,13 @@ bin/rails test
 bin/rails zeitwerk:check
 ```
 
-MySQL is the production database. SQLite may be used for isolated tests with
-`DATABASE_URL`, but MySQL-specific schema options require an adapted test
-schema; SQLite checks do not replace MySQL validation.
+`docker build --target test .` runs the same checks in the image.
 
 ## Migration Retention
 
 Keep migrations for at least 12 months and until every maintained environment
-has applied them. Bootstrap fresh databases from `db/schema.rb` and seed data.
+has applied them. Bootstrap fresh databases from `db/schema.rb` and seed data; `db:prepare`
+loads the schema into a database with no tables of its own.
 
 Before retiring migrations:
 
@@ -135,20 +94,13 @@ migration-history catch-up commit.
 
 ## Configuration and Deployment
 
-Database passwords, Rails encryption keys, `.env` files and plaintext legacy
-secret files belong outside Git. LDAP binding uses `LDAP_BIND_DN` and
-`LDAP_PASSWORD` from deployment-managed environment variables.
-Encrypted Rails credentials may be versioned, but their decryption keys must
-remain private. Never copy configuration values or decrypted credentials into
-logs, issues or commit messages.
+Rails encryption keys, `.env` files and plaintext legacy secret files belong
+outside Git. LDAP binding uses `LDAP_BIND_DN` and `LDAP_PASSWORD` from
+deployment-managed environment variables. Encrypted Rails credentials may be
+versioned, but their decryption keys must remain private. Never copy
+configuration values or decrypted credentials into logs, issues or commit
+messages.
 
-Run the app with Puma using `bundle exec puma -C config/puma.rb`. The repository
-no longer uses Capistrano. Preserve the existing server's reverse proxy,
-Shibboleth authentication and scheduled jobs when deploying; replacing those
-services is outside the framework upgrade.
-
-For an existing installation, install the pinned Ruby and bundle first, run
-`bin/rails db:migrate`, precompile assets and restart the existing app service.
-The new migration removes only duplicate participant foreign keys with
-identical rules. It preserves one constraint and leaves constraints with
-different columns or actions intact. Existing program data is not rewritten.
+Production has no sign-in yet: `/login` says so. Single sign-on (Entra ID)
+goes there next. The nightly `bin/rails cron:nightly_chores` job and an SMTP
+relay are the deployment's to provide.
