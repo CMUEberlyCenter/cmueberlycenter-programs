@@ -22,25 +22,38 @@ class ParticipantsController < ApplicationController
     render json: Participant.filter(keyword: params[:q])
   end
 
+  # A person's page; someone in the directory but not yet in Programs gets
+  # a page with an Add button, and anyone else a 404
   def show
-    @participant = find_or_create_participant(params[:id]) or return
+    @participant = Participant.find_by(andrewid: andrewid_param)
+    return if @participant
+
+    @directory_entry = Participant.directory.find_by(uid: andrewid_param)
+    return render(:new_person) if @directory_entry
+
+    render :not_found, status: :not_found
   end
 
   # A participation record, for printing: anyone's for an administrator,
   # otherwise the signed-in user's own (/profile)
   def record
     @participant = if Current.user.staff? && params[:id].present?
-                     find_or_create_participant(params[:id]) or return
+                     Participant.find_by!(andrewid: andrewid_param)
                    else
                      Current.user
                    end
   end
 
-  # Adds someone as an administrator or consultant, from Settings
+  # Adds someone: from a person's Add button, then opens their page; or as an
+  # administrator or consultant, from Admin
   def create
     participant = find_or_create_participant(admin_participant_params[:andrewid]) or return
     participant.update!(admin_participant_params)
-    redirect_back fallback_location: settings_path, notice: "You added #{participant.name}."
+    if admin_participant_params.key?(:is_admin) || admin_participant_params.key?(:is_consultant)
+      redirect_back fallback_location: settings_path, notice: "You added #{participant.name}."
+    else
+      redirect_to participant_path(participant), notice: "You added #{participant.name}."
+    end
   end
 
   def update
@@ -50,6 +63,8 @@ class ParticipantsController < ApplicationController
   end
 
   private
+
+  def andrewid_param = params[:id].to_s.strip.downcase
 
   # The participant with this Andrew ID, added from the directory if they're
   # new; nil, after sending the administrator back, if there's no such person
