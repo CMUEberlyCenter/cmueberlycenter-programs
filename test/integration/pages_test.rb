@@ -18,6 +18,25 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_select 'a.cta[href^="/login"]', 'Sign In to Register'
   end
 
+  test 'a participant sees only their own registrations coming up' do
+    participant = sign_in('pp00')
+    mine = participant.registrations.present_seminars.map { |r| r.seminar.title }
+    others = Registration.where.not(participant:).present_seminars.map { |r| r.seminar.title } - mine
+
+    get registrations_path
+
+    assert_response :success
+    assert_select 'h1', 'My Registrations'
+    mine.each { |title| assert_select 'td', title }
+    others.each { |title| assert_select 'td', { text: title, count: 0 } }
+  end
+
+  test 'signed out, My Registrations signs in on the way' do
+    get registrations_path
+
+    assert_redirected_to login_path(return_to: registrations_path)
+  end
+
   test 'an administrator sees every admin page' do
     participant = sign_in('pp00')
     admin = sign_in('aa00')

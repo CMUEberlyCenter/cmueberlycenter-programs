@@ -3,10 +3,13 @@
 class RegistrationsController < ApplicationController
   include Pagy::Backend
 
-  before_action :require_administrator, only: :index
-  before_action :require_authentication, only: %i[create destroy]
+  before_action :require_authentication, only: %i[index create destroy]
 
+  # Administrators get everyone's registrations; everyone else gets their own
+  # coming up (My Registrations)
   def index
+    return mine unless Current.user.admin?
+
     @q = params[:q].to_s.strip
     registrations = Registration.includes(:waitlist_status, :attendance_status,
                                           seminar: :seminar_tags,
@@ -39,10 +42,16 @@ class RegistrationsController < ApplicationController
 
     ParticipantMailer.canceled_registration_email(registration).deliver
     registration.destroy
-    redirect_to root_path, notice: "You canceled your registration for #{registration.seminar.title}."
+    redirect_back_or_to root_path, notice: "You canceled your registration for #{registration.seminar.title}."
   end
 
   private
+
+  def mine
+    @registrations = Current.user.registrations.present_seminars
+                            .includes(:waitlist_status, :seminar).order('seminars.start_at')
+    render :mine
+  end
 
   # A signed-in participant asks for a seat: confirmed, or waitlisted when
   # the seminar has a waitlist
