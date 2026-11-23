@@ -88,9 +88,9 @@ class DemoData
     end
     {
       'homepage-participant' => ['Home page note',
-                                 '<p>Seminars and workshops on teaching for graduate students and postdocs. ' \
-                                 'Register for any program below; the Future Faculty Program counts the ones ' \
-                                 'you attend.</p>'],
+                                 '<p class="cmu-lead">Seminars and workshops on teaching from the Eberly Center, ' \
+                                 'wherever you are in your teaching. Register for one below; the Future ' \
+                                 'Faculty Program counts the ones you attend.</p>'],
       'sidebar-participant' => ['Sidebar note for signed-in participants',
                                 '<p>Questions? Email seminars@eberly.cmu.edu.</p>']
     }.each do |key, (label, value)|

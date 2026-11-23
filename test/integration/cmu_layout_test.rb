@@ -6,7 +6,7 @@ class CmuLayoutTest < ActionDispatch::IntegrationTest
     get root_path
 
     assert_response :success
-    assert_select "title", /Seminars\ &\ Workshops/
+    assert_select "title", /Seminars & Programs/
     assert_select "header .roof .wordmark"
     assert_select "footer nav#nav"
   end

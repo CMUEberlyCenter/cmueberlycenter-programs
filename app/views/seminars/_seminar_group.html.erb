@@ -1,8 +1,13 @@
-<h2 class="rule-top"><%= seminar_group.title %></h2>
+<%= tag.div(class: ["content wide", seminar_group.color, ("invert" if seminar_group.invert?)]) do %>
+  <div>
+    <h1><%= seminar_group.title %></h1>
+    <% if seminar_group.seminars.empty? %>
+      <p>None right now.</p>
+    <% end %>
+  </div>
+<% end %>
 <% if seminar_group.seminars.any? %>
-  <div class="grid column2 boxes prg-seminars">
+  <div class="grid column3 <%= seminar_group.color %> boxes prg-seminars">
     <%= render partial: "seminars/seminar", collection: seminar_group.seminars %>
   </div>
-<% else %>
-  <p class="cmu-empty">None right now.</p>
 <% end %>

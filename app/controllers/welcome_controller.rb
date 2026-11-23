@@ -4,24 +4,18 @@ class WelcomeController < ApplicationController
   def index
     @homepage_note = Setting.find_by(key: 'homepage-participant')&.value
     @sidebar_note = Setting.find_by(key: 'sidebar-participant')&.value
-    @tag = params[:tag].presence
 
     @seminar_groups = [
-      SeminarGroup.new(title: 'Live Programs Open for Registration',
-                       seminars: Seminar.registerable.in_person),
-      SeminarGroup.new(title: 'Asynchronous Programs Open for Registration',
-                       seminars: Seminar.registerable.asynchronous)
+      SeminarGroup.new(title: 'Upcoming Programs',
+                       seminars: Seminar.registerable.in_person, color: 'teal'),
+      SeminarGroup.new(title: 'Self-Paced Programs',
+                       seminars: Seminar.registerable.asynchronous, color: 'blue')
     ]
     if Current.user&.admin?
-      @seminar_groups << SeminarGroup.new(title: 'Past Programs', seminars: recent_past_seminars)
+      @seminar_groups << SeminarGroup.new(title: 'Past Programs', seminars: recent_past_seminars, color: 'grey')
       @seminar_groups << SeminarGroup.new(title: 'Programs Not Open for Registration',
-                                          seminars: Seminar.present.closed)
+                                          seminars: Seminar.present.closed, color: 'grey')
     end
-
-    @seminar_tags = @seminar_groups.flat_map(&:seminars).flat_map(&:tags).uniq.sort
-    return unless @tag
-
-    @seminar_groups.each { |group| group.seminars = group.seminars.select { |s| s.tag?(@tag) } }
   end
 
   private

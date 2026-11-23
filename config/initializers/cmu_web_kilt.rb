@@ -1,15 +1,17 @@
 # The site's settings for the Carnegie Mellon Web Kilt's layout
 # (cmu-web-kilt). See CmuWebKilt::Configuration for each one.
 CmuWebKilt.configure do |config|
-  config.site_name = "Seminars & Workshops"
-  config.tagline = "Eberly Center"
+  config.site_name = "Seminars & Programs"
+  # The parent, linked to its home page; the layout prints a safe string as is
+  config.tagline = '<a href="https://www.cmu.edu/teaching/">Eberly Center</a>'.html_safe
   config.roof = :white
 
   # The footer's address lines, under the site name
   config.footer_lines = [ "Eberly Center", "Carnegie Mellon University", "Tepper Quad, Suite 1310",
-                         "4765 Forbes Avenue", "Pittsburgh, PA 15213", "412-268-2896" ]
-  # The contact address in the footer and on the sign-in page
-  config.contact_email = "seminars@eberly.cmu.edu"
+                         "4765 Forbes Avenue, Pittsburgh, PA 15213",
+                         '<a href="mailto:eberly-assist@andrew.cmu.edu">Contact Us</a>'.html_safe ]
+  # A contact address for the footer and the sign-in page; none when nil
+  config.contact_email = nil
 
   # A logo beside the site name: an image in app/assets/images, the words
   # that say where its link goes, and that link

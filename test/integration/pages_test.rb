@@ -15,7 +15,7 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select 'h3', 'Active Learning in Large Classes'
     assert_select 'p.date', /, noon-2 p\.m\./
-    assert_select 'form button', 'Sign In to Register'
+    assert_select 'a.cta[href^="/login"]', 'Sign In to Register'
   end
 
   test 'an administrator sees every admin page' do

@@ -4,7 +4,7 @@
     <% if @homepage_note.present? %>
       <%= sanitize @homepage_note %>
     <% else %>
-      <p>The Eberly Center's seminars and workshops on teaching, for graduate students and postdocs. Find a program below and register for it.</p>
+      <p class="cmu-lead">Seminars and workshops on teaching from the Eberly Center, wherever you are in your teaching. Register for one below; the Future Faculty Program counts the ones you&nbsp;attend.</p>
     <% end %>
   </div><div class="sidebar">
     <% if Current.user&.admin? %>
@@ -23,28 +23,11 @@
         </ul>
       </div>
     <% else %>
-      <div class="red invert">
-        <h1>Register for Seminars</h1>
-        <p>Sign in with your Andrew account to register and see your record.</p>
-        <div class="prg-button"><%= button_to "Sign In", login_path, class: "btn ghost wide", form: { data: { turbo: false } } %></div>
+      <div class="simple">
+        <h1><%= link_to "Sign In", login_path, class: "btn ghost wide" %></h1>
       </div>
     <% end %>
   </div>
 </div>
 
-<div class="content wide">
-  <div>
-    <% if @seminar_tags.any? %>
-      <p class="cmu-label">Show Programs Tagged</p>
-      <p class="prg-tags">
-        <%= link_to "All", root_path(anchor: "programs"), class: ["btn small", ("ghost" if @tag)], "aria-current": (@tag ? nil : "true") %>
-        <% @seminar_tags.each do |t| %>
-          <%= link_to t, root_path(tag: t, anchor: "programs"), class: ["btn small", ("ghost" unless @tag == t)], "aria-current": (@tag == t ? "true" : nil) %>
-        <% end %>
-      </p>
-    <% end %>
-    <div id="programs">
-      <%= render @seminar_groups %>
-    </div>
-  </div>
-</div>
+<%= render @seminar_groups %>
