@@ -60,7 +60,7 @@ class DemoData
     'seminar' => 'A seminar on one part of teaching, with time to try it out.'
   }.freeze
 
-  STUDENTS = %w[am00 hf00 hs00 an00 ap00 ah00 tb00 rd00 jw00 rw00 rc00 hh00 aw00 hc00 tm00 pm00 jh00 rm00 as00].freeze
+  STUDENTS = %w[pp00 ss00 gg00 an00 ap00 ah00 tb00 rd00 jw00 rw00 rc00 hh00 aw00 hc00 tm00 pm00 jh00 rm00 as00].freeze
 
   def load
     @open = Seminar::StatusType.find_by!(key: 'open')
@@ -99,8 +99,8 @@ class DemoData
   end
 
   def staff
-    person('ac00').update!(is_admin: true)
-    person('mm00').update!(is_admin: true, is_consultant: true)
+    person('aa00').update!(is_admin: true)
+    person('cc00').update!(is_admin: true, is_consultant: true)
     person('lc00').update!(is_consultant: true)
   end
 
@@ -148,11 +148,11 @@ class DemoData
         end
       end
     end
-    # Herbert Simon and Allen Newell attended every past seminar; Andrew
+    # Gary Graduate and Allen Newell attended every past seminar; Andrew
     # Mellon all but the workshops
     Seminar.past.find_each do |seminar|
-      %w[hs00 an00 am00].each do |id|
-        next if id == 'am00' && seminar.tag?('workshop')
+      %w[gg00 an00 pp00].each do |id|
+        next if id == 'pp00' && seminar.tag?('workshop')
 
         registration = Registration.find_or_initialize_by(seminar:, participant: people.fetch(id))
         registration.update!(waitlist_status: @confirmed, attendance_status: @attended)
@@ -161,14 +161,14 @@ class DemoData
   end
 
   def future_faculty(people)
-    consultant = Participant.find_by!(andrewid: 'mm00')
+    consultant = Participant.find_by!(andrewid: 'cc00')
     v2023 = Programs::FutureFaculty::RequirementsVersion.find_by!(key: '2023')
     v2015 = Programs::FutureFaculty::RequirementsVersion.find_by!(key: '2015')
 
     # [andrewid, version, activities, final status]
     [
-      ['am00', v2023, %i[overview observation], nil],
-      ['hs00', v2023, %i[overview observation observation syllabus statement], 'graduated'],
+      ['pp00', v2023, %i[overview observation], nil],
+      ['gg00', v2023, %i[overview observation observation syllabus statement], 'graduated'],
       ['an00', v2023, %i[overview observation feedback syllabus statement], nil],
       ['ap00', v2023, %i[overview], nil],
       ['tb00', v2015, %i[overview observation syllabus], nil],

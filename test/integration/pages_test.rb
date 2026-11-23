@@ -19,8 +19,8 @@ class PagesTest < ActionDispatch::IntegrationTest
   end
 
   test 'an administrator sees every admin page' do
-    participant = sign_in('am00')
-    admin = sign_in('ac00')
+    participant = sign_in('pp00')
+    admin = sign_in('aa00')
     Registration.create!(seminar: @seminar, participant:,
                          waitlist_status: Registration::WaitlistStatusType.find_by!(key: 'confirmed'))
 
@@ -35,7 +35,7 @@ class PagesTest < ActionDispatch::IntegrationTest
   end
 
   test "a participant sees their own record and none of the admin pages" do
-    participant = sign_in('am00')
+    participant = sign_in('pp00')
 
     get profile_path
     assert_response :success
@@ -51,13 +51,13 @@ class PagesTest < ActionDispatch::IntegrationTest
   end
 
   test 'an administrator acts as someone else and stops' do
-    participant = sign_in('am00')
-    sign_in('ac00')
+    participant = sign_in('pp00')
+    sign_in('aa00')
 
     post act_as_path(participant)
     get root_path
     assert_select 'body.cmu-acting-as'
-    assert_select '.cmu-acting-bar', /You're acting as Andrew Mellon/
+    assert_select '.cmu-acting-bar', /You're acting as Polly Participant/
 
     post stop_acting_path
     get root_path
@@ -65,7 +65,7 @@ class PagesTest < ActionDispatch::IntegrationTest
   end
 
   test 'signing out ends the session' do
-    sign_in('ac00')
+    sign_in('aa00')
     delete logout_path
     get settings_path
 
@@ -73,7 +73,7 @@ class PagesTest < ActionDispatch::IntegrationTest
   end
 
   test "in production there's no developer sign-in" do
-    with_rails_env('production') { post dev_login_as_path('ac00') }
+    with_rails_env('production') { post dev_login_as_path('aa00') }
 
     assert_response :not_found
   end

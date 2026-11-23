@@ -9,7 +9,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'the registration list renders with the pager and a download' do
-    sign_in('ac00')
+    sign_in('aa00')
     get registrations_path
 
     assert_response :success
@@ -18,7 +18,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'the registration list exports a valid workbook' do
-    sign_in('ac00')
+    sign_in('aa00')
     get registrations_path(format: :xlsx)
 
     assert_response :success
@@ -27,11 +27,11 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'a participant registers for an open seminar and can cancel only their own seat' do
-    other = sign_in('hs00')
+    other = sign_in('gg00')
     post seminar_registrations_path(@seminar)
     theirs = other.registrations.sole
 
-    participant = sign_in('am00')
+    participant = sign_in('pp00')
     post seminar_registrations_path(@seminar)
 
     assert_redirected_to root_path
@@ -45,15 +45,15 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'adding attendees registers new and existing people once and reports bad IDs' do
-    existing = sign_in('am00')
-    sign_in('ac00')
+    existing = sign_in('pp00')
+    sign_in('aa00')
 
-    post seminar_registrations_path(@seminar), params: { participants: " am00, NEWP01 , am00,, Bad*ID" }
+    post seminar_registrations_path(@seminar), params: { participants: " pp00, NEWP01 , pp00,, Bad*ID" }
 
     assert_redirected_to attendance_admin_seminar_path(@seminar)
-    assert_equal %w[am00 newp01], @seminar.registrations.map { |r| r.participant.andrewid }.sort
+    assert_equal %w[newp01 pp00], @seminar.registrations.map { |r| r.participant.andrewid }.sort
     assert @seminar.registrations.all? { |r| r.confirmed? && r.attended? }
-    assert_equal existing, Participant.find_by(andrewid: 'am00')
+    assert_equal existing, Participant.find_by(andrewid: 'pp00')
     assert_match 'bad*id', flash[:alert]
   end
 end

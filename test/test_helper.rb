@@ -27,7 +27,7 @@ end
 
 class ActionDispatch::IntegrationTest
   # Signs in through developer sign-in as a test account in
-  # config/test_accounts.yml: ac00 is an administrator, am00 a participant
+  # config/test_accounts.yml: aa00 is an administrator, pp00 a participant
   def sign_in(andrew_id)
     post dev_login_as_path(andrew_id)
     Participant.find_by!(andrewid: andrew_id)

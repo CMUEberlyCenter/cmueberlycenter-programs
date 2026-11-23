@@ -12,10 +12,10 @@ class CmuLayoutTest < ActionDispatch::IntegrationTest
   end
 
   test "developer sign-in signs in a test account" do
-    post dev_login_as_path("ac00")
+    post dev_login_as_path("aa00")
     get root_path
 
-    assert_select ".roof .cmu-account-open", text: "Andrew Carnegie"
+    assert_select ".roof .cmu-account-open", text: "Andy Admin"
     assert_select ".cmu-site-bar", /Test account:/
   end
 

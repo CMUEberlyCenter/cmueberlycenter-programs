@@ -1,6 +1,40 @@
 # Made-up people for the demo's directory (Participant::DemoPerson), in place
 # of CMU's LDAP directory. The test accounts in config/test_accounts.yml and
-# the demo data (bin/rails demo:seed) use them.
+# the demo data (bin/rails demo:seed) use them. The first six are the test
+# accounts, named for their roles; the tests use the rest.
+- andrew_id: aa00
+  name: Andy Admin
+  affiliation: staff
+  college: Eberly Center
+  dept: Eberly Center for Teaching Excellence & Educational Innovation
+- andrew_id: cc00
+  name: Connie Consultant
+  affiliation: staff
+  college: Eberly Center
+  dept: Eberly Center for Teaching Excellence & Educational Innovation
+- andrew_id: pp00
+  name: Polly Participant
+  affiliation: student
+  college: Mellon College of Science
+  dept: Chemistry
+  student_class: Doctoral
+- andrew_id: gg00
+  name: Gary Graduate
+  affiliation: student
+  college: Dietrich College of Humanities and Social Sciences
+  dept: Psychology
+  student_class: Doctoral
+- andrew_id: ss00
+  name: Sammy Student
+  affiliation: student
+  college: College of Engineering
+  dept: Mechanical Engineering
+  student_class: Doctoral
+- andrew_id: ff00
+  name: Fran Faculty
+  affiliation: faculty
+  college: Dietrich College of Humanities and Social Sciences
+  dept: History
 - andrew_id: ac00
   name: Andrew Carnegie
   affiliation: staff

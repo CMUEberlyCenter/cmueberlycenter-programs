@@ -9,7 +9,8 @@ class DemoDataTest < ActiveSupport::TestCase
     DemoData.new.load
 
     assert_equal counts, [Seminar.count, Participant.count, Registration.count, Participant::Activity.count]
-    assert_equal Participant::DemoPerson.entries.map(&:uid).sort, Participant.pluck(:andrewid).sort
+    assert_empty Participant.pluck(:andrewid) - Participant::DemoPerson.entries.map(&:uid)
+    assert_equal TestAccount.all.map(&:andrew_id) - %w[ff00], TestAccount.all.map(&:andrew_id) & Participant.pluck(:andrewid)
     statuses = Participant.where.not(future_faculty_enrollment_id: nil).map { |p| p.future_faculty_progress_status.key }
     assert_equal %w[complete dropout graduated incomplete], statuses.uniq.sort
   end
