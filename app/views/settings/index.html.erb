@@ -20,8 +20,8 @@
     <% end %>
   </div><div class="sidebar">
     <% @settings.sidebar_settings.each do |setting| %>
-      <h2>Sidebar Preview</h2>
-      <div class="left-rule"><%= sanitize setting.value.to_s %></div>
+      <p class="cmu-label">Sidebar Preview</p>
+      <div class="grey"><%= sanitize setting.value.to_s %></div>
     <% end %>
   </div>
 </div>

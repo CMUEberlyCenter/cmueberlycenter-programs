@@ -255,7 +255,8 @@ class DemoData
                                  'wherever you are in your teaching. Register for one below; the Future ' \
                                  'Faculty Program counts the ones you attend.</p>'],
       'sidebar-participant' => ['Sidebar Note for Signed-In Participants',
-                                '<p>Questions? Email seminars@eberly.cmu.edu.</p>']
+                                '<h2>Questions?</h2><p>Email <a href="mailto:seminars@eberly.cmu.edu">' \
+                                'seminars@eberly.cmu.edu</a>.</p>']
     }.each do |key, (label, value)|
       Setting.find_or_create_by!(key:) { |s| s.assign_attributes(label:, value:) }
     end
