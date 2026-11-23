@@ -6,13 +6,10 @@ Rails.application.routes.draw do
 
   # External navigation items
   direct :eberly do
-    '//www.cmu.edu/teaching'
+    '//www.cmu.edu/teaching/'
   end
   direct :eberly_future_faculty_program do
     '//www.cmu.edu/teaching/graduatestudentsupport/futurefacultyprogram.html'
-  end
-  direct :eberly_teaching_resources do
-    '//www.cmu.edu/teaching/designteach/'
   end
   direct :eberly_graduate_students do
     '//www.cmu.edu/teaching/services/graduate-students/index.html'

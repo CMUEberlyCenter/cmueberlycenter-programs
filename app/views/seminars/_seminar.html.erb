@@ -2,7 +2,10 @@
   <h3><%= seminar.title %></h3>
   <p class="date"><strong><%= seminar_when(seminar) %></strong><% if seminar.location.present? %><br><%= seminar.location %><% end %></p>
   <%= sanitize seminar.description %>
-  <p><%= tag_pills(seminar.tags) %></p>
+  <% if seminar.tags.present? %>
+    <p class="cmu-label">Tags</p>
+    <p><%= tag_pills(seminar.tags) %></p>
+  <% end %>
   <% if Current.user&.admin? %>
     <%= render "seminars/admin_options", seminar: %>
   <% elsif Current.user %>

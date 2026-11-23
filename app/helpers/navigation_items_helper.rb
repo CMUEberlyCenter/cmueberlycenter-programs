@@ -17,8 +17,8 @@ module NavigationItemsHelper
       { label: 'Settings', url: settings_path, if: admin },
       { label: 'My Registrations', url: registrations_path, if: participant },
       { label: 'My Activities', url: profile_path, if: participant },
-      # Eberly's teaching and learning resources, for anyone who teaches
-      { label: 'Teaching Resources', url: eberly_teaching_resources_url, if: participant }
+      # The Eberly Center's home page, for anyone who teaches
+      { label: 'Teaching Resources', url: eberly_url, if: participant }
     ]
   end
 end
