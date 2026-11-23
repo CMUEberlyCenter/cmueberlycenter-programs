@@ -10,7 +10,7 @@
       <ul>
         <li><%= link_to "Met the Requirements (#{@completed_requirements_count})", participants_path(ffp_status: "complete") %></li>
       </ul>
-      <p><%= link_to "Download Program Data (.xlsx)", future_faculty_path(format: :xlsx), class: "btn ghost wide", download: true %></p>
+      <p><%= link_to "Program Data Spreadsheet", future_faculty_path(format: :xlsx), download: true %> [XLSX]</p>
     </div>
   </div>
 </div>

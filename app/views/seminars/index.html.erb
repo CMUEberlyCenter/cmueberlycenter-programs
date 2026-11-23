@@ -3,12 +3,10 @@
 <div class="content wide">
   <div>
     <h1>Seminars</h1>
-    <p class="cmu-cta-row">
-      <% if Current.user.admin? %>
-        <%= link_to "Create Seminar", new_admin_seminar_path, class: "btn" %>
-      <% end %>
-      <%= link_to "Download Seminars (.xlsx)", seminars_path(format: :xlsx), class: "btn ghost", download: true %>
-    </p>
+    <% if Current.user.admin? %>
+      <p class="cmu-cta-row"><%= link_to "Create Seminar", new_admin_seminar_path, class: "btn" %></p>
+    <% end %>
+    <p><%= link_to "Seminars Spreadsheet", seminars_path(format: :xlsx), download: true %> [XLSX]</p>
     <div class="cmu-search-bar">
       <p>Search by title, tag or date.</p>
       <label for="prg-seminar-search" class="sr-only">Find a Seminar</label>

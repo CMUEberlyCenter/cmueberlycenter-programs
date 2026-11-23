@@ -14,7 +14,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select 'h1', 'Registrations'
-    assert_select 'a[download]', 'Download Registrations (.xlsx)'
+    assert_select 'a[download]', 'Registrations Spreadsheet'
   end
 
   test 'the registration list exports a valid workbook' do

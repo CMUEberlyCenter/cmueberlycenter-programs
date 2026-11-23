@@ -3,9 +3,7 @@
 <div class="content wide">
   <div>
     <h1>Registrations</h1>
-    <p class="cmu-cta-row">
-      <%= link_to "Download Registrations (.xlsx)", registrations_path(format: :xlsx, q: @q.presence), class: "btn ghost", download: true %>
-    </p>
+    <p><%= link_to "Registrations Spreadsheet", registrations_path(format: :xlsx, q: @q.presence), download: true %> [XLSX]</p>
     <%= form_with url: registrations_path, method: :get, class: "cmu-search-bar" do %>
       <p>Search by name, Andrew ID or seminar title.</p>
       <label for="prg-registration-search" class="sr-only">Find a Registration</label>
