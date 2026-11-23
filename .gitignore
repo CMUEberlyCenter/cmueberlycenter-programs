@@ -28,3 +28,4 @@
 /public/assets/
 /public/dev-assets/
 /vendor/cache/
+/storage/*

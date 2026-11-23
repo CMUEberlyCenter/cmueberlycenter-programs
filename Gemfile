@@ -20,6 +20,7 @@ gem "filterrific", "~> 5.2", ">= 5.2.7"
 gem "net-ldap"
 gem "activeldap", require: "active_ldap/railtie"
 gem "prawn_rails"
+gem "matrix"
 gem "caxlsx", "~> 4.5"
 gem "caxlsx_rails", "~> 0.7"
 

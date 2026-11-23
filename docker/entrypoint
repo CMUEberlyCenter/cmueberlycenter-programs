@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+
+# Each container owns its PID file; application migrations are a separate deploy step.
+rm -f "${PIDFILE:-tmp/pids/server.pid}"
+exec "$@"

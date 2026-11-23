@@ -352,6 +352,7 @@ DEPENDENCIES
   filterrific (~> 5.2, >= 5.2.7)
   importmap-rails
   jbuilder
+  matrix
   minitest (~> 5.25)
   mysql2
   net-ldap

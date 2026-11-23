@@ -1,0 +1,24 @@
+{
+  "name": "Eberly Programs",
+  "dockerComposeFile": ["../compose.yml", "compose.yml"],
+  "service": "rails",
+  "workspaceFolder": "/app",
+  "remoteUser": "vscode",
+  "shutdownAction": "stopCompose",
+  "postCreateCommand": ".devcontainer/setup",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": { "label": "Rails", "onAutoForward": "notify" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["Shopify.ruby-lsp", "rubocop.vscode-rubocop", "kaiwood.endwise"],
+      "settings": {
+        "[ruby]": {
+          "editor.defaultFormatter": "rubocop.vscode-rubocop",
+          "editor.formatOnSave": true
+        }
+      }
+    }
+  }
+}

@@ -4,6 +4,79 @@ Seminar registration, attendance and Future Faculty Program records for the
 Eberly Center. The app uses Rails 8.1, Ruby 3.4, MySQL, Hotwire and Propshaft.
 The deployment Ruby version is recorded in `.ruby-version`.
 
+## Containers
+
+The Dockerfile provides `development` and `production` targets using the pinned
+Ruby version. No host Ruby, Node or MySQL installation is needed for containers;
+JavaScript uses import maps. Docker Compose supplies MySQL 8.0 and Redis locally.
+
+In VS Code, choose **Dev Containers: Reopen in Container**. Setup installs the
+bundle and prepares separate development and test databases. Start Rails in
+the container terminal:
+
+```sh
+bin/rails server -b 0.0.0.0
+```
+
+Without VS Code:
+
+```sh
+docker compose up --build
+docker compose run --rm rails sh -c 'RAILS_ENV=test bin/rails db:prepare && bin/rails test'
+docker compose exec rails bin/rails console
+```
+
+Open <http://localhost:3000>. On Linux, if your UID/GID differ from 1000, export
+`LOCAL_UID=$(id -u)` and `LOCAL_GID=$(id -g)` before building with Compose.
+If port 3000 is occupied, use `PORT=3100 docker compose up` and open port 3100.
+The devcontainer adjusts the editor user's UID automatically. Rebuild after
+changing the Gemfile or lockfile. Source changes reload from the mounted checkout.
+Compose mounts the database example over `config/database.yml` inside the
+container, preserving any existing host configuration and encryption keys.
+
+MySQL data lives in a named volume. `docker compose down` preserves it;
+`docker compose down --volumes` deletes the development databases. The fixed
+database passwords in Compose are for this isolated local environment. Only
+Rails is published, on loopback; MySQL and Redis have no host ports.
+
+Public pages and tests work without CMU credentials. Login and directory-backed
+participant creation still require CMU LDAP access. Export `LDAP_BIND_DN`,
+`LDAP_PASSWORD` and, for local login, `REMOTE_USER=your-andrewid` before starting
+Compose. Administrator provisioning remains explicit through the seed command
+described below. Development mail uses Rails' default SMTP delivery configuration;
+no mail catcher is included.
+
+The production image contains the runtime bundle and precompiled assets and
+runs as a non-root user. Local environment files, keys, database dumps, cached
+gems and generated assets are excluded from the build context. Build and check
+it without supplying production credentials:
+
+```sh
+docker build --target production -t seminars:local .
+```
+
+An optional deployment Compose file uses externally managed MySQL and Redis.
+Export `DATABASE_URL`, `REDIS_URL` and a persistent `SECRET_KEY_BASE`; provide
+`RAILS_MASTER_KEY` if encrypted credentials are needed. For an existing site,
+retain its actual Rails secret to preserve sessions. Supply LDAP variables at
+runtime as needed. Then:
+
+```sh
+docker compose -f docker/production/compose.yml build
+docker compose -f docker/production/compose.yml run --rm rails bin/rails db:migrate
+docker compose -f docker/production/compose.yml up -d
+```
+
+For a new database, use `db:prepare` instead of `db:migrate`. Migrations never
+run automatically on production container startup. Uploaded files persist in
+the production storage volume. The web port binds to loopback for a host reverse
+proxy. Deployment still needs the site's trusted Shibboleth identity integration
+to populate `request.env['REMOTE_USER']`, SMTP relay access and the nightly
+`bin/rails cron:nightly_chores` job; the container does not configure these services.
+
+GitHub Actions builds both image targets and runs the Rails suite against MySQL.
+It does not publish images or deploy the app.
+
 ## Development
 
 1. Install the Ruby version in `.ruby-version` and MySQL development headers.

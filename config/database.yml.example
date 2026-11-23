@@ -16,4 +16,4 @@ test:
 
 production:
   <<: *default
-  url: <%= ENV.fetch('DATABASE_URL', '').to_json %>
+  url: <%= ENV['DATABASE_URL'].to_json %>
