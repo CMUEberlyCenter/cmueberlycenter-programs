@@ -1,25 +1,48 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>We're sorry, but something went wrong (500)</title>
-  <style type="text/css">
-    body { background-color: #fff; color: #666; text-align: center; font-family: arial, sans-serif; }
-    div.dialog {
-      width: 25em;
-      padding: 0 4em;
-      margin: 4em auto 0 auto;
-      border: 1px solid #ccc;
-      border-right-color: #999;
-      border-bottom-color: #999;
-    }
-    h1 { font-size: 100%; color: #f00; line-height: 1.5em; }
-  </style>
-</head>
-
-<body>
-  <!-- This file lives in public/500.html -->
-  <div class="dialog">
-    <h1>We're sorry, but something went wrong.</h1>
-  </div>
-</body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Something Went Wrong - Seminars &amp; Programs - Carnegie Mellon University</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,300italic,300,600,700,700italic" rel="stylesheet" />
+    <link href="https://www.cmu.edu/common/standard-v6/css/main.6.7.min.css" media="screen" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/gh/cmu-web/cmu-web-kilt@0.8.28/css/cmu-cms.css" rel="stylesheet" />
+    <link href="https://www.cmu.edu/favicon.ico" rel="icon" />
+  </head>
+  <!-- The 500 page as a plain file, sent even when the app can't render -->
+  <body>
+    <div id="container">
+      <header>
+        <div class="roof">
+          <div><a class="wordmark" href="https://www.cmu.edu/">Carnegie Mellon University</a></div>
+        </div>
+        <div id="sitename">
+          <span class="sitetitle"><a href="/">Seminars &amp; Programs</a></span>
+          <h2><a href="https://www.cmu.edu/teaching/">Eberly Center</a></h2>
+        </div>
+      </header>
+      <main id="content">
+        <div class="content">
+          <div>
+            <h1>Something Went Wrong</h1>
+            <p class="cmu-lead">This page didn't load because of a problem on our end, not anything you&nbsp;did.</p>
+            <p>Try again in a few minutes. If it keeps happening, email <a href="mailto:eberly-ctr@andrew.cmu.edu">eberly-ctr@andrew.cmu.edu</a> with the page's address and what you were doing.</p>
+            <div class="cmu-cta-row"><a class="btn" href="/">Go to the Home Page</a></div>
+            <p class="cmu-muted">Error 500</p>
+          </div>
+        </div>
+      </main>
+      <footer class="grid column3 invert">
+        <div>
+          <p>Seminars &amp; Programs<br />Eberly Center<br />Carnegie Mellon University</p>
+          <ul>
+            <li><a href="https://www.cmu.edu/legal/">Legal Info</a></li>
+            <li><a href="https://www.cmu.edu/">www.cmu.edu</a></li>
+          </ul>
+        </div>
+        <div></div>
+        <div><nav id="nav" hidden><ul></ul></nav></div>
+      </footer>
+    </div>
+  </body>
 </html>

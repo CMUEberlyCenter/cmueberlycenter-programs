@@ -9,7 +9,9 @@ Rails.application.configure do
 
   config.enable_reloading = true
   config.eager_load = false
-  config.consider_all_requests_local = true
+  # Rails' error details locally; behind a proxy (APP_HOST), the app's own
+  # error pages
+  config.consider_all_requests_local = ENV["APP_HOST"].blank?
   config.server_timing = true
 
   if Rails.root.join("tmp/caching-dev.txt").exist?

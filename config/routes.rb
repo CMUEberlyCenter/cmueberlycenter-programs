@@ -97,4 +97,8 @@ Rails.application.routes.draw do
   end
 
   get 'up', to: 'rails/health#show', as: :rails_health_check
+
+  # Error pages, for config.exceptions_app
+  match '/404', to: 'errors#not_found', via: :all
+  match '/422', to: 'errors#unprocessable', via: :all
 end
