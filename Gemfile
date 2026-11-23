@@ -18,7 +18,7 @@ gem "pagy", "~> 5.10"
 gem "filterrific", "~> 5.2", ">= 5.2.7"
 gem "net-ldap"
 gem "activeldap", require: "active_ldap/railtie"
-gem "cmu-web-kilt", "~> 0.8.27"
+gem "cmu-web-kilt", "~> 0.8.28"
 gem "caxlsx", "~> 4.5"
 gem "caxlsx_rails", "~> 0.7"
 

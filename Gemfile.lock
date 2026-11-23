@@ -107,7 +107,7 @@ GEM
     caxlsx_rails (0.7.2)
       actionpack (>= 6.1)
       caxlsx (>= 4.0)
-    cmu-web-kilt (0.8.27)
+    cmu-web-kilt (0.8.28)
       railties (>= 7.2, < 9)
     concurrent-ruby (1.3.8)
     connection_pool (3.0.2)
@@ -338,7 +338,7 @@ DEPENDENCIES
   capybara
   caxlsx (~> 4.5)
   caxlsx_rails (~> 0.7)
-  cmu-web-kilt (~> 0.8.27)
+  cmu-web-kilt (~> 0.8.28)
   debug
   dotenv-rails (~> 3.2)
   filterrific (~> 5.2, >= 5.2.7)
