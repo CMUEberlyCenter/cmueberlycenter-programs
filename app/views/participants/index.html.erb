@@ -18,17 +18,17 @@
                data-action="input->people-search#suggest cmu-suggest-pick->people-search#open">
         <ul class="cmu-suggest-list" id="prg-look-up-list" role="listbox" aria-label="Suggestions" hidden data-people-search-target="list"></ul>
       </div>
-      <p class="cmu-hint" id="prg-look-up-hint">By name or Andrew ID. Picking someone opens their page and adds them as a participant.</p>
+      <p class="cmu-hint" id="prg-look-up-hint">By name or Andrew ID. Picking someone opens their page and adds them to People.</p>
     <% end %>
 
     <h2 class="rule-top">Everyone</h2>
     <div class="cmu-search-bar">
       <p>Search by name, Andrew ID, department or school.</p>
-      <label for="prg-participant-search" class="sr-only">Find a Participant</label>
-      <input type="text" id="prg-participant-search" placeholder="Find a participant&hellip;" data-cmu-filter="prg-participants">
+      <label for="prg-participant-search" class="sr-only">Find a Person</label>
+      <input type="text" id="prg-participant-search" placeholder="Find a person&hellip;" data-cmu-filter="prg-participants">
     </div>
     <div class="prg-scroll">
-    <table class="alternate cmu-full prg-wide-table" id="prg-participants" data-cmu-table data-cmu-noun="participant">
+    <table class="alternate cmu-full prg-wide-table" id="prg-participants" data-cmu-table data-cmu-noun="person|people">
       <thead>
         <tr>
           <th scope="col" data-sort-key="name"><button type="button" class="cmu-sort">Name<span class="cmu-sort-arrow"></span></button></th>

@@ -7,19 +7,20 @@
     <% @settings.each do |setting| %>
       <%= form_with model: setting, url: setting_path(setting), method: :patch do |f| %>
         <%= f.label :value, setting.label, for: "setting-#{setting.id}" %>
-        <div class="cmu-field-button">
-          <% if setting.key.start_with?("homepage-", "sidebar-") %>
-            <%= f.text_area :value, id: "setting-#{setting.id}", rows: 3 %>
-          <% else %>
+        <% if setting.key.start_with?("homepage-", "sidebar-") %>
+          <%= f.text_area :value, id: "setting-#{setting.id}", rows: 4 %>
+          <p><%= f.submit "Save", class: "btn" %></p>
+        <% else %>
+          <div class="cmu-field-button">
             <%= f.text_field :value, id: "setting-#{setting.id}" %>
-          <% end %>
-          <%= f.submit "Save", class: "btn" %>
-        </div>
+            <%= f.submit "Save", class: "btn" %>
+          </div>
+        <% end %>
       <% end %>
     <% end %>
   </div><div class="sidebar">
     <% @settings.sidebar_settings.each do |setting| %>
-      <h2><%= setting.label %></h2>
+      <h2>Sidebar Preview</h2>
       <div class="left-rule"><%= sanitize setting.value.to_s %></div>
     <% end %>
   </div>
