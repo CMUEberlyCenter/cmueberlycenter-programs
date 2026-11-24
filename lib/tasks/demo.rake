@@ -252,8 +252,7 @@ class DemoData
     {
       'homepage-participant' => ['Home Page Note',
                                  '<p class="cmu-lead">Seminars and workshops on teaching from the Eberly Center, ' \
-                                 'wherever you are in your teaching. Register for one below; the Future ' \
-                                 'Faculty Program counts the ones you attend.</p>'],
+                                 'wherever you are in your teaching. Register for one below.</p>'],
       'sidebar-participant' => ['Sidebar Note for Signed-In Participants',
                                 '<h2>Questions?</h2><p>Email <a href="mailto:seminars@eberly.cmu.edu">' \
                                 'seminars@eberly.cmu.edu</a>.</p>']

@@ -3,4 +3,4 @@
   <%= seminar.registrations.size %> registered: <%= seminar.registrations.confirmed.size %> confirmed,
   <%= seminar.registrations.pending.size %> waitlisted, <%= seminar.registrations.attended.size %> attended
 </p>
-<p><%= link_to "Manage This Seminar", admin_seminar_path(seminar), class: "cta" %></p>
+<p><%= link_to "Manage Seminar", admin_seminar_path(seminar), class: "cta" %></p>
