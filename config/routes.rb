@@ -40,8 +40,8 @@ Rails.application.routes.draw do
   post 'people/:participant_id/act-as', to: 'sessions#create_acting', as: :act_as
   post 'stop-acting', to: 'sessions#destroy_acting', as: :stop_acting
 
-  # Admin: the site's settings, for administrators
-  resources :settings, path: 'admin', only: [:index, :update]
+  # The site's settings, for administrators
+  resources :settings, only: [:index, :update]
 
   # Programs: an index of them, then each program's own pages
   get 'programs', to: 'programs#index', as: :programs

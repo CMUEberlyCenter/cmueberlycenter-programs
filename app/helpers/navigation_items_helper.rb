@@ -17,7 +17,7 @@ module NavigationItemsHelper
       { label: 'Programs', url: programs_path, if: staff,
         children: [{ label: 'Future Faculty Program', url: future_faculty_path, if: staff }] },
       { label: 'People', url: participants_path, if: staff },
-      { label: 'Admin', url: settings_path, if: admin },
+      { label: 'Settings', url: settings_path, if: admin, secondary: true },
       { label: 'My Registrations', url: registrations_path, if: participant },
       { label: 'My Activities', url: profile_path, if: participant },
       # The Eberly Center's home page
