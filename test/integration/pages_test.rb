@@ -225,4 +225,66 @@ class PagesTest < ActionDispatch::IntegrationTest
 
     assert_response :success
   end
+
+  test "the staff home page lists this week's seminars, attendance not taken and seminars to watch" do
+    staff_home_seminars
+    sign_in('aa00')
+
+    get root_path
+    assert_select '.cmu-cta-row a.btn', 'Create Seminar'
+    assert_select '.cmu-cta-row a.cta', 'See All Seminars'
+    assert_select 'h2', 'This Week'
+    assert_select '#this-week + table a.btn', 'Print Sign-In Sheet'
+    assert_select '#this-week + table .cmu-row-menu-list a', 'Take Attendance'
+    assert_select 'h2', 'Attendance Not Taken'
+    assert_select '#attendance-not-taken + table td a', 'Teaching in Lab Sections'
+    assert_select 'h2', 'Registration'
+    assert_select '#registration + table .cmu-pill--amber', 'Full'
+    assert_select 'h3', { text: 'Active Learning in Large Classes', count: 0 }
+  end
+
+  test 'a consultant gets the staff home page without Create Seminar' do
+    staff_home_seminars
+    sign_in('cc00')
+
+    get root_path
+    assert_select 'h2', 'This Week'
+    assert_select 'a', { text: 'Create Seminar', count: 0 }
+    assert_select '.cmu-cta-row a.cta', 'See All Seminars'
+  end
+
+  test 'a quiet week gets a short staff home page' do
+    Seminar.destroy_all
+    sign_in('aa00')
+
+    get root_path
+    ['This Week', 'Attendance Not Taken', 'Registration'].each { |title| assert_select 'h2', { text: title, count: 0 } }
+    assert_select '.cmu-empty p', 'Nothing to take care of this week.'
+  end
+
+  test 'a participant still gets the seminar cards and no staff lists' do
+    staff_home_seminars
+    sign_in('pp00')
+
+    get root_path
+    assert_select 'h3', 'Active Learning in Large Classes'
+    assert_select 'h2', { text: 'This Week', count: 0 }
+    assert_select 'h2', { text: 'Attendance Not Taken', count: 0 }
+  end
+
+  private
+
+  # A seminar that ended yesterday with a confirmed person and no attendance,
+  # and a full one next week
+  def staff_home_seminars
+    confirmed = Registration::WaitlistStatusType.find_by!(key: 'confirmed')
+    person = sign_in('pp00')
+    past = Seminar.create!(title: 'Teaching in Lab Sections', start_at: 1.day.ago.change(hour: 12),
+                           end_at: 1.day.ago.change(hour: 14),
+                           seminar_status: Seminar::StatusType.find_by!(key: 'closed'))
+    full = Seminar.create!(title: 'Peer Observation of Teaching', start_at: 10.days.from_now.change(hour: 10),
+                           end_at: 10.days.from_now.change(hour: 12), maximum_capacity: 1,
+                           seminar_status: Seminar::StatusType.find_by!(key: 'open'))
+    [past, full].each { |seminar| Registration.create!(seminar:, participant: person, waitlist_status: confirmed) }
+  end
 end

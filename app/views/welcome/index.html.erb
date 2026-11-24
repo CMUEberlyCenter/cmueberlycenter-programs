@@ -1,29 +1,33 @@
-<%= tag.div(class: ["content", ("wide" if Current.user&.staff?)]) do %>
-  <div>
-    <%= greeting %>
-    <% if @homepage_note.present? %>
-      <%= sanitize @homepage_note %>
-    <% else %>
-      <p class="cmu-lead">Seminars and workshops on teaching from the Eberly Center, wherever you are in your teaching. Register for one&nbsp;below.</p>
-    <% end %>
-  </div><% unless Current.user&.staff? %><div class="sidebar">
-    <% if Current.user %>
-      <% if @sidebar_note.present? %>
-        <div class="grey"><%= sanitize @sidebar_note %></div>
+<% if Current.user&.staff? %>
+  <%= render "staff_home" %>
+<% else %>
+  <div class="content">
+    <div>
+      <%= greeting %>
+      <% if @homepage_note.present? %>
+        <%= sanitize @homepage_note %>
+      <% else %>
+        <p class="cmu-lead">Seminars and workshops on teaching from the Eberly Center, wherever you are in your teaching. Register for one&nbsp;below.</p>
       <% end %>
-      <div class="list">
-        <h1>Learn More</h1>
-        <ul>
-          <li><%= link_to "Graduate Student Support", eberly_graduate_students_url, class: "external" %></li>
-          <li><%= link_to "Future Faculty Program", eberly_future_faculty_program_url, class: "external" %></li>
-        </ul>
-      </div>
-    <% else %>
-      <div class="simple">
-        <h1><%= link_to "Sign In", login_path, class: "btn ghost wide" %></h1>
-      </div>
-    <% end %>
-  </div><% end %>
-<% end %>
+    </div><div class="sidebar">
+      <% if Current.user %>
+        <% if @sidebar_note.present? %>
+          <div class="grey"><%= sanitize @sidebar_note %></div>
+        <% end %>
+        <div class="list">
+          <h1>Learn More</h1>
+          <ul>
+            <li><%= link_to "Graduate Student Support", eberly_graduate_students_url, class: "external" %></li>
+            <li><%= link_to "Future Faculty Program", eberly_future_faculty_program_url, class: "external" %></li>
+          </ul>
+        </div>
+      <% else %>
+        <div class="simple">
+          <h1><%= link_to "Sign In", login_path, class: "btn ghost wide" %></h1>
+        </div>
+      <% end %>
+    </div>
+  </div>
 
-<%= render @seminar_groups %>
+  <%= render @seminar_groups %>
+<% end %>
