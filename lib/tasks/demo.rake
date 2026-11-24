@@ -49,6 +49,21 @@ class DemoData
     ['Course Design Institute', 'other', 58, [9, 16], 'Tepper Quad 1310', 1]
   ].freeze
 
+  # For the staff home page: one this week, one with attendance not taken
+  # and one full. Loaded after the others, so their registrations stay as
+  # they were.
+  STAFF_HOME_SEMINARS = [
+    ['Teaching in Lab Sections', 'seminar', -1, [12, 14], 'Doherty Hall 2315'],
+    ['Facilitating Small-Group Work', 'core', 2, [12, 14], 'Tepper Quad 1310'],
+    ['Peer Observation of Teaching', 'workshop', 12, [10, 12], 'Baker Hall A53']
+  ].freeze
+
+  # Seminars with fewer seats than the usual 30
+  CAPACITY = { 'Peer Observation of Teaching' => 14 }.freeze
+
+  # Past seminars with no attendance recorded yet
+  ATTENDANCE_NOT_TAKEN = ['Teaching in Lab Sections'].freeze
+
   ASYNCHRONOUS = [
     ['Teaching at CMU: A Self-Paced Introduction', 'core', 60],
     ['Accessible Course Materials', 'dei', 90],
@@ -216,7 +231,8 @@ class DemoData
     settings
     staff
     people = STUDENTS.index_with { |id| person(id) }
-    seminars = SEMINARS.map { |row| seminar(*row) } + ASYNCHRONOUS.map { |row| asynchronous(*row) }
+    seminars = SEMINARS.map { |row| seminar(*row) } + ASYNCHRONOUS.map { |row| asynchronous(*row) } +
+               STAFF_HOME_SEMINARS.map { |row| seminar(*row) }
     registrations(people, seminars)
     future_faculty(people)
   end
@@ -282,7 +298,7 @@ class DemoData
       s.tags = tags
       s.location = location
       s.description = description(title, tags)
-      s.maximum_capacity = 30
+      s.maximum_capacity = CAPACITY.fetch(title, 30)
       s.enable_waitlist = title == 'Course Design Institute'
       s.seminar_status = days.negative? || title == 'Making the Most of Office Hours' ? @closed : @open
     end
@@ -308,13 +324,15 @@ class DemoData
         past = seminar.end_at < Time.zone.now
         Registration.find_or_create_by!(seminar:, participant:) do |r|
           r.waitlist_status = seminar.enable_waitlist? && (i / 2).odd? ? @pending : @confirmed
-          r.attendance_status = ((i + n) % 7).zero? ? @absent : @attended if past
+          next unless past && ATTENDANCE_NOT_TAKEN.exclude?(seminar.title)
+
+          r.attendance_status = ((i + n) % 7).zero? ? @absent : @attended
         end
       end
     end
     # Gary Graduate and Allen Newell attended every past seminar; Andrew
     # Mellon all but the workshops
-    Seminar.past.find_each do |seminar|
+    Seminar.past.where.not(title: ATTENDANCE_NOT_TAKEN).find_each do |seminar|
       %w[gg00 an00 pp00].each do |id|
         next if id == 'pp00' && seminar.tag?('workshop')
 

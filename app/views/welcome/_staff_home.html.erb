@@ -1,0 +1,108 @@
+<%# The staff home page: what runs this week, attendance to take and open seminars to watch %>
+<div class="content wide">
+  <div>
+    <%= greeting %>
+    <p class="cmu-lead">Seminars running this week, attendance to take and registrations to&nbsp;watch.</p>
+    <div class="cmu-cta-row">
+      <% if Current.user.admin? %><%= link_to "Create Seminar", new_admin_seminar_path, class: "btn" %><% end %>
+      <%= link_to "See All Seminars", seminars_path, class: "cta" %>
+    </div>
+
+    <% if @this_week.any? %>
+      <h2 class="rule-top" id="this-week">This Week</h2>
+      <table class="alternate cmu-full">
+        <thead>
+          <tr>
+            <th scope="col">Seminar</th>
+            <th scope="col">When</th>
+            <th scope="col" class="num cmu-fit">Confirmed</th>
+            <th scope="col" class="cmu-fit"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @this_week.each do |seminar| %>
+            <tr>
+              <td><%= link_to seminar.title, admin_seminar_path(seminar) %><% if seminar.location.present? %><br><%= seminar.location %><% end %></td>
+              <td><%= seminar_when(seminar) %></td>
+              <td class="num cmu-fit"><%= seminar.registrations.confirmed.size %></td>
+              <td class="cmu-fit">
+                <div class="cmu-row-buttons">
+                  <%= link_to "Print Sign-In Sheet", sign_in_sheet_admin_seminar_path(seminar), class: "btn small" %>
+                  <div class="cmu-row-menu">
+                    <button class="btn small ghost" type="button" data-cmu-menu aria-controls="prg-week-menu-<%= seminar.id %>" aria-expanded="false"
+                            aria-label="More actions for <%= seminar.title %>" title="More actions"></button>
+                    <div class="cmu-row-menu-list" id="prg-week-menu-<%= seminar.id %>" hidden>
+                      <%= link_to "Take Attendance", attendance_admin_seminar_path(seminar) %>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+
+    <% if @attendance_due.any? %>
+      <h2 class="rule-top" id="attendance-not-taken">Attendance Not Taken</h2>
+      <table class="alternate cmu-full">
+        <thead>
+          <tr>
+            <th scope="col">Seminar</th>
+            <th scope="col">When</th>
+            <th scope="col" class="num cmu-fit">Confirmed</th>
+            <th scope="col" class="cmu-fit"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @attendance_due.each do |seminar| %>
+            <tr>
+              <td><%= link_to seminar.title, admin_seminar_path(seminar) %></td>
+              <td><%= seminar_when(seminar) %></td>
+              <td class="num cmu-fit"><%= seminar.registrations.confirmed.size %></td>
+              <td class="cmu-fit"><%= link_to "Take Attendance", attendance_admin_seminar_path(seminar), class: "btn small" %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+
+    <% if @to_watch.any? %>
+      <h2 class="rule-top" id="registration">Registration</h2>
+      <table class="alternate cmu-full">
+        <thead>
+          <tr>
+            <th scope="col">Seminar</th>
+            <th scope="col">When</th>
+            <th scope="col" class="num cmu-fit">Confirmed</th>
+            <th scope="col" class="num cmu-fit">Waitlisted</th>
+            <th scope="col" class="cmu-fit">Seats</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @to_watch.each do |seminar| %>
+            <% confirmed = seminar.registrations.confirmed.size %>
+            <tr>
+              <td><%= link_to seminar.title, admin_seminar_path(seminar) %></td>
+              <td><%= seminar_when(seminar) %></td>
+              <td class="num cmu-fit"><%= seminar.maximum_capacity.to_i.positive? ? "#{confirmed} of #{seminar.maximum_capacity}" : confirmed %></td>
+              <td class="num cmu-fit"><%= seminar.registrations.pending.size %></td>
+              <td class="cmu-fit">
+                <% seats = seats(seminar) %>
+                <% if seats == "Full" %><span class="cmu-pill cmu-pill--amber">Full</span>
+                <% elsif seats %><span class="cmu-pill"><%= seats %></span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+
+    <% if @this_week.none? && @attendance_due.none? && @to_watch.none? %>
+      <div class="cmu-empty">
+        <p>Nothing to take care of this week.</p>
+      </div>
+    <% end %>
+  </div>
+</div>
