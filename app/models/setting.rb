@@ -1,10 +1,9 @@
 class Setting < ActiveRecord::Base
-  # Each setting's label in Admin, by key; a key not listed uses its row's label
+  # The settings in Settings, with each one's label, by key
   LABELS = {
     'homepage-participant' => 'Home Page Note',
     'sidebar-participant' => 'Sidebar Note for Signed-In Participants',
-    'default-tag' => 'Default Tag for New Seminars',
-    'admin-list-tag' => 'Show Past Programs Tagged'
+    'default-tag' => 'Default Tag for New Seminars'
   }.freeze
 
   def label = LABELS.fetch(key) { self[:label] }

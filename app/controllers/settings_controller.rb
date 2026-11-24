@@ -4,7 +4,7 @@ class SettingsController < ApplicationController
   before_action :require_administrator
 
   def index
-    @settings = Setting.all
+    @settings = Setting.where(key: Setting::LABELS.keys)
     @consultants = Participant.consultants
     @admins = Participant.admins
   end

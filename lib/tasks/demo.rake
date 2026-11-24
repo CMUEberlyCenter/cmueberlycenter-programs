@@ -262,7 +262,7 @@ class DemoData
   end
 
   def settings
-    { 'admin-list-tag' => 'core, dei, seminar, workshop', 'default-tag' => 'seminar' }.each do |key, value|
+    { 'default-tag' => 'seminar' }.each do |key, value|
       Setting.find_by!(key:).update!(value:)
     end
     {
