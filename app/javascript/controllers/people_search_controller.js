@@ -1,33 +1,36 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Suggests people from the directory as an administrator types an Andrew ID
-// or name (the kit's Search Suggestions); picking one opens their page
+// As staff type in Find People, lists people in the directory who match and
+// aren't in Programs yet under the table, each linked to their page
 export default class extends Controller {
-  static targets = ["input", "list"]
-  static values = { url: String }
+  static targets = ["input", "more", "list"]
+  static values = { url: String, people: String }
+
+  connect() {
+    if (this.inputTarget.value.trim()) this.suggest()
+  }
 
   async suggest() {
     const q = this.inputTarget.value.trim()
-    if (q.length < 2) {
-      this.listTarget.replaceChildren()
-      return
-    }
+    if (q.length < 2) return this.show([])
     const response = await fetch(`${this.urlValue}?q=${encodeURIComponent(q)}`, {
       headers: { Accept: "application/json" },
     })
     if (!response.ok || this.inputTarget.value.trim() !== q) return
-    const people = await response.json()
+    this.show(await response.json())
+  }
+
+  show(people) {
     this.listTarget.replaceChildren(
       ...people.map((person) => {
         const li = document.createElement("li")
-        li.dataset.value = person.andrewid
-        li.textContent = `${person.name} (${person.andrewid})`
+        const link = document.createElement("a")
+        link.href = `${this.peopleValue}/${encodeURIComponent(person.andrewid)}`
+        link.textContent = `${person.name} (${person.andrewid})`
+        li.append(link)
         return li
       }),
     )
-  }
-
-  open(event) {
-    window.Turbo.visit(`${this.inputTarget.form.action}/${encodeURIComponent(event.detail.dataset.value)}`)
+    this.moreTarget.hidden = people.length === 0
   }
 }

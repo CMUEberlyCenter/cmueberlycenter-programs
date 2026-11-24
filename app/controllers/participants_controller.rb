@@ -17,9 +17,11 @@ class ParticipantsController < ApplicationController
     end
   end
 
-  # People in the directory, for the participants page's look-up
+  # People in the directory who aren't in Programs yet, for the People page's search
   def search
-    render json: Participant.filter(keyword: params[:q])
+    people = Participant.filter(keyword: params[:q])
+    known = Participant.where(andrewid: people.pluck(:andrewid)).pluck(:andrewid)
+    render json: people.reject { |person| known.include?(person[:andrewid]) }
   end
 
   # A person's page; someone in the directory but not yet in Programs gets
