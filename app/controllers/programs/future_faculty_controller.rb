@@ -7,13 +7,23 @@ class Programs::FutureFacultyController < ApplicationController
     respond_to do |format|
       format.html do
         @completed_requirements_count = Participant.completed_future_faculty_requirements.count
+        @close_to_finishing = Programs::FutureFaculty::RequirementsVersion.close_to_finishing
         @activities = Participant::Activity.includes(:observer, :lead_consultant,
                                                      participant: :future_faculty_progress_status,
                                                      future_faculty_requirement: :requirement_category)
                                            .order(created_at: :desc)
                                            .select(&:participant)
       end
-      format.xlsx { @participants = Participant.all }
+      format.xlsx do
+        if params[:list] == 'close-to-finishing'
+          @close_to_finishing = Programs::FutureFaculty::RequirementsVersion.close_to_finishing
+          filename = "Close-to-Finishing-#{Time.zone.now.to_fs(:db)}.xlsx"
+          response.headers['Content-Disposition'] = "attachment; filename=\"#{filename}\""
+          render 'close_to_finishing'
+        else
+          @participants = Participant.all
+        end
+      end
     end
   end
 

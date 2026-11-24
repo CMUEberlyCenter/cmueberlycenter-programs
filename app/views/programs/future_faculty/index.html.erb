@@ -3,11 +3,12 @@
 <div class="content">
   <div>
     <h1>Future Faculty Program</h1>
-    <p>Every program activity recorded for a participant, newest first.</p>
+    <p>Participants close to finishing, and every program activity recorded for a participant, newest&nbsp;first.</p>
   </div><div class="sidebar">
     <div class="list grey">
       <h2>Review Participants</h2>
       <ul>
+        <li><%= link_to "Close to Finishing (#{@close_to_finishing.size})", "#close-to-finishing" %></li>
         <li><%= link_to "Met the Requirements (#{@completed_requirements_count})", participants_path(ffp_status: "complete") %></li>
       </ul>
       <p><%= link_to "Program Data Spreadsheet", future_faculty_path(format: :xlsx), download: true %> [XLSX]</p>
@@ -16,7 +17,36 @@
 </div>
 <div class="content wide">
   <div>
-    <h2>Activities</h2>
+    <h2 id="close-to-finishing">Close to Finishing</h2>
+    <p>In-progress participants with one or two requirements left.</p>
+    <% if @close_to_finishing.any? %>
+      <table class="alternate cmu-full">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col" class="cmu-fit">Andrew ID</th>
+            <th scope="col">Department</th>
+            <th scope="col">Requirements Left</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @close_to_finishing.each do |participant, left| %>
+            <tr>
+              <td><%= link_to participant.name, participant_path(participant) %></td>
+              <td class="cmu-fit"><%= participant.andrewid %></td>
+              <td><%= participant.pretty_depts %></td>
+              <td><%= left.map(&:to_s).to_sentence %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <p><%= link_to "Spreadsheet of #{pluralize(@close_to_finishing.size, 'Person', plural: 'People')}",
+                     future_faculty_path(format: :xlsx, list: "close-to-finishing"), download: true %> [XLSX]</p>
+    <% else %>
+      <div class="cmu-empty"><p>No one has just one or two requirements left.</p></div>
+    <% end %>
+
+    <h2 class="rule-top">Activities</h2>
     <div class="cmu-search-bar">
       <p>Search by participant, activity, course or consultant.</p>
       <label for="prg-activity-search" class="sr-only">Find an Activity</label>
