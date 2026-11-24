@@ -126,7 +126,8 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_select 'nav#nav > ul > li > a', text: 'Seminars'
     assert_select 'nav#nav > ul > li > a', text: 'Programs'
     assert_select 'nav#nav > ul > li > a', text: 'People'
-    assert_select 'nav#nav > ul > li > a', text: 'Admin'
+    assert_select 'nav#nav > ul > li:not(.secondary) > a', text: 'Settings', count: 0
+    assert_select 'nav#nav > ul > li.secondary > a', text: 'Settings'
     assert_select 'nav#nav li li a', text: 'All Registrations'
 
     get programs_path

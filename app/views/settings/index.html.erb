@@ -1,8 +1,8 @@
-<% cmu_title "Admin" %>
-<% cmu_breadcrumb "Admin" %>
+<% cmu_title "Settings" %>
+<% cmu_breadcrumb "Settings" %>
 <div class="content">
   <div>
-    <h1>Admin</h1>
+    <h1>Settings</h1>
     <h2>Display</h2>
     <% @settings.each do |setting| %>
       <%= form_with model: setting, url: setting_path(setting), method: :patch do |f| %>
