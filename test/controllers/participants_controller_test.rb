@@ -33,7 +33,7 @@ class ParticipantsControllerTest < ActionController::TestCase
     assert_equal 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', response.media_type
     rows = spreadsheet_rows
     assert_equal 3, rows.size, rows.inspect
-    assert_equal ['Seminars', 'DEI Seminars', 'Obs', 'ECFs', 'Micros', 'LPRs', 'CSDs', 'TPs'], rows.first.last(8)
+    assert_equal ParticipantsHelper::COUNT_COLUMNS.values, rows.first.last(8)
     assert_equal [2, 1, 2, 1, 1, 1, 1, 1], rows.find { |row| row[2] == participant.andrewid }.last(8)
     assert_equal [0] * 8, rows.find { |row| row[2] == empty.andrewid }.last(8)
 
@@ -62,6 +62,18 @@ class ParticipantsControllerTest < ActionController::TestCase
     Current.stub(:user, admin) { get :index, params: { ffp_status: 'complete' }, format: :xlsx }
     assert_response :success
     assert_equal [participant.andrewid], spreadsheet_rows.drop(1).map { |row| row[2] }
+  end
+
+  test 'the spreadsheet holds only the people the search shows' do
+    load Rails.root.join('db/seeds.rb')
+    Participant.create!(andrewid: 'kept', name: 'Margaret Morrison', ldap_entry: Object.new)
+    Participant.create!(andrewid: 'other', name: 'Andrew Mellon', ldap_entry: Object.new)
+    admin = Struct.new(:admin?, :staff?).new(true, true)
+
+    Current.stub(:user, admin) { get :index, params: { q: ' MORRISON ' }, format: :xlsx }
+
+    assert_response :success
+    assert_equal ['kept'], spreadsheet_rows.drop(1).map { |row| row[2] }
   end
 
   private

@@ -1,23 +1,18 @@
 wb = xlsx_package.workbook
-count_fields = %w[ffp_seminar_size ffp_dei_size ffp_obs ffp_ecf ffp_micro ffp_lpr ffp_csd ffp_tp]
 counts_by_participant = Participant.table_rows(@participants).index_by { |row| row['id'] }
 wb.add_worksheet(name: "Participants") do |sheet|
-  sheet.add_row [ "Last Change","Name","Andrew ID","Department","School","Student Class","First Consultation On","FFP Graduation Date","FFP Status",
-                  "Seminars", "DEI Seminars", "Obs", "ECFs", "Micros", "LPRs", "CSDs", "TPs" ]
+  sheet.add_row ["Last Change", "Name", "Andrew ID", "Department", "School", "Student Class", "First Consultation",
+                 "FFP Status", "Graduated", *ParticipantsHelper::COUNT_COLUMNS.values]
   @participants.each do |p|
-    future_faculty_progress = p.future_faculty_progress_status&.label
-    sheet.add_row [   p.updated_at, 
-                      p.name,
-                      p.andrewid,
-                      p.pretty_depts,
-                      p.pretty_colleges,
-                      p.student_class,
-     	              p.first_consultation_on,
-                      p.future_faculty_program_graduated_on,
-  		      future_faculty_progress
-      ] + counts_by_participant.fetch(p.id).values_at(*count_fields)
-  end # participants
-  #.to_formatted_s(:short),
-end # sheet
-
-
+    row = counts_by_participant.fetch(p.id)
+    sheet.add_row [p.updated_at,
+                   p.name,
+                   p.andrewid,
+                   p.pretty_depts,
+                   p.pretty_colleges,
+                   p.student_class,
+                   p.first_consultation_on,
+                   ParticipantsHelper::FFP_STATUS_NAMES[row['ffp_status']],
+                   p.future_faculty_program_graduated_on] + row.values_at(*ParticipantsHelper::COUNT_COLUMNS.keys)
+  end
+end
