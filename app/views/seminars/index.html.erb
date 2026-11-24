@@ -4,40 +4,46 @@
   <div>
     <h1>Seminars and Workshops</h1>
     <p class="cmu-lead">Every seminar, workshop and self-paced program, past and upcoming, with its registrations and&nbsp;attendance.</p>
-    <p class="cmu-cta-row">
-      <% if Current.user.admin? %><%= link_to "Create Seminar", new_admin_seminar_path, class: "btn" %><% end %>
-      <%= link_to "See All Registrations", all_registrations_path, class: "cta" %>
-    </p>
-    <div class="cmu-search-bar">
-      <label for="prg-seminar-search" class="sr-only">Find a Seminar</label>
-      <input type="text" id="prg-seminar-search" placeholder="Find a seminar by title, tag or date&hellip;" data-cmu-filter="prg-seminars">
-    </div>
-    <table class="alternate cmu-full cmu-sticky" id="prg-seminars" data-cmu-table data-cmu-noun="seminar">
-      <thead>
-        <tr>
-          <th scope="col" data-sort-key="title"><button type="button" class="cmu-sort">Title<span class="cmu-sort-arrow"></span></button></th>
-          <th scope="col" class="cmu-fit" data-sort-key="date" aria-sort="descending"><button type="button" class="cmu-sort">Date<span class="cmu-sort-arrow"></span></button></th>
-          <th scope="col" data-cmu-column="tags">Tags</th>
-          <th scope="col" class="cmu-fit" data-sort-key="registration"><button type="button" class="cmu-sort">Registration<span class="cmu-sort-arrow"></span></button></th>
-          <th scope="col" class="num cmu-fit" data-sort-key="confirmed"><button type="button" class="cmu-sort">Confirmed<span class="cmu-sort-arrow"></span></button></th>
-          <th scope="col" class="num cmu-fit" data-sort-key="attended"><button type="button" class="cmu-sort">Attended<span class="cmu-sort-arrow"></span></button></th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @seminars.sort_by { |s| -(s.start_at || s.end_at).to_i }.each do |seminar| %>
-          <% registrations = seminar.registrations %>
+    <p><%= link_to "See All Registrations", all_registrations_path, class: "cta" %></p>
+    <% if @seminars.empty? %>
+      <%# With no seminars yet, the empty message holds the create button %>
+      <div class="cmu-empty">
+        <p>No seminars yet.</p>
+        <% if Current.user.admin? %><p><%= link_to "Create Seminar", new_admin_seminar_path, class: "btn" %></p><% end %>
+      </div>
+    <% else %>
+      <div class="cmu-search-bar">
+        <label for="prg-seminar-search" class="cmu-label">Find Seminars</label>
+        <input type="text" id="prg-seminar-search" placeholder="Title, tag or date" data-cmu-filter="prg-seminars">
+        <% if Current.user.admin? %><%= link_to "Create Seminar", new_admin_seminar_path, class: "btn" %><% end %>
+      </div>
+      <table class="alternate cmu-full cmu-sticky" id="prg-seminars" data-cmu-table data-cmu-noun="seminar">
+        <thead>
           <tr>
-            <td><%= link_to seminar.title, admin_seminar_path(seminar) %></td>
-            <td class="cmu-fit" data-sort-value="<%= (seminar.start_at || seminar.end_at)&.iso8601 %>"><%= seminar_day(seminar) %></td>
-            <td><%= seminar.tags.join(", ") %></td>
-            <td class="cmu-fit"><span class="cmu-pill <%= seminar.open? ? 'cmu-pill--green' : 'cmu-pill--amber' %>"><%= seminar.open? ? "Open" : "Closed" %></span></td>
-            <td class="num cmu-fit"><%= registrations.count(&:confirmed?) %></td>
-            <td class="num cmu-fit"><%= registrations.count(&:attended?) %></td>
+            <th scope="col" data-sort-key="title"><button type="button" class="cmu-sort">Title<span class="cmu-sort-arrow"></span></button></th>
+            <th scope="col" class="cmu-fit" data-sort-key="date" aria-sort="descending"><button type="button" class="cmu-sort">Date<span class="cmu-sort-arrow"></span></button></th>
+            <th scope="col" data-cmu-column="tags">Tags</th>
+            <th scope="col" class="cmu-fit" data-sort-key="registration"><button type="button" class="cmu-sort">Registration<span class="cmu-sort-arrow"></span></button></th>
+            <th scope="col" class="num cmu-fit" data-sort-key="confirmed"><button type="button" class="cmu-sort">Confirmed<span class="cmu-sort-arrow"></span></button></th>
+            <th scope="col" class="num cmu-fit" data-sort-key="attended"><button type="button" class="cmu-sort">Attended<span class="cmu-sort-arrow"></span></button></th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
-    <p class="cmu-results-count" data-cmu-count="prg-seminars" aria-live="polite">Showing all <%= pluralize(@seminars.size, "seminar") %></p>
-    <p><%= link_to "Seminars Spreadsheet", seminars_path(format: :xlsx), download: true %> [XLSX]</p>
+        </thead>
+        <tbody>
+          <% @seminars.sort_by { |s| -(s.start_at || s.end_at).to_i }.each do |seminar| %>
+            <% registrations = seminar.registrations %>
+            <tr>
+              <td><%= link_to seminar.title, admin_seminar_path(seminar) %></td>
+              <td class="cmu-fit" data-sort-value="<%= (seminar.start_at || seminar.end_at)&.iso8601 %>"><%= seminar_day(seminar) %></td>
+              <td><%= seminar.tags.join(", ") %></td>
+              <td class="cmu-fit"><span class="cmu-pill <%= seminar.open? ? 'cmu-pill--green' : 'cmu-pill--amber' %>"><%= seminar.open? ? "Open" : "Closed" %></span></td>
+              <td class="num cmu-fit"><%= registrations.count(&:confirmed?) %></td>
+              <td class="num cmu-fit"><%= registrations.count(&:attended?) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <p class="cmu-results-count" data-cmu-count="prg-seminars" aria-live="polite">Showing all <%= pluralize(@seminars.size, "seminar") %></p>
+      <p><%= link_to "Seminars Spreadsheet", seminars_path(format: :xlsx), download: true %> [XLSX]</p>
+    <% end %>
   </div>
 </div>

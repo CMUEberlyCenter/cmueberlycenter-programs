@@ -44,6 +44,7 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_response :success
     get seminars_path
     assert_response :success
+    assert_select '.cmu-search-bar'
     assert_select 'a', { text: 'Create Seminar', count: 0 }
     assert_select 'nav#nav a', { text: 'Settings', count: 0 }
 
@@ -51,6 +52,29 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_url
     get new_admin_seminar_path
     assert_redirected_to root_url
+  end
+
+  test 'an administrator creates seminars from beside the search, or from the empty list' do
+    sign_in('aa00')
+
+    get seminars_path
+    assert_select '.cmu-search-bar > a.btn[href=?]', new_admin_seminar_path, 'Create Seminar'
+
+    Registration.delete_all
+    Seminar.delete_all
+    get seminars_path
+    assert_select '.cmu-search-bar', 0
+    assert_select '.cmu-empty a.btn[href=?]', new_admin_seminar_path, 'Create Seminar'
+  end
+
+  test 'a consultant sees an empty list without the create button' do
+    sign_in('cc00')
+    Registration.delete_all
+    Seminar.delete_all
+
+    get seminars_path
+    assert_select '.cmu-empty p', 'No seminars yet.'
+    assert_select 'a', { text: 'Create Seminar', count: 0 }
   end
 
   test 'opening a person who is not in Programs yet offers to add them, and adds only on the button' do
