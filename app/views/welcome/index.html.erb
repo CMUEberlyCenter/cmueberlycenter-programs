@@ -4,7 +4,7 @@
     <% if @homepage_note.present? %>
       <%= sanitize @homepage_note %>
     <% else %>
-      <p class="cmu-lead">Seminars and workshops on teaching from the Eberly Center, wherever you are in your teaching. Register for one below; the Future Faculty Program counts the ones you&nbsp;attend.</p>
+      <p class="cmu-lead">Seminars and workshops on teaching from the Eberly Center, wherever you are in your teaching. Register for one&nbsp;below.</p>
     <% end %>
   </div><% unless Current.user&.staff? %><div class="sidebar">
     <% if Current.user %>
