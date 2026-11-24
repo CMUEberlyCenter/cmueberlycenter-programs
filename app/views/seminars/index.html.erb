@@ -1,18 +1,16 @@
-<% cmu_title "Seminars" %>
+<% cmu_title "Seminars and Workshops" %>
 <% cmu_breadcrumb "Seminars" %>
 <div class="content wide">
   <div>
-    <h1>Seminars</h1>
-    <p class="cmu-lead">Every seminar, workshop and self-paced program, with its registrations and attendance.</p>
+    <h1>Seminars and Workshops</h1>
+    <p class="cmu-lead">Every seminar, workshop and self-paced program, past and upcoming, with its registrations and&nbsp;attendance.</p>
     <p class="cmu-cta-row">
       <% if Current.user.admin? %><%= link_to "Create Seminar", new_admin_seminar_path, class: "btn" %><% end %>
       <%= link_to "See All Registrations", all_registrations_path, class: "cta" %>
     </p>
-    <p><%= link_to "Seminars Spreadsheet", seminars_path(format: :xlsx), download: true %> [XLSX]</p>
     <div class="cmu-search-bar">
-      <p>Search by title, tag or date.</p>
       <label for="prg-seminar-search" class="sr-only">Find a Seminar</label>
-      <input type="text" id="prg-seminar-search" placeholder="Find a seminar&hellip;" data-cmu-filter="prg-seminars">
+      <input type="text" id="prg-seminar-search" placeholder="Find a seminar by title, tag or date&hellip;" data-cmu-filter="prg-seminars">
     </div>
     <table class="alternate cmu-full cmu-sticky" id="prg-seminars" data-cmu-table data-cmu-noun="seminar">
       <thead>
@@ -40,5 +38,6 @@
       </tbody>
     </table>
     <p class="cmu-results-count" data-cmu-count="prg-seminars" aria-live="polite">Showing all <%= pluralize(@seminars.size, "seminar") %></p>
+    <p><%= link_to "Seminars Spreadsheet", seminars_path(format: :xlsx), download: true %> [XLSX]</p>
   </div>
 </div>
