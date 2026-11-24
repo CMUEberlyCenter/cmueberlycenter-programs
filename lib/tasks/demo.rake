@@ -352,7 +352,7 @@ class DemoData
       ['pp00', v2023, %i[overview observation], nil],
       ['gg00', v2023, %i[overview observation observation syllabus statement], 'graduated'],
       ['an00', v2023, %i[overview observation feedback syllabus statement], nil],
-      ['ap00', v2023, %i[overview], nil],
+      ['ap00', v2023, %i[overview observation observation], nil],
       ['tb00', v2015, %i[overview observation syllabus], nil],
       ['ah00', v2023, %i[overview], 'dropout']
     ].each do |andrewid, version, kinds, status|

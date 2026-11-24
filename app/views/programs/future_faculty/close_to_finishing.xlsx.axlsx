@@ -1,0 +1,16 @@
+wb = xlsx_package.workbook
+wb.add_worksheet(name: "Close to Finishing") do |sheet|
+  sheet.add_row ["Name", "Andrew ID", "Email", "Department", "School", "Student Class", "Program Version",
+                 "First Consultation", "Requirements Left"]
+  @close_to_finishing.each do |participant, left|
+    sheet.add_row [participant.name,
+                   participant.andrewid,
+                   participant.email,
+                   participant.pretty_depts,
+                   participant.pretty_colleges,
+                   participant.student_class,
+                   participant.future_faculty_enrollment.key,
+                   participant.first_consultation_on,
+                   left.map(&:to_s).to_sentence]
+  end
+end
