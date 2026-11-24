@@ -20,6 +20,14 @@ module ParticipantsHelper
     'ffp_tp' => 'Teaching Statements'
   }.freeze
 
+  # A People table row's text, as its cells show it, in lowercase
+  def participant_row_text(row)
+    [row['name'] || row['andrewid'], row['andrewid'], row['pretty_depts'], row['pretty_colleges'], row['student_class'],
+     ap_date(row['first_consultation_on']&.to_date), FFP_STATUS_NAMES[row['ffp_status']],
+     ap_date(row['future_faculty_program_graduated_on']&.to_date), *row.values_at(*COUNT_COLUMNS.keys)]
+      .compact.join(' ').downcase
+  end
+
   # A Future Faculty Program status in a word or two
   def ffp_status_name(status)
     FFP_STATUS_NAMES.fetch(status&.key, status&.key.to_s.titleize) if status

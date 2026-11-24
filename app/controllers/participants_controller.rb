@@ -13,7 +13,10 @@ class ParticipantsController < ApplicationController
     respond_to do |format|
       format.html { @rows = Participant.table_rows(@participants) }
       format.json { render json: Participant.table_rows(@participants) }
-      format.xlsx { response.headers.merge! file_export_headers }
+      format.xlsx do
+        @participants = matching(@participants, params[:q]) if params[:q].present?
+        response.headers.merge! file_export_headers
+      end
     end
   end
 
@@ -67,6 +70,14 @@ class ParticipantsController < ApplicationController
   private
 
   def andrewid_param = params[:id].to_s.strip.downcase
+
+  # The participants whose row in the People table holds the search text, as
+  # the table's search matches it
+  def matching(participants, query)
+    query = query.strip.downcase
+    rows = Participant.table_rows(participants).select { |row| helpers.participant_row_text(row).include?(query) }
+    participants.where(id: rows.pluck('id'))
+  end
 
   # The participant with this Andrew ID, added from the directory if they're
   # new; nil, after sending the administrator back, if there's no such person

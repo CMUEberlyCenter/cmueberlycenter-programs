@@ -60,6 +60,7 @@
     <% end %>
     <% end %>
     <p><%= link_to "Spreadsheet of #{pluralize(@rows.size, 'Person', plural: 'People')}", participants_path(format: :xlsx, ffp_status: @ffp_status),
-                   download: true %> [XLSX]</p>
+                   download: true, data: { controller: "filtered-download", filtered_download_input_value: "prg-participant-search",
+                                           filtered_download_table_value: "prg-participants", filtered_download_noun_value: "Person|People" } %> [XLSX]</p>
   </div>
 </div>
